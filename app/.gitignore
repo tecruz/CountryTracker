@@ -1,0 +1,14 @@
+# Build outputs
+/build/
+
+# KSP generated code
+/generated/
+
+# Test reports
+/reports/
+
+# Coverage reports
+/coverage/
+
+# Debug keystore
+debug.keystore

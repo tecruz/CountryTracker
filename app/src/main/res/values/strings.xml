@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">Country Tracker</string>
+
+    <!-- Country List Screen -->
+    <string name="title_country_tracker">Country Tracker</string>
+    <string name="tab_map">Map</string>
+    <string name="tab_countries">Countries</string>
+    <string name="map_legend_visited">Visited</string>
+    <string name="map_legend_not_visited">Not visited</string>
+    <string name="map_hint"></string>
+    <string name="search_placeholder">Search countries…</string>
+    <string name="no_countries_found">No countries found</string>
+    <string name="filter_visited_only">Visited only</string>
+    <string name="filter_by_region">Filter by Region</string>
+    <string name="region_all">All</string>
+    <string name="stat_visited">VISITED</string>
+    <string name="stat_total">TOTAL</string>
+    <string name="stat_complete">COMPLETE</string>
+    <string name="stats_visited">VISITED</string>
+    <string name="stats_total">TOTAL</string>
+    <string name="stats_complete">COMPLETE</string>
+    <string name="visited_date_format">Visited: %1$s</string>
+
+    <!-- Country Detail Screen -->
+    <string name="mark_as_visited">Mark as Visited</string>
+    <string name="mark_as_not_visited">Mark as not visited</string>
+    <string name="visited_status">Visited</string>
+    <string name="your_rating">Your Rating</string>
+    <string name="notes_title">Notes</string>
+    <string name="edit_notes">Edit Notes</string>
+    <string name="notes_placeholder">Write your memories here…</string>
+    <string name="no_notes_placeholder">No notes yet. Tap edit to add your memories!</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <!-- Accessibility -->
+    <string name="content_desc_filter">Filter countries</string>
+    <string name="content_desc_clear_search">Clear search</string>
+    <string name="content_desc_search">Search</string>
+    <string name="content_desc_back">Navigate back</string>
+    <string name="content_desc_visited_badge">Visited</string>
+    <string name="content_desc_edit_date">Edit visit date</string>
+    <string name="content_desc_edit_notes">Edit notes</string>
+    <string name="content_desc_rate_stars">Rate %1$d stars</string>
+    <string name="content_desc_country_flag">Flag of %1$s</string>
+    <string name="content_desc_region_option">Select %1$s region</string>
+
+    <!-- Errors -->
+    <string name="error_generic">An unexpected error occurred</string>
+    <string name="error_load_countries">Failed to load countries</string>
+    <string name="error_load_country">Failed to load country details</string>
+    <string name="error_save_failed">Failed to save changes</string>
+    <string name="error_notes_too_long">Notes cannot exceed %1$d characters</string>
+    <string name="error_dismiss">Dismiss</string>
+
+    <!-- Input Validation -->
+    <string name="notes_character_count">%1$d / %2$d</string>
+
+    <!-- Maps -->
+    <string name="maps_api_key_missing_title">Map unavailable</string>
+    <string name="maps_api_key_missing_message">Google Maps API key not configured</string>
+</resources>

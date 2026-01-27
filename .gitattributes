@@ -1,0 +1,155 @@
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
+* text=auto
+
+# Source code
+*.kt text diff=kotlin
+*.java text diff=java
+*.xml text diff=html
+*.gradle text diff=java
+*.kts text diff=kotlin
+*.properties text
+*.json text
+
+# Documentation
+*.md text diff=markdown
+*.txt text
+*.adoc text
+*.textile text
+*.mustache text
+*.csv text
+*.tab text
+*.tsv text
+*.sql text
+
+# Templates
+*.dot text
+*.ejs text
+*.erb text
+*.haml text
+*.handlebars text
+*.hbs text
+*.hbt text
+*.jade text
+*.latte text
+*.njk text
+*.phtml text
+*.tmpl text
+*.tpl text
+*.twig text
+*.vue text
+
+# Configs
+*.toml text
+*.yaml text
+*.yml text
+*.cfg text
+*.conf text
+*.config text
+*.ini text
+*.cnf text
+.editorconfig text
+.gitattributes text
+.gitconfig text
+.gitignore text
+gradlew text eol=lf
+
+# Fixes syntax highlighting on GitHub to allow comments
+.gitattributes linguist-language=gitattributes
+.gitignore linguist-language=gitignore
+
+# Scripts
+*.bash text eol=lf
+*.fish text eol=lf
+*.sh text eol=lf
+*.zsh text eol=lf
+# These are explicitly windows files and should use crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Graphics
+*.ai binary
+*.bmp binary
+*.eps binary
+*.gif binary
+*.gifv binary
+*.ico binary
+*.jng binary
+*.jp2 binary
+*.jpg binary
+*.jpeg binary
+*.jpx binary
+*.jxr binary
+*.pdf binary
+*.png binary
+*.psb binary
+*.psd binary
+*.svg text
+*.svgz binary
+*.tif binary
+*.tiff binary
+*.wbmp binary
+*.webp binary
+
+# Audio
+*.kar binary
+*.m4a binary
+*.mid binary
+*.midi binary
+*.mp3 binary
+*.ogg binary
+*.ra binary
+
+# Video
+*.3gpp binary
+*.3gp binary
+*.as binary
+*.asf binary
+*.asx binary
+*.avi binary
+*.fla binary
+*.flv binary
+*.m4v binary
+*.mng binary
+*.mov binary
+*.mp4 binary
+*.mpeg binary
+*.mpg binary
+*.ogv binary
+*.swc binary
+*.swf binary
+*.webm binary
+
+# Archives
+*.7z binary
+*.gz binary
+*.jar binary
+*.rar binary
+*.tar binary
+*.zip binary
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# Executables
+*.exe binary
+*.pyc binary
+
+# RC files (like .babelrc or .eslintrc)
+*.*rc text
+
+# Ignore files (like .npmignore or .gitignore)
+*.*ignore text
+
+# Android specific
+*.aar binary
+*.ap_ binary
+*.apk binary
+*.aab binary
+*.dex binary
+*.so binary

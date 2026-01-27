@@ -1,0 +1,197 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+  <!-- Gradient Background -->
+  <path android:pathData="M0,0h108v108h-108z">
+    <aapt:attr name="android:fillColor">
+      <gradient
+          android:startX="0"
+          android:startY="0"
+          android:endX="108"
+          android:endY="108"
+          android:type="linear">
+        <item android:offset="0" android:color="#FF2E7D32"/>
+        <item android:offset="0.5" android:color="#FF388E3C"/>
+        <item android:offset="1" android:color="#FF43A047"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+
+  <!-- Decorative circles (subtle background pattern) -->
+  <path
+      android:pathData="M20,20m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.08"/>
+  <path
+      android:pathData="M88,25m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.08"/>
+  <path
+      android:pathData="M15,85m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.08"/>
+  <path
+      android:pathData="M90,88m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.08"/>
+
+  <!-- Main Globe Circle with gradient -->
+  <path android:pathData="M54,30m-26,0a26,26 0,1 1,52 0a26,26 0,1 1,-52 0">
+    <aapt:attr name="android:fillColor">
+      <gradient
+          android:startX="28"
+          android:startY="4"
+          android:endX="80"
+          android:endY="56"
+          android:type="linear">
+        <item android:offset="0" android:color="#FF81C784"/>
+        <item android:offset="0.5" android:color="#FF66BB6A"/>
+        <item android:offset="1" android:color="#FF4CAF50"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+
+  <!-- Globe latitude lines -->
+  <path
+      android:pathData="M28,30a26,6.5 0,1 0,52 0a26,6.5 0,1 0,-52 0z"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M28,30a26,13 0,1 0,52 0a26,13 0,1 0,-52 0z"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M28,30a26,19.5 0,1 0,52 0a26,19.5 0,1 0,-52 0z"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+
+  <!-- Globe longitude lines -->
+  <path
+      android:pathData="M45,30a9,26 0,1 0,18 0a9,26 0,1 0,-18 0z"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M36,30a18,26 0,1 0,36 0a18,26 0,1 0,-36 0z"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+
+  <!-- Globe light reflection (top left) -->
+  <path
+      android:pathData="M32,10a18,18 0,1 0,36 0a18,18 0,1 0,-36 0z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.25"/>
+
+  <!-- Pin Icon (center) with shadow -->
+  <path
+      android:pathData="M54,62Q48,62 48,68Q48,74 54,82Q60,74 60,68Q60,62 54,62Z"
+      android:fillColor="#1B5E20"
+      android:fillAlpha="0.3"/>
+  
+  <path
+      android:pathData="M54,60Q48,60 48,66Q48,72 54,80Q60,72 60,66Q60,60 54,60Z">
+    <aapt:attr name="android:fillColor">
+      <gradient
+          android:startX="48"
+          android:startY="60"
+          android:endX="48"
+          android:endY="80"
+          android:type="linear">
+        <item android:offset="0" android:color="#FFFFFFFF"/>
+        <item android:offset="1" android:color="#FFE8F5E9"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+
+  <!-- Pin circle center -->
+  <path
+      android:pathData="M54,66m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
+      android:fillColor="#2E7D32"/>
+
+  <!-- Checkmark in pin -->
+  <path
+      android:pathData="M52,66L53.5,67.5L56,65"
+      android:strokeLineJoin="round"
+      android:strokeWidth="1.2"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"/>
+
+  <!-- Small decorative pins around globe -->
+  <path
+      android:pathData="M34,22Q32,22 32,24Q32,26 34,30Q36,26 36,24Q36,22 34,22Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.6"
+      android:strokeWidth="0.8"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M34,24m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.8"/>
+
+  <path
+      android:pathData="M74,34Q72,34 72,36Q72,38 74,42Q76,38 76,36Q76,34 74,34Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.6"
+      android:strokeWidth="0.8"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M74,36m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.8"/>
+
+  <path
+      android:pathData="M42,48Q40,48 40,50Q40,52 42,56Q44,52 44,50Q44,48 42,48Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.6"
+      android:strokeWidth="0.8"
+      android:strokeColor="#FFFFFF"
+      android:strokeAlpha="0.4"/>
+  <path
+      android:pathData="M42,50m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.8"/>
+
+  <!-- Sparkles for visual interest -->
+  <path
+      android:pathData="M24,45L26,50L31,51L26,53L25,58L24,53L19,52L23,50Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.7"/>
+  <path
+      android:pathData="M82,50L84,55L89,56L84,58L83,63L82,58L77,57L81,55Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.7"/>
+  <path
+      android:pathData="M68,18L69,21L72,22L69,23L68,26L67,23L64,22L67,21Z"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.8"/>
+
+  <!-- Small dots for depth -->
+  <path
+      android:pathData="M30,55m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.5"/>
+  <path
+      android:pathData="M78,42m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.5"/>
+  <path
+      android:pathData="M65,52m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.6"/>
+</vector>
