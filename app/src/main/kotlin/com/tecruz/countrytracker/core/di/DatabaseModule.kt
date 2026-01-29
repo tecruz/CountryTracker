@@ -30,28 +30,24 @@ object DatabaseModule {
     @Singleton
     fun provideCountryDatabase(
         @ApplicationContext context: Context,
-        daoProvider: Provider<CountryDao>
-    ): CountryDatabase {
-        return Room.databaseBuilder(
-            context,
-            CountryDatabase::class.java,
-            "country_tracker_database"
-        )
-            .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                        val countries = CountryDataLoader.loadCountriesFromAssets(context)
-                        daoProvider.get().insertCountries(countries)
-                    }
+        daoProvider: Provider<CountryDao>,
+    ): CountryDatabase = Room.databaseBuilder(
+        context,
+        CountryDatabase::class.java,
+        "country_tracker_database",
+    )
+        .addCallback(object : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                    val countries = CountryDataLoader.loadCountriesFromAssets(context)
+                    daoProvider.get().insertCountries(countries)
                 }
-            })
-            .build()
-    }
+            }
+        })
+        .build()
 
     @Provides
     @Singleton
-    fun provideCountryDao(database: CountryDatabase): CountryDao {
-        return database.countryDao()
-    }
+    fun provideCountryDao(database: CountryDatabase): CountryDao = database.countryDao()
 }

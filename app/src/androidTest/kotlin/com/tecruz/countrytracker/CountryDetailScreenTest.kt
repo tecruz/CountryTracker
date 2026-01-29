@@ -6,12 +6,12 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.tecruz.countrytracker.core.domain.model.Country
-import com.tecruz.countrytracker.features.countrydetail.presentation.HeroCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.RatingCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.NotesCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.VisitStatusCard
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
+import com.tecruz.countrytracker.features.countrydetail.presentation.HeroCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.NotesCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.RatingCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.VisitStatusCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.model.CountryDetailUi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,15 +22,16 @@ class CountryDetailScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val testCountry = Country(
+    private val testCountry = CountryDetailUi(
         code = "US",
         name = "United States",
         region = "North America",
         visited = true,
         visitedDate = 1704067200000L,
+        visitedDateFormatted = "January 01, 2024",
         notes = "Amazing trip to NYC!",
         rating = 4,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8"
+        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
     )
 
     @Test
@@ -51,7 +52,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 RatingCard(
                     rating = 4,
-                    onRatingChange = {}
+                    onRatingChange = {},
                 )
             }
         }
@@ -67,7 +68,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 RatingCard(
                     rating = currentRating,
-                    onRatingChange = { currentRating = it }
+                    onRatingChange = { currentRating = it },
                 )
             }
         }
@@ -83,7 +84,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 NotesCard(
                     notes = "Amazing trip to NYC!",
-                    onEditNotes = {}
+                    onEditNotes = {},
                 )
             }
         }
@@ -98,7 +99,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 NotesCard(
                     notes = "",
-                    onEditNotes = {}
+                    onEditNotes = {},
                 )
             }
         }
@@ -115,7 +116,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 NotesCard(
                     notes = "Some notes",
-                    onEditNotes = { editClicked = true }
+                    onEditNotes = { editClicked = true },
                 )
             }
         }
@@ -131,7 +132,7 @@ class CountryDetailScreenTest {
                 VisitStatusCard(
                     country = testCountry,
                     onEditDate = {},
-                    onMarkAsUnvisited = {}
+                    onMarkAsUnvisited = {},
                 )
             }
         }
@@ -148,7 +149,7 @@ class CountryDetailScreenTest {
                 VisitStatusCard(
                     country = testCountry,
                     onEditDate = {},
-                    onMarkAsUnvisited = { unvisitedClicked = true }
+                    onMarkAsUnvisited = { unvisitedClicked = true },
                 )
             }
         }
@@ -166,7 +167,7 @@ class CountryDetailScreenTest {
                 VisitStatusCard(
                     country = testCountry,
                     onEditDate = { editDateClicked = true },
-                    onMarkAsUnvisited = {}
+                    onMarkAsUnvisited = {},
                 )
             }
         }
@@ -181,7 +182,7 @@ class CountryDetailScreenTest {
             CountryTrackerTheme {
                 RatingCard(
                     rating = 0,
-                    onRatingChange = {}
+                    onRatingChange = {},
                 )
             }
         }

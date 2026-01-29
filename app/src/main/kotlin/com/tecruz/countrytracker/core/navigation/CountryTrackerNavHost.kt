@@ -12,32 +12,30 @@ import com.tecruz.countrytracker.features.countrydetail.presentation.CountryDeta
 import com.tecruz.countrytracker.features.countrylist.presentation.CountryListScreen
 
 @Composable
-fun CountryTrackerNavHost(
-    modifier: Modifier = Modifier
-) {
+fun CountryTrackerNavHost(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    
+
     NavHost(
         navController = navController,
         startDestination = "country_list",
-        modifier = modifier
+        modifier = modifier,
     ) {
         composable("country_list") {
             CountryListScreen(
                 onCountryClick = { countryCode ->
                     navController.navigate("country_detail/$countryCode")
                 },
-                viewModel = hiltViewModel()
+                viewModel = hiltViewModel(),
             )
         }
-        
+
         composable(
             route = "country_detail/{countryCode}",
-            arguments = listOf(navArgument("countryCode") { type = NavType.StringType })
+            arguments = listOf(navArgument("countryCode") { type = NavType.StringType }),
         ) {
             CountryDetailScreen(
                 onNavigateBack = { navController.navigateUp() },
-                viewModel = hiltViewModel()
+                viewModel = hiltViewModel(),
             )
         }
     }

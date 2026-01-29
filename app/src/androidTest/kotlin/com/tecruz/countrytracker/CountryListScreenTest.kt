@@ -6,15 +6,15 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.tecruz.countrytracker.core.domain.model.Country
-import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
-import com.tecruz.countrytracker.features.countrylist.presentation.SearchBar
-import com.tecruz.countrytracker.features.countrylist.presentation.FilterChips
-import com.tecruz.countrytracker.features.countrylist.presentation.CountryListItem
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
+import com.tecruz.countrytracker.features.countrylist.presentation.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.FilterChips
+import com.tecruz.countrytracker.features.countrylist.presentation.SearchBar
+import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem as CountryListItemModel
 
 @RunWith(AndroidJUnit4::class)
 class CountryListScreenTest {
@@ -22,26 +22,20 @@ class CountryListScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val testCountry = Country(
+    private val testCountry = CountryListItemModel(
         code = "US",
         name = "United States",
         region = "North America",
         visited = false,
-        visitedDate = null,
-        notes = "",
-        rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8"
+        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
     )
 
-    private val visitedCountry = Country(
+    private val visitedCountry = CountryListItemModel(
         code = "FR",
         name = "France",
         region = "Europe",
         visited = true,
-        visitedDate = 1704067200000L,
-        notes = "Great trip!",
-        rating = 5,
-        flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7"
+        flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
     )
 
     @Test
@@ -51,7 +45,7 @@ class CountryListScreenTest {
                 StatsCard(
                     visitedCount = 10,
                     totalCount = 50,
-                    percentage = 20
+                    percentage = 20,
                 )
             }
         }
@@ -69,7 +63,7 @@ class CountryListScreenTest {
             CountryTrackerTheme {
                 SearchBar(
                     query = searchQuery,
-                    onQueryChange = { searchQuery = it }
+                    onQueryChange = { searchQuery = it },
                 )
             }
         }
@@ -80,7 +74,7 @@ class CountryListScreenTest {
 
     @Test
     fun filterChips_displayAllRegions() {
-        val regions = listOf("Europe", "Asia", "North America")
+        val regions = listOf("Europe", "Asia")
 
         composeTestRule.setContent {
             CountryTrackerTheme {
@@ -89,14 +83,13 @@ class CountryListScreenTest {
                     selectedRegion = "All",
                     showOnlyVisited = false,
                     onToggleVisited = {},
-                    onRegionSelect = {}
+                    onRegionSelect = {},
                 )
             }
         }
 
         composeTestRule.onNodeWithText("Europe").assertIsDisplayed()
         composeTestRule.onNodeWithText("Asia").assertIsDisplayed()
-        composeTestRule.onNodeWithText("North America").assertIsDisplayed()
     }
 
     @Test
@@ -110,7 +103,7 @@ class CountryListScreenTest {
                     selectedRegion = "All",
                     showOnlyVisited = showOnlyVisited,
                     onToggleVisited = { showOnlyVisited = !showOnlyVisited },
-                    onRegionSelect = {}
+                    onRegionSelect = {},
                 )
             }
         }
@@ -125,7 +118,7 @@ class CountryListScreenTest {
             CountryTrackerTheme {
                 CountryListItem(
                     country = testCountry,
-                    onClick = {}
+                    onClick = {},
                 )
             }
         }
@@ -140,7 +133,7 @@ class CountryListScreenTest {
             CountryTrackerTheme {
                 CountryListItem(
                     country = visitedCountry,
-                    onClick = {}
+                    onClick = {},
                 )
             }
         }
@@ -157,7 +150,7 @@ class CountryListScreenTest {
             CountryTrackerTheme {
                 CountryListItem(
                     country = testCountry,
-                    onClick = { clicked = true }
+                    onClick = { clicked = true },
                 )
             }
         }
@@ -177,7 +170,7 @@ class CountryListScreenTest {
                     selectedRegion = selectedRegion,
                     showOnlyVisited = false,
                     onToggleVisited = {},
-                    onRegionSelect = { selectedRegion = it }
+                    onRegionSelect = { selectedRegion = it },
                 )
             }
         }

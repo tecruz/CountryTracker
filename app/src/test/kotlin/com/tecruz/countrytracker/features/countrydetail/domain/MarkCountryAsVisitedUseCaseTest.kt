@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.core.domain.model.Country
-import com.tecruz.countrytracker.core.domain.repository.CountryRepository
+import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
+import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -10,10 +10,10 @@ import org.junit.Test
 
 class MarkCountryAsVisitedUseCaseTest {
 
-    private lateinit var repository: CountryRepository
+    private lateinit var repository: CountryDetailRepository
     private lateinit var useCase: MarkCountryAsVisitedUseCase
 
-    private val testCountry = Country(
+    private val testCountry = CountryDetail(
         code = "US",
         name = "United States",
         region = "North America",
@@ -21,7 +21,7 @@ class MarkCountryAsVisitedUseCaseTest {
         visitedDate = null,
         notes = "",
         rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8"
+        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
     )
 
     @Before

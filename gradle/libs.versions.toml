@@ -9,6 +9,8 @@ agp = "9.0.0"
 kotlin="2.3.0"
 ksp = "2.3.4"
 detekt = "1.23.7"
+spotless = "7.0.2"
+ktlint = "1.5.0"
 
 # AndroidX Core
 coreKtx = "1.17.0"
@@ -145,3 +147,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

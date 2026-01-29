@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
             CountryTrackerTheme {
                 Surface(
                     modifier = Modifier.Companion.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     CountryTrackerNavHost()
                 }

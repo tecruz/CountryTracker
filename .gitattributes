@@ -3,13 +3,13 @@
 * text=auto
 
 # Source code
-*.kt text diff=kotlin
-*.java text diff=java
-*.xml text diff=html
-*.gradle text diff=java
-*.kts text diff=kotlin
-*.properties text
-*.json text
+*.kt text eol=lf diff=kotlin
+*.java text eol=lf diff=java
+*.xml text eol=lf diff=html
+*.gradle text eol=lf diff=java
+*.kts text eol=lf diff=kotlin
+*.properties text eol=lf
+*.json text eol=lf
 
 # Documentation
 *.md text diff=markdown

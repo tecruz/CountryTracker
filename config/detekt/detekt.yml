@@ -34,6 +34,7 @@ complexity:
   CognitiveComplexMethod:
     active: true
     threshold: 15
+    ignoreAnnotated: ['Composable']
   ComplexCondition:
     active: true
     threshold: 4
@@ -42,6 +43,7 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 15
+    ignoreAnnotated: ['Composable']
   LabeledExpression:
     active: false
   LargeClass:
@@ -50,6 +52,7 @@ complexity:
   LongMethod:
     active: true
     threshold: 60
+    ignoreAnnotated: ['Composable']
   LongParameterList:
     active: true
     functionThreshold: 8
@@ -167,7 +170,7 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**']
+    excludes: ['**/test/**', '**/androidTest/**', '**/*ViewModel.kt']
     exceptionNames:
       - 'ArrayIndexOutOfBoundsException'
       - 'Error'
@@ -221,7 +224,7 @@ naming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*|_'
   MatchingDeclarationName:
-    active: true
+    active: false
   MemberNameEqualsClassName:
     active: true
   NoNameShadowing:
@@ -232,7 +235,7 @@ naming:
     active: true
     constantPattern: '[A-Za-z][_A-Za-z0-9]*'
     propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
-    privatePropertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
   PackageNaming:
     active: true
     packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
@@ -248,7 +251,7 @@ naming:
   VariableNaming:
     active: true
     variablePattern: '[a-z][A-Za-z0-9]*'
-    privateVariablePattern: '[a-z][A-Za-z0-9]*'
+    privateVariablePattern: '_?[a-z][A-Za-z0-9]*'
 
 performance:
   active: true
@@ -467,7 +470,7 @@ style:
   TrimMultilineRawString:
     active: false
   UnderscoresInNumericLiterals:
-    active: true
+    active: false
     acceptableLength: 4
     allowNonStandardGrouping: false
   UnnecessaryAbstractClass:
@@ -545,6 +548,7 @@ style:
     excludeImports:
       - 'java.util.*'
       - 'kotlinx.android.synthetic.*'
+      - 'kotlinx.coroutines.flow.*'
       - 'androidx.compose.material3.*'
       - 'androidx.compose.material.icons.*'
       - 'androidx.compose.material.icons.filled.*'

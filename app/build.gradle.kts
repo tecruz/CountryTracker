@@ -4,17 +4,27 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.spotless)
     jacoco
 }
 
 android {
     namespace = "com.tecruz.countrytracker"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.compileSdk
+            .get()
+            .toInt()
 
     defaultConfig {
         applicationId = "com.tecruz.countrytracker"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.targetSdk
+                .get()
+                .toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -33,7 +43,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -46,7 +56,6 @@ android {
     buildFeatures {
         compose = true
     }
-
 
     packaging {
         resources {
@@ -83,38 +92,67 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     }
 }
 
+// Spotless Configuration
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        targetExclude("**/build/**")
+        ktlint(libs.versions.ktlint.get())
+            .editorConfigOverride(
+                mapOf(
+                    "android" to "true",
+                    "max_line_length" to "120",
+                    "indent_size" to "4",
+                    "continuation_indent_size" to "4",
+                    "insert_final_newline" to "true",
+                    "ktlint_standard_no-wildcard-imports" to "disabled",
+                    "ktlint_standard_package-name" to "disabled",
+                    "ktlint_standard_function-naming" to "disabled",
+                    "ktlint_standard_backing-property-naming" to "disabled",
+                ),
+            )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint(libs.versions.ktlint.get())
+    }
+}
+
 // JaCoCo Configuration
 jacoco {
     toolVersion = "0.8.12"
 }
 
 // Exclude generated files from coverage
-val jacocoExcludes = listOf(
-    "**/R.class",
-    "**/R$*.class",
-    "**/BuildConfig.*",
-    "**/Manifest*.*",
-    "**/*Test*.*",
-    "android/**/*.*",
-    // Hilt generated
-    "**/*_HiltModules*.*",
-    "**/*_Factory*.*",
-    "**/*_MembersInjector*.*",
-    "**/Hilt_*.*",
-    "**/*Module_*.*",
-    "**/dagger/**",
-    "**/hilt_aggregated_deps/**",
-    // Room generated
-    "**/*_Impl*.*",
-    "**/dao/*Dao_Impl*.*",
-    // Data classes and sealed classes
-    "**/model/*.*",
-    "**/entity/*.*",
-    // Navigation
-    "**/navigation/*.*",
-    // Theme
-    "**/theme/*.*"
-)
+val jacocoExcludes =
+    listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        // Hilt generated
+        "**/*_HiltModules*.*",
+        "**/*_Factory*.*",
+        "**/*_MembersInjector*.*",
+        "**/Hilt_*.*",
+        "**/*Module_*.*",
+        "**/dagger/**",
+        "**/hilt_aggregated_deps/**",
+        // Room generated
+        "**/*_Impl*.*",
+        "**/dao/*Dao_Impl*.*",
+        // Data classes and sealed classes
+        "**/model/*.*",
+        "**/entity/*.*",
+        // Navigation
+        "**/navigation/*.*",
+        // Theme
+        "**/theme/*.*",
+    )
 
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
@@ -126,21 +164,26 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         xml.required.set(true)
         html.required.set(true)
         csv.required.set(false)
-        xml.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"))
+        xml.outputLocation.set(
+            file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"),
+        )
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/html"))
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+            exclude(jacocoExcludes)
+        }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-    })
+    executionData.setFrom(
+        fileTree(project.layout.buildDirectory.get()) {
+            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        },
+    )
 }
 
 tasks.register<JacocoReport>("jacocoAndroidTestReport") {
@@ -153,21 +196,30 @@ tasks.register<JacocoReport>("jacocoAndroidTestReport") {
         xml.required.set(true)
         html.required.set(true)
         csv.required.set(false)
-        xml.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoAndroidTestReport/jacocoAndroidTestReport.xml"))
-        html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoAndroidTestReport/html"))
+        xml.outputLocation.set(
+            file(
+                "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoAndroidTestReport/jacocoAndroidTestReport.xml",
+            ),
+        )
+        html.outputLocation.set(
+            file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoAndroidTestReport/html"),
+        )
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+            exclude(jacocoExcludes)
+        }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
-    })
+    executionData.setFrom(
+        fileTree(project.layout.buildDirectory.get()) {
+            include("outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
+        },
+    )
 }
 
 tasks.register<JacocoReport>("jacocoCombinedReport") {
@@ -180,24 +232,29 @@ tasks.register<JacocoReport>("jacocoCombinedReport") {
         xml.required.set(true)
         html.required.set(true)
         csv.required.set(false)
-        xml.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml"))
+        xml.outputLocation.set(
+            file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml"),
+        )
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoCombinedReport/html"))
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+            exclude(jacocoExcludes)
+        }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include(
-            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
-            "outputs/code_coverage/debugAndroidTest/connected/**/*.ec"
-        )
-    })
+    executionData.setFrom(
+        fileTree(project.layout.buildDirectory.get()) {
+            include(
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec",
+            )
+        },
+    )
 }
 
 // Coverage verification task
@@ -207,14 +264,17 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
 
     dependsOn("jacocoTestReport")
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+            exclude(jacocoExcludes)
+        }
 
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-    })
+    executionData.setFrom(
+        fileTree(project.layout.buildDirectory.get()) {
+            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        },
+    )
 
     violationRules {
         rule {
@@ -224,12 +284,13 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
         }
         rule {
             element = "CLASS"
-            excludes = listOf(
-                "*.BuildConfig",
-                "*.R",
-                "*.*Module*",
-                "*.*Factory*"
-            )
+            excludes =
+                listOf(
+                    "*.BuildConfig",
+                    "*.R",
+                    "*.*Module*",
+                    "*.*Factory*",
+                )
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"

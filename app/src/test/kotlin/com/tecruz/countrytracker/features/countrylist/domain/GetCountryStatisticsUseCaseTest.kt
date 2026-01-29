@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrylist.domain
 
 import app.cash.turbine.test
-import com.tecruz.countrytracker.core.domain.repository.CountryRepository
+import com.tecruz.countrytracker.features.countrylist.domain.repository.CountryListRepository
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -12,7 +12,7 @@ import org.junit.Test
 
 class GetCountryStatisticsUseCaseTest {
 
-    private lateinit var repository: CountryRepository
+    private lateinit var repository: CountryListRepository
     private lateinit var useCase: GetCountryStatisticsUseCase
 
     @Before

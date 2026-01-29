@@ -1,10 +1,10 @@
 package com.tecruz.countrytracker.features.countrylist.presentation
 
 import app.cash.turbine.test
-import com.tecruz.countrytracker.core.domain.model.Country
 import com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
+import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -30,16 +30,16 @@ class CountryListViewModelTest {
     private lateinit var viewModel: CountryListViewModel
 
     private val testCountries = listOf(
-        Country("US", "United States", "North America", false, null, "", 0, "\uD83C\uDDFA\uD83C\uDDF8"),
-        Country("FR", "France", "Europe", true, 1704067200000L, "Great trip!", 5, "\uD83C\uDDEB\uD83C\uDDF7"),
-        Country("JP", "Japan", "Asia", false, null, "", 0, "\uD83C\uDDEF\uD83C\uDDF5"),
-        Country("BR", "Brazil", "South America", true, 1706745600000L, "Amazing!", 4, "\uD83C\uDDE7\uD83C\uDDF7")
+        CountryListItem("US", "United States", "North America", false, "\uD83C\uDDFA\uD83C\uDDF8"),
+        CountryListItem("FR", "France", "Europe", true, "\uD83C\uDDEB\uD83C\uDDF7"),
+        CountryListItem("JP", "Japan", "Asia", false, "\uD83C\uDDEF\uD83C\uDDF5"),
+        CountryListItem("BR", "Brazil", "South America", true, "\uD83C\uDDE7\uD83C\uDDF7"),
     )
 
     private val testStatistics = CountryStatistics(
         visitedCount = 2,
         totalCount = 4,
-        percentage = 50
+        percentage = 50,
     )
 
     @Before

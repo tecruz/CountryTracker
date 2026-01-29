@@ -2,12 +2,12 @@ package com.tecruz.countrytracker.features.countrydetail.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.tecruz.countrytracker.core.domain.model.Country
 import com.tecruz.countrytracker.features.countrydetail.domain.GetCountryByCodeUseCase
-import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsUnvisitedUseCase
+import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryNotesUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryRatingUseCase
+import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -38,7 +38,7 @@ class CountryDetailViewModelTest {
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: CountryDetailViewModel
 
-    private val testCountry = Country(
+    private val testCountry = CountryDetail(
         code = "US",
         name = "United States",
         region = "North America",
@@ -46,7 +46,7 @@ class CountryDetailViewModelTest {
         visitedDate = null,
         notes = "",
         rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8"
+        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
     )
 
     @Before
@@ -67,16 +67,14 @@ class CountryDetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(): CountryDetailViewModel {
-        return CountryDetailViewModel(
-            getCountryByCodeUseCase,
-            markCountryAsVisitedUseCase,
-            markCountryAsUnvisitedUseCase,
-            updateCountryNotesUseCase,
-            updateCountryRatingUseCase,
-            savedStateHandle
-        )
-    }
+    private fun createViewModel(): CountryDetailViewModel = CountryDetailViewModel(
+        getCountryByCodeUseCase,
+        markCountryAsVisitedUseCase,
+        markCountryAsUnvisitedUseCase,
+        updateCountryNotesUseCase,
+        updateCountryRatingUseCase,
+        savedStateHandle,
+    )
 
     @Test
     fun `initial state should be loading`() {
@@ -150,8 +148,9 @@ class CountryDetailViewModelTest {
     @Test
     fun `updateNotes should handle validation error`() = runTest {
         val longNotes = "a".repeat(UpdateCountryNotesUseCase.MAX_NOTES_LENGTH + 1)
-        coEvery { updateCountryNotesUseCase(any(), longNotes) } throws IllegalArgumentException("Notes cannot exceed 500 characters")
-        
+        coEvery { updateCountryNotesUseCase(any(), longNotes) } throws
+            IllegalArgumentException("Notes cannot exceed 500 characters")
+
         viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -182,8 +181,9 @@ class CountryDetailViewModelTest {
 
     @Test
     fun `updateRating should handle validation error`() = runTest {
-        coEvery { updateCountryRatingUseCase(any(), 6) } throws IllegalArgumentException("Rating must be between 0 and 5")
-        
+        coEvery { updateCountryRatingUseCase(any(), 6) } throws
+            IllegalArgumentException("Rating must be between 0 and 5")
+
         viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -200,7 +200,7 @@ class CountryDetailViewModelTest {
     @Test
     fun `clearError should clear error state`() = runTest {
         coEvery { updateCountryRatingUseCase(any(), 10) } throws IllegalArgumentException("Invalid rating")
-        
+
         viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -248,7 +248,7 @@ class CountryDetailViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify(exactly = 0) { 
+        coVerify(exactly = 0) {
             updateCountryRatingUseCase(any(), any())
             updateCountryNotesUseCase(any(), any())
             markCountryAsUnvisitedUseCase(any())

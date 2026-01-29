@@ -31,8 +31,8 @@ object CountryDataLoader {
                     code = code,
                     name = countryData.getString("name"),
                     region = countryData.getString("continent"),
-                    flagEmoji = countryData.getString("flag")
-                )
+                    flagEmoji = countryData.getString("flag"),
+                ),
             )
         }
 
