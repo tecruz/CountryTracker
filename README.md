@@ -1,17 +1,33 @@
 # Country Tracker
 
+[![CI](https://github.com/tecruz/CountryTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/tecruz/CountryTracker/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/tecruz/CountryTracker/branch/master/graph/badge.svg)](https://codecov.io/gh/tecruz/CountryTracker)
+
 A modern Android application for tracking countries you've visited around the world. Built with Jetpack Compose, Clean Architecture, and Material 3.
+
+## Screenshots
+
+| Country List | World Map | Country Detail |
+|:---:|:---:|:---:|
+| ![Country List](screenshots/country_list.png) | ![World Map](screenshots/world_map.png) | ![Country Detail](screenshots/country_detail.png) |
+
+| Search & Filter | Visited Countries | Rating & Notes |
+|:---:|:---:|:---:|
+| ![Search](screenshots/search_filter.png) | ![Visited](screenshots/visited.png) | ![Rating](screenshots/rating_notes.png) |
 
 ## Features
 
+- **Interactive World Map** - SVG-based world map canvas with visited countries highlighted in green
 - **Statistics Dashboard** - View visited count, total countries, and completion percentage
-- **Search & Filter** - Find countries by name and filter by region (Africa, Asia, Europe, North America, South America, Oceania)
+- **Search & Filter** - Find countries by name, filter by region and visited status
 - **Visit Tracking** - Mark countries as visited with date picker
 - **5-Star Rating System** - Rate your travel experiences
 - **Travel Notes** - Add personal notes up to 500 characters per country
 - **75+ Countries** - Pre-populated database across 6 continents
 - **Dark/Light Theme** - Material 3 dynamic theming support
-- **Smooth Animations** - Polished UI transitions and interactions
+- **Edge-to-Edge Display** - Modern immersive UI with themed status bar
+- **Process Death Handling** - Filter states and UI preserved across configuration changes
+- **Adaptive Layouts** - WindowSizeClass support for responsive tablet/foldable experiences
 
 ## Prerequisites
 
@@ -22,10 +38,13 @@ A modern Android application for tracking countries you've visited around the wo
 
 ## Getting Started
 
-1. Clone or download the project
+1. Clone the repository
+   ```bash
+   git clone https://github.com/tecruz/CountryTracker.git
+   ```
 2. Open in Android Studio
 3. Wait for Gradle sync to complete
-4. Run on emulator or device (Shift+F10)
+4. Run on emulator or device
 
 ## Tech Stack
 
@@ -33,85 +52,106 @@ A modern Android application for tracking countries you've visited around the wo
 |----------|------------|---------|
 | Language | Kotlin | 2.3.0 |
 | UI Framework | Jetpack Compose | 2026.01.00 |
-| Design System | Material 3 | Latest |
+| Design System | Material 3 Expressive | 1.5.0-alpha |
+| Adaptive UI | Material 3 Adaptive | 1.1.0 |
 | Architecture | Clean Architecture + MVVM | - |
 | DI | Hilt | 2.59 |
 | Database | Room | 2.8.4 |
 | Async | Coroutines + Flow | 1.10.2 |
 | Navigation | Navigation Compose | 2.9.6 |
-| Build System | Gradle (Kotlin DSL) | - |
+| Code Formatting | Spotless + ktlint | 7.0.2 / 1.5.0 |
+| Static Analysis | Detekt | 1.23.8 |
+| Code Coverage | JaCoCo | 0.8.12 |
+| Build System | Gradle (Kotlin DSL) | 9.1.0 |
 | Annotation Processing | KSP | 2.3.4 |
 
 ## Project Structure
 
 ```
-app/src/main/kotlin/com/example/countrytracker/
-├── CountryTrackerApplication.kt     # Hilt Application
-├── data/                            # Data Layer
-│   ├── local/
-│   │   ├── dao/CountryDao.kt
-│   │   ├── database/CountryDatabase.kt
-│   │   └── entity/CountryEntity.kt
-│   └── repository/CountryRepositoryImpl.kt
-├── domain/                          # Domain Layer
-│   ├── model/Country.kt
-│   ├── repository/CountryRepository.kt
-│   └── usecase/
-│       ├── GetAllCountriesUseCase.kt
-│       ├── GetCountryStatisticsUseCase.kt
-│       └── MarkCountryAsVisitedUseCase.kt
-├── presentation/                    # Presentation Layer
-│   ├── MainActivity.kt
-│   ├── navigation/CountryTrackerNavHost.kt
-│   ├── countrylist/
-│   │   ├── CountryListScreen.kt
-│   │   └── CountryListViewModel.kt
-│   ├── countrydetail/
-│   │   ├── CountryDetailScreen.kt
-│   │   └── CountryDetailViewModel.kt
-│   └── theme/
-│       ├── Color.kt
-│       ├── Theme.kt
-│       └── Type.kt
-└── di/                              # Dependency Injection
-    ├── DatabaseModule.kt
-    └── RepositoryModule.kt
+app/src/main/kotlin/com/tecruz/countrytracker/
+├── CountryTrackerApplication.kt
+├── MainActivity.kt
+├── core/
+│   ├── data/
+│   │   ├── database/          # Room database, DAO, Entity
+│   │   └── datasource/        # Data loaders
+│   ├── designsystem/          # Theme, Colors, Typography
+│   ├── di/                    # Core DI modules
+│   ├── navigation/            # Navigation graph
+│   └── util/                  # Shared utilities
+└── features/
+    ├── countrydetail/
+    │   ├── data/              # Repository impl, mappers, DI
+    │   ├── domain/            # Use cases, models, repository interface
+    │   └── presentation/      # Screen, ViewModel, UI model
+    └── countrylist/
+        ├── data/              # Repository impl, mappers, datasource, DI
+        ├── domain/            # Use cases, models, repository interface
+        └── presentation/      # Screen, ViewModel, components
 ```
 
-## Testing
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
-Run unit tests:
+## Quality
+
+### Code Formatting
+
 ```bash
-./gradlew test
+# Check formatting
+./gradlew spotlessCheck
+
+# Auto-fix formatting
+./gradlew spotlessApply
 ```
 
-Run instrumented tests:
+### Static Analysis
+
 ```bash
-./gradlew connectedAndroidTest
+./gradlew detekt
+```
+
+### Testing
+
+```bash
+# Unit tests
+./gradlew testDebugUnitTest
+
+# Instrumented tests
+./gradlew connectedDebugAndroidTest
+
+# Code coverage report
+./gradlew jacocoTestReport
 ```
 
 ### Test Coverage
 
-- **Use Cases**: `GetAllCountriesUseCaseTest`, `GetCountryStatisticsUseCaseTest`
-- **Repository**: `CountryRepositoryImplTest`
-- **ViewModels**: `CountryListViewModelTest`, `CountryDetailViewModelTest`
+| Layer | Tests |
+|-------|-------|
+| **Data** | `CountryListRepositoryImplTest`, `CountryDetailRepositoryImplTest` |
+| **Domain** | `GetAllCountriesUseCaseTest`, `GetCountryStatisticsUseCaseTest`, `MarkCountryAsVisitedUseCaseTest` |
+| **Presentation** | `CountryListViewModelTest`, `CountryDetailViewModelTest` |
+| **UI (Instrumented)** | `CountryListScreenTest`, `CountryDetailScreenTest`, `WorldMapColoringTest`, `CountryTrackerE2ETest` |
 
-Testing libraries: JUnit 4, MockK, Turbine, Coroutines Test
+Testing libraries: JUnit 4, MockK, Turbine, Coroutines Test, Compose UI Test
 
-## Architecture
+### CI Pipeline
 
-This project follows Clean Architecture with three layers:
+The CI pipeline runs on every push and pull request:
 
-- **Domain** - Pure Kotlin business logic, framework-independent
-- **Data** - Room database persistence, repository implementations
-- **Presentation** - Jetpack Compose UI, MVVM pattern with ViewModels
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
+| Job | Description |
+|-----|-------------|
+| **Build & Unit Tests** | Compiles debug APK and runs unit tests |
+| **Code Formatting** | Verifies code style with Spotless + ktlint |
+| **Android Lint** | Runs Android lint checks |
+| **Detekt Analysis** | Static code analysis |
+| **Code Coverage** | Generates JaCoCo report, uploads to Codecov |
+| **Instrumented Tests** | Runs UI tests on emulator |
+| **Build Release APK** | Builds release APK (main/master only) |
 
 ## Build Variants
 
-- **Debug** - Full logging and debugging enabled
-- **Release** - Minification with ProGuard/R8
+- **Debug** - Full logging, test coverage enabled
+- **Release** - Minification with R8/ProGuard
 
 ## License
 

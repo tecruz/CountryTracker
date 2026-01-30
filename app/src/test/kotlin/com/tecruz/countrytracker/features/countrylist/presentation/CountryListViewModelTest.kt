@@ -1,5 +1,6 @@
 package com.tecruz.countrytracker.features.countrylist.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
@@ -27,6 +28,7 @@ class CountryListViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var getAllCountriesUseCase: GetAllCountriesUseCase
     private lateinit var getCountryStatisticsUseCase: GetCountryStatisticsUseCase
+    private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: CountryListViewModel
 
     private val testCountries = listOf(
@@ -47,11 +49,12 @@ class CountryListViewModelTest {
         Dispatchers.setMain(testDispatcher)
         getAllCountriesUseCase = mockk()
         getCountryStatisticsUseCase = mockk()
+        savedStateHandle = SavedStateHandle()
 
         every { getAllCountriesUseCase() } returns flowOf(testCountries)
         every { getCountryStatisticsUseCase() } returns flowOf(testStatistics)
 
-        viewModel = CountryListViewModel(getAllCountriesUseCase, getCountryStatisticsUseCase)
+        viewModel = CountryListViewModel(getAllCountriesUseCase, getCountryStatisticsUseCase, savedStateHandle)
     }
 
     @After

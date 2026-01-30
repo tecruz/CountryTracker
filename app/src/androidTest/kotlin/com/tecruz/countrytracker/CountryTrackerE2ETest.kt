@@ -42,11 +42,25 @@ class CountryTrackerE2ETest {
         // Step 1: Verify the app is displayed
         composeTestRule.onNodeWithText("Country Tracker").assertIsDisplayed()
 
-        // Step 2: Verify statistics card is displayed on Map tab
+        // Step 2: Countries tab is now the default, verify it's displayed
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodes(hasSetTextAction())
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Step 3: Switch to Map tab to verify statistics card
+        composeTestRule.onNodeWithText("Map").performClick()
+
+        // Wait for Map tab to load
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithText("VISITED", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
         composeTestRule.onNodeWithText("VISITED", substring = true).assertIsDisplayed()
         composeTestRule.onNodeWithText("TOTAL", substring = true).assertIsDisplayed()
 
-        // Step 3: Switch to Countries tab
+        // Step 4: Switch to Countries tab
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for Countries tab to load with search field

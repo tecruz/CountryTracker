@@ -10,6 +10,7 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 |------------|---------|
 | Kotlin | 2.3.0 |
 | Jetpack Compose BOM | 2026.01.00 |
+| Material 3 Adaptive | 1.1.0 |
 | Room | 2.8.4 |
 | Hilt | 2.59 |
 | Navigation Compose | 2.9.6 |
@@ -111,6 +112,12 @@ Each feature (Country List, Country Detail) has its own:
 - ViewModel with state management
 - UI state sealed classes for loading, success, and error states
 
+**Android Best Practices**:
+- **Edge-to-Edge Display**: Content renders behind system bars for immersive UI
+- **Process Death Handling**: UI state preserved using `SavedStateHandle` and `rememberSaveable`
+- **Adaptive Layouts**: `WindowSizeClass` provided via `CompositionLocal` for responsive design
+- **Themed Status Bar**: Status bar color matches app theme for visual consistency
+
 ## Dependency Flow
 
 ```
@@ -198,6 +205,51 @@ User Action → ViewModel → Use Case → Repository → Database
    ```kotlin
    StateFlow updates → UI recomposes
    ```
+
+## Android Guidelines Implementation
+
+### Edge-to-Edge Display
+The app uses modern edge-to-edge rendering where content draws behind system bars:
+
+```kotlin
+// MainActivity.kt
+enableEdgeToEdge(
+    statusBarStyle = SystemBarStyle.dark(PRIMARY_GREEN),
+    navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+)
+```
+
+Screens handle `WindowInsets` to ensure content doesn't overlap with system bars:
+- `WindowInsets.statusBars` - Applied to top app bars
+- `WindowInsets.navigationBars` - Applied to scrollable content
+
+### Process Death Handling
+State is preserved across process death using:
+
+1. **SavedStateHandle in ViewModels**:
+   ```kotlin
+   private val _searchQuery = savedStateHandle.getStateFlow(KEY_SEARCH_QUERY, "")
+   ```
+
+2. **rememberSaveable in Composables**:
+   ```kotlin
+   var showDatePicker by rememberSaveable { mutableStateOf(false) }
+   ```
+
+### Adaptive Layouts
+`WindowSizeClass` is provided via `CompositionLocal` for responsive design:
+
+```kotlin
+val LocalWindowSizeClass = staticCompositionLocalOf<WindowSizeClass> { ... }
+
+// In screens
+val windowSizeClass = LocalWindowSizeClass.current
+when (windowSizeClass.windowWidthSizeClass) {
+    WindowWidthSizeClass.COMPACT -> // Phone layout
+    WindowWidthSizeClass.MEDIUM -> // Tablet portrait
+    WindowWidthSizeClass.EXPANDED -> // Tablet landscape / Desktop
+}
+```
 
 ## Benefits of This Architecture
 
@@ -287,6 +339,7 @@ app/src/test/kotlin/com/example/countrytracker/
 |------------|---------|---------|
 | Kotlin | 2.3.0 | Primary language |
 | Jetpack Compose | 2026.01.00 | Declarative UI framework |
+| Material 3 Adaptive | 1.1.0 | Responsive layouts for all screen sizes |
 | Room | 2.8.4 | Local SQLite database |
 | Hilt | 2.59 | Dependency injection |
 | Coroutines | 1.10.2 | Asynchronous operations |
@@ -294,6 +347,7 @@ app/src/test/kotlin/com/example/countrytracker/
 | Material 3 | Latest | Design system |
 | Navigation Compose | 2.9.6 | Screen navigation |
 | DataStore | 1.2.0 | Preferences storage |
+| SavedStateHandle | (with Lifecycle) | Process death survival |
 
 ## Future Enhancements
 

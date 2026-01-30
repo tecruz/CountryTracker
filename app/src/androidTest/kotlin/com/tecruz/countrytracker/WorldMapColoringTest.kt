@@ -1,11 +1,13 @@
 package com.tecruz.countrytracker
 
+import android.content.pm.ActivityInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +36,45 @@ class WorldMapColoringTest {
         hiltRule.inject()
     }
 
+    @After
+    fun tearDown() {
+        // Reset orientation to portrait after each test
+        composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
+    @Test
+    fun worldMap_inLandscapeOrientation_isDisplayed() {
+        // Wait for the app to load
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Switch to Map tab (Countries is now the default tab)
+        composeTestRule.onNodeWithText("Map").performClick()
+
+        // Verify the world map is displayed in portrait
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("world_map")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("world_map").assertIsDisplayed()
+
+        // Rotate to landscape orientation
+        composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+        // Wait for rotation to complete and map to be displayed again
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("world_map")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("world_map").assertIsDisplayed()
+
+        // Verify statistics are also accessible (may need to scroll)
+        composeTestRule.onNodeWithText("VISITED", substring = true).assertExists()
+    }
+
     @Test
     fun worldMap_whenCountryMarkedAsVisited_showsCountryCodeInSemantics() {
         // Wait for the app to load
@@ -42,14 +83,17 @@ class WorldMapColoringTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Verify the world map is displayed on the Map tab (default tab)
+        // Countries tab is now the default tab, switch to Map tab to verify it exists
+        composeTestRule.onNodeWithText("Map").performClick()
+
+        // Verify the world map is displayed on the Map tab
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithTag("world_map")
                 .fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithTag("world_map").assertIsDisplayed()
 
-        // Mark Germany as visited
+        // Mark Germany as visited (this will switch to Countries tab internally)
         markCountryAsVisited("Germany")
 
         // Switch to Map tab

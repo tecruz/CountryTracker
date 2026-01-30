@@ -1,5 +1,6 @@
 package com.tecruz.countrytracker.features.countrylist.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
@@ -24,16 +25,22 @@ data class CountryListUiState(
     val error: String? = null,
 )
 
+private const val KEY_SEARCH_QUERY = "search_query"
+private const val KEY_SELECTED_REGION = "selected_region"
+private const val KEY_SHOW_ONLY_VISITED = "show_only_visited"
+
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class CountryListViewModel @Inject constructor(
     private val getAllCountriesUseCase: GetAllCountriesUseCase,
     private val getCountryStatisticsUseCase: GetCountryStatisticsUseCase,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _searchQuery = MutableStateFlow("")
-    private val _selectedRegion = MutableStateFlow("All")
-    private val _showOnlyVisited = MutableStateFlow(false)
+    // Use SavedStateHandle to survive process death
+    private val _searchQuery = savedStateHandle.getStateFlow(KEY_SEARCH_QUERY, "")
+    private val _selectedRegion = savedStateHandle.getStateFlow(KEY_SELECTED_REGION, "All")
+    private val _showOnlyVisited = savedStateHandle.getStateFlow(KEY_SHOW_ONLY_VISITED, false)
 
     // Debounced search query - waits 300ms after user stops typing
     private val debouncedSearchQuery = _searchQuery
@@ -109,15 +116,15 @@ class CountryListViewModel @Inject constructor(
     )
 
     fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
+        savedStateHandle[KEY_SEARCH_QUERY] = query
     }
 
     fun selectRegion(region: String) {
-        _selectedRegion.value = region
+        savedStateHandle[KEY_SELECTED_REGION] = region
     }
 
     fun toggleShowOnlyVisited() {
-        _showOnlyVisited.value = !_showOnlyVisited.value
+        savedStateHandle[KEY_SHOW_ONLY_VISITED] = !_showOnlyVisited.value
     }
 
     fun clearError() {

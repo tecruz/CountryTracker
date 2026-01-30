@@ -2,7 +2,21 @@ package com.tecruz.countrytracker.features.countrydetail.presentation
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -11,7 +25,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -36,8 +58,9 @@ import com.tecruz.countrytracker.features.countrydetail.presentation.model.Count
 @Composable
 fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailViewModel, modifier: Modifier = Modifier) {
     val uiState by viewModel.uiState.collectAsState()
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showNotesDialog by remember { mutableStateOf(false) }
+    // Use rememberSaveable to survive process death
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showNotesDialog by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val errorDismissText = stringResource(R.string.error_dismiss)
 
@@ -65,6 +88,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = {
@@ -105,6 +129,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                 .padding(padding)
                 .background(Background)
                 .verticalScroll(rememberScrollState())
+                .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(20.dp),
         ) {
             // Hero Card
