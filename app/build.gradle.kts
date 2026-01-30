@@ -170,13 +170,18 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/html"))
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
+            exclude(jacocoExcludes)
+        } +
+            fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
+                exclude(jacocoExcludes)
+            } +
+            fileTree(
+                "${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+            ) {
+                exclude(jacocoExcludes)
+            }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
@@ -209,13 +214,18 @@ tasks.register<JacocoReport>("jacocoAndroidTestReport") {
         )
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
+            exclude(jacocoExcludes)
+        } +
+            fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
+                exclude(jacocoExcludes)
+            } +
+            fileTree(
+                "${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+            ) {
+                exclude(jacocoExcludes)
+            }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
@@ -244,13 +254,18 @@ tasks.register<JacocoReport>("jacocoCombinedReport") {
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoCombinedReport/html"))
     }
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
+            exclude(jacocoExcludes)
+        } +
+            fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
+                exclude(jacocoExcludes)
+            } +
+            fileTree(
+                "${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+            ) {
+                exclude(jacocoExcludes)
+            }
 
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
@@ -273,13 +288,18 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
 
     dependsOn("jacocoTestReport")
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
-        exclude(jacocoExcludes)
-    } + fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
-        exclude(jacocoExcludes)
-    }
+    val debugTree =
+        fileTree("${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes") {
+            exclude(jacocoExcludes)
+        } +
+            fileTree("${project.layout.buildDirectory.get()}/intermediates/rundouble_compile/debug_classes") {
+                exclude(jacocoExcludes)
+            } +
+            fileTree(
+                "${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+            ) {
+                exclude(jacocoExcludes)
+            }
 
     classDirectories.setFrom(files(debugTree))
     executionData.setFrom(
