@@ -81,13 +81,13 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: coverage-report
-          path: app/build/reports/jacoco/jacocoTestReport/
+          path: app/build/reports/jacoco/jacocoCombinedReport/
           retention-days: 7
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          files: app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml,app/build/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml
           fail_ci_if_error: false
           verbose: true
         env:
