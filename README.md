@@ -1,7 +1,7 @@
 # Country Tracker
 
 [![CI](https://github.com/tecruz/CountryTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/tecruz/CountryTracker/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/tecruz/CountryTracker/branch/master/graph/badge.svg)](https://codecov.io/gh/tecruz/CountryTracker)
+[![codecov](https://codecov.io/gh/tecruz/CountryTracker/branch/master/graph/badge.svg?token=jT9FMf2Q4Y)](https://codecov.io/gh/tecruz/CountryTracker)
 
 A modern Android application for tracking countries you've visited around the world. Built with Jetpack Compose, Clean Architecture, and Material 3.
 
