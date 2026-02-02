@@ -11,16 +11,11 @@ import javax.inject.Inject
 class UpdateCountryRatingUseCase @Inject constructor(private val repository: CountryDetailRepository) {
     suspend operator fun invoke(country: CountryDetail, rating: Int) {
         // Validate rating range
-        require(rating in MIN_RATING..MAX_RATING) {
-            "Rating must be between $MIN_RATING and $MAX_RATING"
+        require(rating in CountryDetail.MIN_RATING..CountryDetail.MAX_RATING) {
+            "Rating must be between ${CountryDetail.MIN_RATING} and ${CountryDetail.MAX_RATING}"
         }
 
         val updatedCountry = country.copy(rating = rating)
         repository.updateCountry(updatedCountry)
-    }
-
-    companion object {
-        const val MIN_RATING = 0
-        const val MAX_RATING = 5
     }
 }

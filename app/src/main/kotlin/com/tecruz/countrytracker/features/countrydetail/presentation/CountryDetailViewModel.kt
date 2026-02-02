@@ -5,6 +5,7 @@ package com.tecruz.countrytracker.features.countrydetail.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tecruz.countrytracker.core.navigation.Screen
 import com.tecruz.countrytracker.features.countrydetail.domain.GetCountryByCodeUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsUnvisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
@@ -36,20 +37,20 @@ class CountryDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val countryCode: String = checkNotNull(savedStateHandle["countryCode"])
+    private val countryCode: String = checkNotNull(savedStateHandle[Screen.CountryDetail.ARG_COUNTRY_CODE])
 
     private val _refreshTrigger = MutableStateFlow(0)
     private val _error = MutableStateFlow<String?>(null)
     private val _isSaving = MutableStateFlow(false)
 
-    // Store domain model internally for operations
-    private var currentCountryDomain: CountryDetail? = null
+    // Thread-safe storage of domain model for operations
+    private val _currentCountryDomain = MutableStateFlow<CountryDetail?>(null)
 
     val uiState: StateFlow<CountryDetailUiState> = combine(
         _refreshTrigger.flatMapLatest {
             flow {
                 val country = getCountryByCodeUseCase(countryCode)
-                currentCountryDomain = country
+                _currentCountryDomain.value = country
                 emit(country)
             }.catch { e ->
                 _error.value = e.message ?: "Failed to load country"
@@ -72,7 +73,7 @@ class CountryDetailViewModel @Inject constructor(
     )
 
     fun markAsVisited(date: Long, notes: String, rating: Int) {
-        val country = currentCountryDomain ?: return
+        val country = _currentCountryDomain.value ?: return
         viewModelScope.launch {
             _isSaving.value = true
             _error.value = null
@@ -88,7 +89,7 @@ class CountryDetailViewModel @Inject constructor(
     }
 
     fun markAsUnvisited() {
-        val country = currentCountryDomain ?: return
+        val country = _currentCountryDomain.value ?: return
         viewModelScope.launch {
             _isSaving.value = true
             _error.value = null
@@ -104,7 +105,7 @@ class CountryDetailViewModel @Inject constructor(
     }
 
     fun updateNotes(notes: String) {
-        val country = currentCountryDomain ?: return
+        val country = _currentCountryDomain.value ?: return
         viewModelScope.launch {
             _isSaving.value = true
             _error.value = null
@@ -122,7 +123,7 @@ class CountryDetailViewModel @Inject constructor(
     }
 
     fun updateRating(rating: Int) {
-        val country = currentCountryDomain ?: return
+        val country = _currentCountryDomain.value ?: return
         viewModelScope.launch {
             _isSaving.value = true
             _error.value = null

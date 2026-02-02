@@ -17,21 +17,23 @@ fun CountryTrackerNavHost(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = "country_list",
+        startDestination = Screen.CountryList.route,
         modifier = modifier,
     ) {
-        composable("country_list") {
+        composable(Screen.CountryList.route) {
             CountryListScreen(
                 onCountryClick = { countryCode ->
-                    navController.navigate("country_detail/$countryCode")
+                    navController.navigate(Screen.CountryDetail.createRoute(countryCode))
                 },
                 viewModel = hiltViewModel(),
             )
         }
 
         composable(
-            route = "country_detail/{countryCode}",
-            arguments = listOf(navArgument("countryCode") { type = NavType.StringType }),
+            route = Screen.CountryDetail.route,
+            arguments = listOf(
+                navArgument(Screen.CountryDetail.ARG_COUNTRY_CODE) { type = NavType.StringType },
+            ),
         ) {
             CountryDetailScreen(
                 onNavigateBack = { navController.navigateUp() },

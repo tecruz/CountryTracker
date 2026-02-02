@@ -44,6 +44,37 @@ val StarYellow = Color(0xFFFFB800)
 val VisitedGradientStart = Color(0xFFF0FFF8)
 val VisitedGradientEnd = Color(0xFFE8FFF3)
 
+// World Map Colors
+val OceanGradientStart = Color(0xFFB8D4E8)
+val OceanGradientMid = Color(0xFF9AC5E0)
+val OceanGradientEnd = Color(0xFF7FB3D8)
+val LandColor = Color(0xFFF8F9FA)
+val LandShadow = Color(0xFFE9ECEF)
+val MapVisitedLight = Color(0xFF66BB6A)
+val MapVisitedDark = Color(0xFF43A047)
+val MapBorder = Color(0xFFCED4DA)
+val MapVisitedBorder = Color(0xFF2E7D32)
+val CountryShadow = Color(0x33000000)
+
+// Detail Screen Colors
+val HeroCardGradientEnd = Color(0xFFB8D9C9)
+val VisitStatusGradientEnd = Color(0xFF9FFFD4)
+
+// List Screen Colors
+val TopBarGradientStart = Color(0xFF2D8659)
+val TopBarGradientEnd = Color(0xFF35A76F)
+val StatsGradientStart = Color(0xFFD4F1E3)
+val StatsGradientMid = Color(0xFFB8E6D5)
+val StatsGradientEnd = Color(0xFFA0D9C7)
+val StatsIconVisited = Color(0xFF2E7D32)
+val StatsIconTotal = Color(0xFF1B5E20)
+val StatsIconComplete = Color(0xFF388E3C)
+val StatsValueColor = Color(0xFF1B5E20)
+val StatsLabelColor = Color(0xFF2E7D32)
+val CountryItemVisitedStart = Color(0xFFF0FFF8)
+val CountryItemVisitedEnd = Color(0xFFE3F9EE)
+val CountryItemNeutralEnd = Color(0xFFFBFCFC)
+
 // Dark Theme Colors
 val DarkPrimary = Color(0xFF6CDBAC)
 val DarkOnPrimary = Color(0xFF003826)

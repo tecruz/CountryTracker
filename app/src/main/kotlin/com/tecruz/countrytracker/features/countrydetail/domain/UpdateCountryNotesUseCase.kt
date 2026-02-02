@@ -11,15 +11,11 @@ import javax.inject.Inject
 class UpdateCountryNotesUseCase @Inject constructor(private val repository: CountryDetailRepository) {
     suspend operator fun invoke(country: CountryDetail, notes: String) {
         // Validate notes length
-        require(notes.length <= MAX_NOTES_LENGTH) {
-            "Notes cannot exceed $MAX_NOTES_LENGTH characters"
+        require(notes.length <= CountryDetail.MAX_NOTES_LENGTH) {
+            "Notes cannot exceed ${CountryDetail.MAX_NOTES_LENGTH} characters"
         }
 
         val updatedCountry = country.copy(notes = notes)
         repository.updateCountry(updatedCountry)
-    }
-
-    companion object {
-        const val MAX_NOTES_LENGTH = 500
     }
 }

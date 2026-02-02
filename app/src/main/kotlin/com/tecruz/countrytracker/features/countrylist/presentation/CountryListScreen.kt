@@ -91,11 +91,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.Background
+import com.tecruz.countrytracker.core.designsystem.CountryItemNeutralEnd
+import com.tecruz.countrytracker.core.designsystem.CountryItemVisitedEnd
+import com.tecruz.countrytracker.core.designsystem.CountryItemVisitedStart
 import com.tecruz.countrytracker.core.designsystem.OnSurface
 import com.tecruz.countrytracker.core.designsystem.OnSurfaceVariant
 import com.tecruz.countrytracker.core.designsystem.Outline
 import com.tecruz.countrytracker.core.designsystem.PrimaryGreen
 import com.tecruz.countrytracker.core.designsystem.PrimaryLight
+import com.tecruz.countrytracker.core.designsystem.StatsGradientEnd
+import com.tecruz.countrytracker.core.designsystem.StatsGradientMid
+import com.tecruz.countrytracker.core.designsystem.StatsGradientStart
+import com.tecruz.countrytracker.core.designsystem.StatsIconComplete
+import com.tecruz.countrytracker.core.designsystem.StatsIconTotal
+import com.tecruz.countrytracker.core.designsystem.StatsIconVisited
+import com.tecruz.countrytracker.core.designsystem.StatsLabelColor
+import com.tecruz.countrytracker.core.designsystem.StatsValueColor
+import com.tecruz.countrytracker.core.designsystem.TopBarGradientEnd
+import com.tecruz.countrytracker.core.designsystem.TopBarGradientStart
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.presentation.components.WorldMapCanvas
 import kotlinx.coroutines.launch
@@ -160,9 +173,9 @@ fun CountryListScreen(
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                Color(0xFF2D8659),
+                                TopBarGradientStart,
                                 PrimaryGreen,
-                                Color(0xFF35A76F),
+                                TopBarGradientEnd,
                             ),
                         ),
                     )
@@ -493,9 +506,9 @@ fun StatsCard(visitedCount: Int, totalCount: Int, percentage: Int, modifier: Mod
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFD4F1E3),
-                            Color(0xFFB8E6D5),
-                            Color(0xFFA0D9C7),
+                            StatsGradientStart,
+                            StatsGradientMid,
+                            StatsGradientEnd,
                         ),
                     ),
                 )
@@ -510,7 +523,7 @@ fun StatsCard(visitedCount: Int, totalCount: Int, percentage: Int, modifier: Mod
                     icon = Icons.Default.Flag,
                     value = visitedCount.toString(),
                     label = stringResource(R.string.stats_visited),
-                    iconTint = Color(0xFF2E7D32),
+                    iconTint = StatsIconVisited,
                 )
 
                 HorizontalDivider(
@@ -524,7 +537,7 @@ fun StatsCard(visitedCount: Int, totalCount: Int, percentage: Int, modifier: Mod
                     icon = Icons.Default.Public,
                     value = totalCount.toString(),
                     label = stringResource(R.string.stats_total),
-                    iconTint = Color(0xFF1B5E20),
+                    iconTint = StatsIconTotal,
                 )
 
                 HorizontalDivider(
@@ -538,7 +551,7 @@ fun StatsCard(visitedCount: Int, totalCount: Int, percentage: Int, modifier: Mod
                     icon = Icons.AutoMirrored.Filled.TrendingUp,
                     value = "$percentage%",
                     label = stringResource(R.string.stats_complete),
-                    iconTint = Color(0xFF388E3C),
+                    iconTint = StatsIconComplete,
                 )
             }
         }
@@ -562,7 +575,7 @@ fun StatItem(icon: ImageVector, value: String, label: String, iconTint: Color, m
             text = value,
             fontSize = 40.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF1B5E20),
+            color = StatsValueColor,
             lineHeight = 40.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -570,7 +583,7 @@ fun StatItem(icon: ImageVector, value: String, label: String, iconTint: Color, m
             text = label,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF2E7D32),
+            color = StatsLabelColor,
             letterSpacing = 0.8.sp,
             textAlign = TextAlign.Center,
         )
@@ -767,12 +780,12 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
     val backgroundColor = if (country.visited) {
         Brush.linearGradient(
             colors = listOf(
-                Color(0xFFF0FFF8),
-                Color(0xFFE3F9EE),
+                CountryItemVisitedStart,
+                CountryItemVisitedEnd,
             ),
         )
     } else {
-        Brush.linearGradient(colors = listOf(Color.White, Color(0xFFFBFCFC)))
+        Brush.linearGradient(colors = listOf(Color.White, CountryItemNeutralEnd))
     }
 
     Card(

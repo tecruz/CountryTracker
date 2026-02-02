@@ -24,6 +24,9 @@
     <!-- Country Detail Screen -->
     <string name="mark_as_visited">Mark as Visited</string>
     <string name="mark_as_not_visited">Mark as not visited</string>
+    <string name="confirm_unvisit_title">Remove visit?</string>
+    <string name="confirm_unvisit_message">This will remove the visit date, notes, and rating for this country. This action cannot be undone.</string>
+    <string name="confirm_unvisit_action">Remove</string>
     <string name="visited_status">Visited</string>
     <string name="your_rating">Your Rating</string>
     <string name="notes_title">Notes</string>

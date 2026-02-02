@@ -13,4 +13,10 @@ data class CountryDetail(
     val notes: String,
     val rating: Int,
     val flagEmoji: String,
-)
+) {
+    companion object {
+        const val MAX_NOTES_LENGTH = 500
+        const val MIN_RATING = 0
+        const val MAX_RATING = 5
+    }
+}

@@ -2,6 +2,7 @@ package com.tecruz.countrytracker.features.countrydetail.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.tecruz.countrytracker.core.navigation.Screen
 import com.tecruz.countrytracker.features.countrydetail.domain.GetCountryByCodeUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsUnvisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
@@ -57,7 +58,7 @@ class CountryDetailViewModelTest {
         markCountryAsUnvisitedUseCase = mockk(relaxed = true)
         updateCountryNotesUseCase = mockk(relaxed = true)
         updateCountryRatingUseCase = mockk(relaxed = true)
-        savedStateHandle = SavedStateHandle(mapOf("countryCode" to "US"))
+        savedStateHandle = SavedStateHandle(mapOf(Screen.CountryDetail.ARG_COUNTRY_CODE to "US"))
 
         coEvery { getCountryByCodeUseCase("US") } returns testCountry
     }
@@ -147,7 +148,7 @@ class CountryDetailViewModelTest {
 
     @Test
     fun `updateNotes should handle validation error`() = runTest {
-        val longNotes = "a".repeat(UpdateCountryNotesUseCase.MAX_NOTES_LENGTH + 1)
+        val longNotes = "a".repeat(CountryDetail.MAX_NOTES_LENGTH + 1)
         coEvery { updateCountryNotesUseCase(any(), longNotes) } throws
             IllegalArgumentException("Notes cannot exceed 500 characters")
 

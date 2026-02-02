@@ -42,6 +42,9 @@ class CountryListViewModel @Inject constructor(
     private val _selectedRegion = savedStateHandle.getStateFlow(KEY_SELECTED_REGION, "All")
     private val _showOnlyVisited = savedStateHandle.getStateFlow(KEY_SHOW_ONLY_VISITED, false)
 
+    // Manual error flow for clearError support
+    private val _manualError = MutableStateFlow<String?>(null)
+
     // Debounced search query - waits 300ms after user stops typing
     private val debouncedSearchQuery = _searchQuery
         .debounce(300)
@@ -52,22 +55,36 @@ class CountryListViewModel @Inject constructor(
         )
 
     val uiState: StateFlow<CountryListUiState> = combine(
-        getAllCountriesUseCase()
-            .catch { emit(emptyList()) },
-        getCountryStatisticsUseCase()
-            .catch { emit(com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics(0, 0, 0)) },
-        _searchQuery,
-        debouncedSearchQuery,
-        _selectedRegion,
-        _showOnlyVisited,
-    ) { flows ->
-        @Suppress("UNCHECKED_CAST")
-        val countries = flows[0] as List<CountryListItem>
-        val stats = flows[1] as com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics
-        val immediateSearchQuery = flows[2] as String
-        val debouncedQuery = flows[3] as String
-        val selectedRegion = flows[4] as String
-        val showOnlyVisited = flows[5] as Boolean
+        combine(
+            getAllCountriesUseCase()
+                .catch {
+                    _manualError.value = it.message ?: "Failed to load countries"
+                    emit(emptyList())
+                },
+            getCountryStatisticsUseCase()
+                .catch {
+                    _manualError.value = it.message ?: "Failed to load statistics"
+                    emit(com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics(0, 0, 0))
+                },
+            _searchQuery,
+        ) {
+                countries: List<CountryListItem>,
+                stats: com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics,
+                immediateSearchQuery: String,
+            ->
+            Triple(countries, stats, immediateSearchQuery)
+        },
+        combine(
+            debouncedSearchQuery,
+            _selectedRegion,
+            _showOnlyVisited,
+        ) { debouncedQuery: String, selectedRegion: String, showOnlyVisited: Boolean ->
+            Triple(debouncedQuery, selectedRegion, showOnlyVisited)
+        },
+        _manualError,
+    ) { dataTriple, filterTriple, manualError ->
+        val (countries, stats, immediateSearchQuery) = dataTriple
+        val (debouncedQuery, selectedRegion, showOnlyVisited) = filterTriple
         try {
             val filteredCountries = countries
                 .filter { country ->
@@ -94,15 +111,17 @@ class CountryListViewModel @Inject constructor(
                 showOnlyVisited = showOnlyVisited,
                 isLoading = false,
                 allRegions = regions,
-                error = null,
+                error = manualError,
             )
         } catch (e: Exception) {
+            _manualError.value = e.message ?: "An unexpected error occurred"
             CountryListUiState(
                 isLoading = false,
                 error = e.message ?: "An unexpected error occurred",
             )
         }
     }.catch { e ->
+        _manualError.value = e.message ?: "Failed to load countries"
         emit(
             CountryListUiState(
                 isLoading = false,
@@ -128,6 +147,6 @@ class CountryListViewModel @Inject constructor(
     }
 
     fun clearError() {
-        // Error is automatically cleared on next successful data load
+        _manualError.value = null
     }
 }

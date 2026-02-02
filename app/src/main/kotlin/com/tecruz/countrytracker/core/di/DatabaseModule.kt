@@ -1,6 +1,8 @@
 package com.tecruz.countrytracker.core.di
 
 import android.content.Context
+import android.database.SQLException
+import android.util.Log
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -12,10 +14,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.io.IOException
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -39,9 +39,15 @@ object DatabaseModule {
         .addCallback(object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                    val countries = CountryDataLoader.loadCountriesFromAssets(context)
-                    daoProvider.get().insertCountries(countries)
+                try {
+                    runBlocking {
+                        val countries = CountryDataLoader.loadCountriesFromAssets(context)
+                        daoProvider.get().insertCountries(countries)
+                    }
+                } catch (e: IOException) {
+                    Log.e("DatabaseModule", "Failed to seed database", e)
+                } catch (e: SQLException) {
+                    Log.e("DatabaseModule", "Failed to seed database", e)
                 }
             }
         })

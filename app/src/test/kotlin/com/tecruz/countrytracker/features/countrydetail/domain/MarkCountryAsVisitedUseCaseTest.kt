@@ -5,6 +5,7 @@ import com.tecruz.countrytracker.features.countrydetail.domain.repository.Countr
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -66,9 +67,9 @@ class MarkCountryAsVisitedUseCaseTest {
     }
 
     @Test
-    fun `invoke should handle long notes`() = runTest {
+    fun `invoke should handle long notes at max length`() = runTest {
         val date = 1704067200000L
-        val longNotes = "A".repeat(500)
+        val longNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH)
 
         useCase(testCountry, date, longNotes, 4)
 
@@ -97,5 +98,67 @@ class MarkCountryAsVisitedUseCaseTest {
         coVerify {
             repository.markAsVisited(testCountry, date, "Perfect!", 5)
         }
+    }
+
+    @Test
+    fun `invoke should reject notes exceeding max length`() = runTest {
+        val date = 1704067200000L
+        val tooLongNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH + 1)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.test.runTest {
+                useCase(testCountry, date, tooLongNotes, 3)
+            }
+        }
+
+        coVerify(exactly = 0) { repository.markAsVisited(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `invoke should reject rating above max`() = runTest {
+        val date = 1704067200000L
+
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.test.runTest {
+                useCase(testCountry, date, "Notes", CountryDetail.MAX_RATING + 1)
+            }
+        }
+
+        coVerify(exactly = 0) { repository.markAsVisited(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `invoke should reject negative rating`() = runTest {
+        val date = 1704067200000L
+
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.test.runTest {
+                useCase(testCountry, date, "Notes", -1)
+            }
+        }
+
+        coVerify(exactly = 0) { repository.markAsVisited(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `invoke should reject zero date`() = runTest {
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.test.runTest {
+                useCase(testCountry, 0L, "Notes", 3)
+            }
+        }
+
+        coVerify(exactly = 0) { repository.markAsVisited(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `invoke should reject negative date`() = runTest {
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.test.runTest {
+                useCase(testCountry, -1L, "Notes", 3)
+            }
+        }
+
+        coVerify(exactly = 0) { repository.markAsVisited(any(), any(), any(), any()) }
     }
 }

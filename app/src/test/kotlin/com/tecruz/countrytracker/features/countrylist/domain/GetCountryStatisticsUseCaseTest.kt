@@ -50,13 +50,25 @@ class GetCountryStatisticsUseCaseTest {
     }
 
     @Test
-    fun `invoke should calculate percentage with rounding down`() = runTest {
+    fun `invoke should calculate percentage with rounding`() = runTest {
         every { repository.getVisitedCount() } returns flowOf(1)
         every { repository.getTotalCount() } returns flowOf(3)
 
         useCase().test {
             val result = awaitItem()
-            assertEquals(33, result.percentage) // 1/3 = 33% (integer division)
+            assertEquals(33, result.percentage) // 1/3 = 33.33% rounds to 33
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `invoke should round up when fraction is above half`() = runTest {
+        every { repository.getVisitedCount() } returns flowOf(2)
+        every { repository.getTotalCount() } returns flowOf(3)
+
+        useCase().test {
+            val result = awaitItem()
+            assertEquals(67, result.percentage) // 2/3 = 66.67% rounds to 67
             awaitComplete()
         }
     }

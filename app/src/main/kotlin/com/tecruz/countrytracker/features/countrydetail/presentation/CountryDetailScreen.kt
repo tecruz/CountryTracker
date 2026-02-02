@@ -1,5 +1,6 @@
 package com.tecruz.countrytracker.features.countrydetail.presentation
 
+import android.provider.Settings
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,12 +38,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.Background
+import com.tecruz.countrytracker.core.designsystem.HeroCardGradientEnd
 import com.tecruz.countrytracker.core.designsystem.OnSurface
 import com.tecruz.countrytracker.core.designsystem.OnSurfaceVariant
 import com.tecruz.countrytracker.core.designsystem.PrimaryContainer
@@ -50,7 +53,8 @@ import com.tecruz.countrytracker.core.designsystem.PrimaryGreen
 import com.tecruz.countrytracker.core.designsystem.SecondaryContainer
 import com.tecruz.countrytracker.core.designsystem.StarYellow
 import com.tecruz.countrytracker.core.designsystem.Surface
-import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryNotesUseCase
+import com.tecruz.countrytracker.core.designsystem.VisitStatusGradientEnd
+import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import com.tecruz.countrytracker.features.countrydetail.presentation.model.CountryDetailUi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -60,6 +64,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
     // Use rememberSaveable to survive process death
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showNotesDialog by rememberSaveable { mutableStateOf(false) }
+    var showUnvisitedConfirmation by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val errorDismissText = stringResource(R.string.error_dismiss)
 
@@ -144,7 +149,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                 VisitStatusCard(
                     country = country,
                     onEditDate = { showDatePicker = true },
-                    onMarkAsUnvisited = viewModel::markAsUnvisited,
+                    onMarkAsUnvisited = { showUnvisitedConfirmation = true },
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -241,10 +246,38 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
         }
     }
 
+    // Unvisited Confirmation Dialog
+    if (showUnvisitedConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showUnvisitedConfirmation = false },
+            title = { Text(stringResource(R.string.confirm_unvisit_title)) },
+            text = { Text(stringResource(R.string.confirm_unvisit_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.markAsUnvisited()
+                        showUnvisitedConfirmation = false
+                    },
+                ) {
+                    Text(
+                        stringResource(R.string.confirm_unvisit_action),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnvisitedConfirmation = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = Surface,
+        )
+    }
+
     // Notes Dialog
     if (showNotesDialog) {
         var tempNotes by remember { mutableStateOf(country.notes) }
-        val maxLength = UpdateCountryNotesUseCase.MAX_NOTES_LENGTH
+        val maxLength = CountryDetail.MAX_NOTES_LENGTH
         val isOverLimit = tempNotes.length > maxLength
 
         AlertDialog(
@@ -305,17 +338,34 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
 
 @Composable
 fun HeroCard(country: CountryDetailUi, modifier: Modifier = Modifier) {
-    // Pulsing animation
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "pulseAlpha",
-    )
+    // Check if animations are enabled for accessibility
+    val context = LocalContext.current
+    val animationsEnabled = remember {
+        try {
+            Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+            ) != 0f
+        } catch (_: Settings.SettingNotFoundException) {
+            true
+        }
+    }
+
+    val pulseAlpha = if (animationsEnabled) {
+        val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+        val animatedAlpha by infiniteTransition.animateFloat(
+            initialValue = 0.3f,
+            targetValue = 0.2f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(4000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "pulseAlpha",
+        )
+        animatedAlpha
+    } else {
+        0.25f
+    }
 
     Card(
         modifier = modifier.height(240.dp),
@@ -327,7 +377,7 @@ fun HeroCard(country: CountryDetailUi, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(SecondaryContainer, Color(0xFFB8D9C9)),
+                        colors = listOf(SecondaryContainer, HeroCardGradientEnd),
                     ),
                 ),
             contentAlignment = Alignment.Center,
@@ -388,7 +438,7 @@ fun VisitStatusCard(
                 .fillMaxWidth()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(PrimaryContainer, Color(0xFF9FFFD4)),
+                        colors = listOf(PrimaryContainer, VisitStatusGradientEnd),
                     ),
                 )
                 .padding(16.dp),

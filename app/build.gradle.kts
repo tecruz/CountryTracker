@@ -75,6 +75,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 detekt {
     buildUponDefaultConfig = true
     allRules = false
