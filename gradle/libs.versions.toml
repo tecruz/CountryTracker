@@ -15,7 +15,7 @@ ktlint = "1.5.0"
 # AndroidX Core
 coreKtx = "1.17.0"
 lifecycleRuntime = "2.10.0"
-activityCompose = "1.12.2"
+activityCompose = "1.12.3"
 
 # Compose
 composeBom = "2026.01.00"
