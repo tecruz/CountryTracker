@@ -149,7 +149,9 @@ android-testing = [
     "androidx-junit",
     "androidx-espresso-core",
     "androidx-compose-ui-test-junit4",
-    "hilt-android-testing"
+    "hilt-android-testing",
+    "turbine",
+    "kotlinx-coroutines-test"
 ]
 
 [plugins]

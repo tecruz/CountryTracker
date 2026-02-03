@@ -1,7 +1,9 @@
 package com.tecruz.countrytracker.core.di
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.SQLException
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -14,9 +16,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -28,10 +28,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideCountryDatabase(
-        @ApplicationContext context: Context,
-        daoProvider: Provider<CountryDao>,
-    ): CountryDatabase = Room.databaseBuilder(
+    fun provideCountryDatabase(@ApplicationContext context: Context): CountryDatabase = Room.databaseBuilder(
         context,
         CountryDatabase::class.java,
         "country_tracker_database",
@@ -40,9 +37,22 @@ object DatabaseModule {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 try {
-                    runBlocking {
-                        val countries = CountryDataLoader.loadCountriesFromAssets(context)
-                        daoProvider.get().insertCountries(countries)
+                    val countries = CountryDataLoader.loadCountriesFromAssets(context)
+                    countries.forEach { country ->
+                        db.insert(
+                            "countries",
+                            SQLiteDatabase.CONFLICT_REPLACE,
+                            ContentValues().apply {
+                                put("code", country.code)
+                                put("name", country.name)
+                                put("region", country.region)
+                                put("visited", if (country.visited) 1 else 0)
+                                putNull("visitedDate")
+                                put("notes", country.notes)
+                                put("rating", country.rating)
+                                put("flagEmoji", country.flagEmoji)
+                            },
+                        )
                     }
                 } catch (e: IOException) {
                     Log.e("DatabaseModule", "Failed to seed database", e)
