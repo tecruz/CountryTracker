@@ -6,7 +6,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.tecruz.countrytracker.core.data.database.CountryDatabase
 import com.tecruz.countrytracker.core.data.database.CountryEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -15,6 +20,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CountryListRepositoryIntegrationTest {
 
@@ -22,41 +28,12 @@ class CountryListRepositoryIntegrationTest {
     private lateinit var dao: com.tecruz.countrytracker.core.data.database.CountryDao
     private lateinit var repository: CountryListRepositoryImpl
 
-    private val testEntity1 = CountryEntity(
-        code = "US",
-        name = "United States",
-        region = "North America",
-        visited = false,
-        visitedDate = null,
-        notes = "",
-        rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
-    )
+    private val testDispatcher = StandardTestDispatcher()
 
-    private val testEntity2 = CountryEntity(
-        code = "FR",
-        name = "France",
-        region = "Europe",
-        visited = true,
-        visitedDate = 1704067200000L,
-        notes = "Great trip!",
-        rating = 5,
-        flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
-    )
-
-    private val testEntity3 = CountryEntity(
-        code = "JP",
-        name = "Japan",
-        region = "Asia",
-        visited = true,
-        visitedDate = 1704067200000L - 86400000L,
-        notes = "Amazing food",
-        rating = 4,
-        flagEmoji = "\uD83C\uDDEF\uD83C\uDDF5",
-    )
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
+        Dispatchers.setMain(testDispatcher)
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             CountryDatabase::class.java,
@@ -65,8 +42,10 @@ class CountryListRepositoryIntegrationTest {
         repository = CountryListRepositoryImpl(dao)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
+        Dispatchers.resetMain()
         database.close()
     }
 
@@ -90,7 +69,7 @@ class CountryListRepositoryIntegrationTest {
             assertTrue(frResult?.visited ?: false)
             assertEquals("\uD83C\uDDEB\uD83C\uDDF7", frResult?.flagEmoji)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -103,7 +82,7 @@ class CountryListRepositoryIntegrationTest {
             val result = awaitItem()
             assertEquals(1, result.size)
             assertEquals("", result[0].flagEmoji)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -126,7 +105,7 @@ class CountryListRepositoryIntegrationTest {
             assertEquals(1, result.size)
             assertEquals("\uD83C\uDDEA\uD83C\uDDF8", result[0].flagEmoji)
             assertEquals("ES", result[0].code)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -140,7 +119,7 @@ class CountryListRepositoryIntegrationTest {
             assertEquals("France", result[0].name)
             assertEquals("Europe", result[0].region)
             assertEquals("FR", result[0].code)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -151,7 +130,7 @@ class CountryListRepositoryIntegrationTest {
         repository.getVisitedCount().test {
             val result = awaitItem()
             assertEquals(2, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -162,7 +141,7 @@ class CountryListRepositoryIntegrationTest {
         repository.getTotalCount().test {
             val result = awaitItem()
             assertEquals(3, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -176,7 +155,7 @@ class CountryListRepositoryIntegrationTest {
             assertTrue(result.contains("Asia"))
             assertTrue(result.contains("Europe"))
             assertTrue(result.contains("North America"))
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -203,7 +182,7 @@ class CountryListRepositoryIntegrationTest {
             assertEquals("DE", deResult.code)
             assertTrue(deResult.visited)
             assertEquals("\uD83C\uDDE9\uD83C\uDDEA", deResult.flagEmoji)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -212,25 +191,51 @@ class CountryListRepositoryIntegrationTest {
         repository.getAllCountries().test {
             val result = awaitItem()
             assertEquals(0, result.size)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
 
         repository.getVisitedCount().test {
             val result = awaitItem()
             assertEquals(0, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
 
         repository.getTotalCount().test {
             val result = awaitItem()
             assertEquals(0, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
 
         repository.getAllRegions().test {
             val result = awaitItem()
             assertEquals(0, result.size)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    companion object {
+        private val testEntity1 = CountryEntity(
+            code = "US",
+            name = "United States",
+            region = "North America",
+            visited = false,
+            flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+        )
+        private val testEntity2 = CountryEntity(
+            code = "FR",
+            name = "France",
+            region = "Europe",
+            visited = true,
+            visitedDate = 1704067200000L,
+            flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
+        )
+        private val testEntity3 = CountryEntity(
+            code = "JP",
+            name = "Japan",
+            region = "Asia",
+            visited = true,
+            visitedDate = 1703980800000L,
+            flagEmoji = "\uD83C\uDDEF\uD83C\uDDF5",
+        )
     }
 }

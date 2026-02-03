@@ -4,7 +4,13 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -12,47 +18,19 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CountryDaoTest {
 
     private lateinit var database: CountryDatabase
     private lateinit var dao: CountryDao
 
-    private val testCountry1 = CountryEntity(
-        code = "US",
-        name = "United States",
-        region = "North America",
-        visited = false,
-        visitedDate = null,
-        notes = "",
-        rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
-    )
+    private val testDispatcher = StandardTestDispatcher()
 
-    private val testCountry2 = CountryEntity(
-        code = "FR",
-        name = "France",
-        region = "Europe",
-        visited = true,
-        visitedDate = 1704067200000L, // 2024-01-01 00:00:00 UTC
-        notes = "Great trip!",
-        rating = 5,
-        flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
-    )
-
-    private val testCountry3 = CountryEntity(
-        code = "JP",
-        name = "Japan",
-        region = "Asia",
-        visited = true,
-        visitedDate = 1704067200000L - 86400000L, // 2023-12-31 00:00:00 UTC (one day before FR)
-        notes = "Amazing food",
-        rating = 4,
-        flagEmoji = "\uD83C\uDDEF\uD83C\uDDF5",
-    )
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
+        Dispatchers.setMain(testDispatcher)
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             CountryDatabase::class.java,
@@ -60,8 +38,10 @@ class CountryDaoTest {
         dao = database.countryDao()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
+        Dispatchers.resetMain()
         database.close()
     }
 
@@ -70,7 +50,7 @@ class CountryDaoTest {
         dao.getAllCountries().test {
             val result = awaitItem()
             assertTrue(result.isEmpty())
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -78,14 +58,11 @@ class CountryDaoTest {
     fun getAllCountries_should_return_all_entities_ordered_by_name_ASC() = runTest {
         dao.insertCountries(listOf(testCountry1, testCountry2, testCountry3))
 
-        dao.getAllCountries().test {
-            val result = awaitItem()
-            assertEquals(3, result.size)
-            assertEquals("France", result[0].name)
-            assertEquals("Japan", result[1].name)
-            assertEquals("United States", result[2].name)
-            awaitComplete()
-        }
+        val result = dao.getAllCountries().first()
+        assertEquals(3, result.size)
+        assertEquals("France", result[0].name)
+        assertEquals("Japan", result[1].name)
+        assertEquals("United States", result[2].name)
     }
 
     @Test
@@ -98,7 +75,7 @@ class CountryDaoTest {
             assertEquals("France", result[0].name)
             assertEquals("Japan", result[1].name)
             assertTrue(result.all { it.visited })
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -121,7 +98,7 @@ class CountryDaoTest {
             assertEquals(2, result.size)
             assertTrue(result.any { it.code == "FR" })
             assertTrue(result.any { it.code == "DE" })
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -134,7 +111,7 @@ class CountryDaoTest {
             assertEquals(1, result.size)
             assertEquals("United States", result[0].name)
             assertTrue(!result[0].visited)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -147,7 +124,7 @@ class CountryDaoTest {
             assertEquals(1, result.size)
             assertEquals("France", result[0].name)
             assertEquals("Europe", result[0].region)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -158,7 +135,7 @@ class CountryDaoTest {
         dao.getCountriesByRegion("Antarctica").test {
             val result = awaitItem()
             assertTrue(result.isEmpty())
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -187,7 +164,7 @@ class CountryDaoTest {
         dao.getVisitedCount().test {
             val result = awaitItem()
             assertEquals(2, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -198,7 +175,7 @@ class CountryDaoTest {
         dao.getTotalCount().test {
             val result = awaitItem()
             assertEquals(3, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -298,7 +275,7 @@ class CountryDaoTest {
         dao.getTotalCount().test {
             val result = awaitItem()
             assertEquals(0, result)
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -312,7 +289,7 @@ class CountryDaoTest {
             assertEquals("Asia", result[0])
             assertEquals("Europe", result[1])
             assertEquals("North America", result[2])
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -329,7 +306,7 @@ class CountryDaoTest {
             val secondResult = awaitItem()
             assertEquals(2, secondResult.size)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -347,7 +324,7 @@ class CountryDaoTest {
             val secondResult = awaitItem()
             assertEquals("United States of America", secondResult[0].name)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -365,7 +342,33 @@ class CountryDaoTest {
             assertEquals(1, secondResult.size)
             assertEquals("France", secondResult[0].name)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    companion object {
+        private val testCountry1 = CountryEntity(
+            code = "US",
+            name = "United States",
+            region = "North America",
+            visited = false,
+            flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+        )
+        private val testCountry2 = CountryEntity(
+            code = "FR",
+            name = "France",
+            region = "Europe",
+            visited = true,
+            visitedDate = 1704067200000L,
+            flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
+        )
+        private val testCountry3 = CountryEntity(
+            code = "JP",
+            name = "Japan",
+            region = "Asia",
+            visited = true,
+            visitedDate = 1703980800000L,
+            flagEmoji = "\uD83C\uDDEF\uD83C\uDDF5",
+        )
     }
 }
