@@ -9,7 +9,7 @@ agp = "9.0.0"
 kotlin="2.3.0"
 ksp = "2.3.5"
 detekt = "1.23.8"
-spotless = "7.0.2"
+spotless = "8.2.1"
 ktlint = "1.5.0"
 
 # AndroidX Core
