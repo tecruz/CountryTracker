@@ -370,7 +370,36 @@ app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests
 
 # Instrumented tests (requires connected device or emulator)
 ./gradlew connectedAndroidTest
+
+# Combined coverage report (unit + instrumented, requires device)
+./gradlew jacocoCombinedReport
 ```
+
+### Code Coverage
+
+Coverage is collected with JaCoCo 0.8.12 and reported via three Gradle tasks:
+
+| Task | Scope | Execution data |
+|------|-------|----------------|
+| `jacocoTestReport` | Unit tests only | `.exec` |
+| `jacocoAndroidTestReport` | Instrumented tests only | `.ec` |
+| `jacocoCombinedReport` | Both | `.exec` + `.ec` |
+
+`jacocoCoverageVerification` enforces a minimum of 80% overall line coverage and 40% per-class.
+
+### CI Pipeline
+
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs five parallel jobs after the initial build:
+
+| Job | Description |
+|-----|-------------|
+| **Build & Unit Tests** | Compiles debug APK and runs unit tests |
+| **Code Coverage** | Boots an API 30 emulator, runs `jacocoCombinedReport` (unit + instrumented), uploads to Codecov |
+| **Android Lint** | Static analysis via `lintDebug` |
+| **Detekt Analysis** | Kotlin static analysis |
+| **Code Formatting** | Checks formatting via Spotless |
+
+The **Build Release APK** job runs only on pushes to `main`/`master` after build, lint, detekt, and spotless pass.
 
 ## Naming Conventions
 
