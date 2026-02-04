@@ -18,7 +18,7 @@ lifecycleRuntime = "2.10.0"
 activityCompose = "1.12.2"
 
 # Compose
-composeBom = "2026.01.00"
+composeBom = "2026.01.01"
 material3Expressive = "1.5.0-alpha13"
 material3Adaptive = "1.2.0"
 
