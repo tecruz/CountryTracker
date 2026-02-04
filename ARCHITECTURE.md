@@ -21,48 +21,77 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 ### Project Structure
 
 ```
-app/src/main/kotlin/com/example/countrytracker/
-├── CountryTrackerApplication.kt    # Hilt Application entry point
+app/src/main/kotlin/com/tecruz/countrytracker/
+├── CountryTrackerApplication.kt        # Hilt Application entry point
+├── MainActivity.kt                     # Single Activity entry
 │
-├── data/                           # Data Layer
-│   ├── local/
-│   │   ├── dao/
-│   │   │   └── CountryDao.kt      # Room Data Access Object
+├── core/                               # Shared infrastructure
+│   ├── data/
 │   │   ├── database/
-│   │   │   └── CountryDatabase.kt # Room Database configuration
-│   │   └── entity/
-│   │       └── CountryEntity.kt   # Database entity + converters
-│   └── repository/
-│       └── CountryRepositoryImpl.kt
-│
-├── domain/                         # Domain Layer (Business Logic)
-│   ├── model/
-│   │   └── Country.kt             # Domain model
-│   ├── repository/
-│   │   └── CountryRepository.kt   # Repository interface
-│   └── usecase/
-│       ├── GetAllCountriesUseCase.kt
-│       ├── GetCountryStatisticsUseCase.kt
-│       └── MarkCountryAsVisitedUseCase.kt
-│
-├── presentation/                   # Presentation Layer (UI)
-│   ├── MainActivity.kt            # Single Activity entry
+│   │   │   ├── CountryDao.kt          # Room Data Access Object
+│   │   │   ├── CountryDatabase.kt     # Room Database configuration
+│   │   │   └── CountryEntity.kt       # Database entity
+│   │   └── datasource/
+│   │       └── CountryDataLoader.kt   # Pre-populates database
+│   ├── designsystem/
+│   │   ├── Color.kt
+│   │   ├── Theme.kt
+│   │   └── Type.kt
+│   ├── di/
+│   │   └── DatabaseModule.kt          # Database + DAO providers
 │   ├── navigation/
-│   │   └── CountryTrackerNavHost.kt
-│   ├── countrylist/
-│   │   ├── CountryListScreen.kt
-│   │   └── CountryListViewModel.kt
-│   ├── countrydetail/
-│   │   ├── CountryDetailScreen.kt
-│   │   └── CountryDetailViewModel.kt
-│   └── theme/
-│       ├── Color.kt
-│       ├── Theme.kt
-│       └── Type.kt
+│   │   ├── CountryTrackerNavHost.kt
+│   │   └── Screen.kt                  # Type-safe navigation routes
+│   └── util/
+│       └── SvgPathParser.kt           # SVG path parsing for map
 │
-└── di/                            # Dependency Injection
-    ├── DatabaseModule.kt          # Database + DAO providers
-    └── RepositoryModule.kt        # Repository bindings
+├── features/
+│   ├── countrylist/                    # Country List feature
+│   │   ├── data/
+│   │   │   ├── datasource/
+│   │   │   │   └── WorldMapPathData.kt
+│   │   │   ├── di/
+│   │   │   │   └── CountryListDataModule.kt
+│   │   │   ├── mapper/
+│   │   │   │   └── CountryListMapper.kt
+│   │   │   └── repository/
+│   │   │       └── CountryListRepositoryImpl.kt
+│   │   ├── domain/
+│   │   │   ├── model/
+│   │   │   │   └── CountryListItem.kt
+│   │   │   ├── repository/
+│   │   │   │   └── CountryListRepository.kt
+│   │   │   ├── GetAllCountriesUseCase.kt
+│   │   │   └── GetCountryStatisticsUseCase.kt
+│   │   └── presentation/
+│   │       ├── components/
+│   │       │   └── WorldMapCanvas.kt
+│   │       ├── CountryListScreen.kt
+│   │       └── CountryListViewModel.kt
+│   │
+│   └── countrydetail/                  # Country Detail feature
+│       ├── data/
+│       │   ├── di/
+│       │   │   └── CountryDetailDataModule.kt
+│       │   ├── mapper/
+│       │   │   └── CountryDetailMapper.kt
+│       │   └── repository/
+│       │       └── CountryDetailRepositoryImpl.kt
+│       ├── domain/
+│       │   ├── model/
+│       │   │   └── CountryDetail.kt
+│       │   ├── repository/
+│       │   │   └── CountryDetailRepository.kt
+│       │   ├── GetCountryByCodeUseCase.kt
+│       │   ├── MarkCountryAsVisitedUseCase.kt
+│       │   ├── MarkCountryAsUnvisitedUseCase.kt
+│       │   ├── UpdateCountryNotesUseCase.kt
+│       │   └── UpdateCountryRatingUseCase.kt
+│       └── presentation/
+│           ├── model/
+│           │   └── CountryDetailUi.kt
+│           ├── CountryDetailScreen.kt
+│           └── CountryDetailViewModel.kt
 ```
 
 ## Layer Responsibilities
@@ -71,12 +100,11 @@ app/src/main/kotlin/com/example/countrytracker/
 **Purpose**: Contains business logic and is independent of frameworks
 
 **Components**:
-- **Models**: Pure Kotlin data classes (Country)
-- **Repository Interfaces**: Contracts for data operations
+- **Models**: Pure Kotlin data classes (`CountryListItem`, `CountryDetail`)
+- **Repository Interfaces**: Contracts for data operations (`CountryListRepository`, `CountryDetailRepository`)
 - **Use Cases**: Single-responsibility business operations
-  - `GetAllCountriesUseCase`
-  - `MarkCountryAsVisitedUseCase`
-  - `GetCountryStatisticsUseCase`
+  - Country List: `GetAllCountriesUseCase`, `GetCountryStatisticsUseCase`
+  - Country Detail: `GetCountryByCodeUseCase`, `MarkCountryAsVisitedUseCase`, `MarkCountryAsUnvisitedUseCase`, `UpdateCountryNotesUseCase`, `UpdateCountryRatingUseCase`
 
 **Benefits**:
 - Framework independent
@@ -87,10 +115,11 @@ app/src/main/kotlin/com/example/countrytracker/
 **Purpose**: Manages data sources and implements repositories
 
 **Components**:
-- **Entities**: Room database entities
-- **DAOs**: Database access objects
-- **Database**: Room database configuration
-- **Repository Implementations**: Concrete implementations of domain repositories
+- **Entities**: Room database entities (`CountryEntity`)
+- **DAOs**: Database access objects (`CountryDao`)
+- **Database**: Room database configuration (`CountryDatabase`)
+- **Mappers**: Entity-to-model conversion (`CountryListMapper`, `CountryDetailMapper`)
+- **Repository Implementations**: Concrete implementations of domain repositories (`CountryListRepositoryImpl`, `CountryDetailRepositoryImpl`)
 
 **Key Features**:
 - Converts between Entity (data) and Model (domain)
@@ -134,8 +163,9 @@ Presentation → Domain ← Data
 ## Dependency Injection with Hilt
 
 ### Modules:
-1. **DatabaseModule**: Provides Room database and DAO
-2. **RepositoryModule**: Binds repository interfaces to implementations
+1. **DatabaseModule** (core): Provides Room database and DAO
+2. **CountryListDataModule**: Binds `CountryListRepository` to `CountryListRepositoryImpl`
+3. **CountryDetailDataModule**: Binds `CountryDetailRepository` to `CountryDetailRepositoryImpl`
 
 ### Scopes:
 - `@Singleton`: Database, DAOs, Repositories
@@ -283,17 +313,41 @@ when (windowSizeClass.windowWidthSizeClass) {
 ### Test Structure
 
 ```
-app/src/test/kotlin/com/example/countrytracker/
-├── data/repository/
-│   └── CountryRepositoryImplTest.kt    # Repository tests
-├── domain/usecase/
-│   ├── GetAllCountriesUseCaseTest.kt   # Use case tests
-│   └── GetCountryStatisticsUseCaseTest.kt
-└── presentation/
-    ├── countrylist/
-    │   └── CountryListViewModelTest.kt # ViewModel tests
-    └── countrydetail/
-        └── CountryDetailViewModelTest.kt
+app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests
+├── features/
+│   ├── countrylist/
+│   │   ├── data/repository/
+│   │   │   └── CountryListRepositoryImplTest.kt
+│   │   ├── domain/
+│   │   │   ├── GetAllCountriesUseCaseTest.kt
+│   │   │   └── GetCountryStatisticsUseCaseTest.kt
+│   │   └── presentation/
+│   │       └── CountryListViewModelTest.kt
+│   └── countrydetail/
+│       ├── data/repository/
+│       │   └── CountryDetailRepositoryImplTest.kt
+│       ├── domain/
+│       │   ├── GetCountryByCodeUseCaseTest.kt
+│       │   ├── MarkCountryAsVisitedUseCaseTest.kt
+│       │   ├── MarkCountryAsUnvisitedUseCaseTest.kt
+│       │   ├── UpdateCountryNotesUseCaseTest.kt
+│       │   └── UpdateCountryRatingUseCaseTest.kt
+│       └── presentation/
+│           └── CountryDetailViewModelTest.kt
+
+app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests
+├── core/data/database/
+│   └── CountryDaoTest.kt                      # DAO integration tests
+├── features/
+│   ├── countrylist/data/repository/
+│   │   └── CountryListRepositoryIntegrationTest.kt
+│   └── countrydetail/data/repository/
+│       └── CountryDetailRepositoryIntegrationTest.kt
+├── CountryListScreenTest.kt                   # UI tests
+├── CountryDetailScreenTest.kt
+├── CountryTrackerE2ETest.kt                   # End-to-end tests
+├── WorldMapColoringTest.kt
+└── HiltTestRunner.kt                          # Custom test runner
 ```
 
 ### Testing Libraries
@@ -305,6 +359,8 @@ app/src/test/kotlin/com/example/countrytracker/
 | Turbine 1.2.1 | Flow testing |
 | Coroutines Test 1.10.2 | Coroutine testing |
 | Arch Core Testing 2.2.0 | Architecture component testing |
+| Compose UI Test | Compose UI testing |
+| Room Testing | Room in-memory database testing |
 
 ### Running Tests
 
@@ -312,7 +368,7 @@ app/src/test/kotlin/com/example/countrytracker/
 # Unit tests
 ./gradlew test
 
-# Instrumented tests
+# Instrumented tests (requires connected device or emulator)
 ./gradlew connectedAndroidTest
 ```
 
@@ -375,9 +431,8 @@ app/src/test/kotlin/com/example/countrytracker/
    - Inject analytics service in data layer
 
 6. **Testing**
-   - Add comprehensive unit tests
-   - Add instrumented tests
-   - Add UI tests with Compose Testing
+   - Expand UI test coverage with Compose Testing
+   - Add screenshot testing
 
 ## Code Style Guidelines
 

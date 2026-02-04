@@ -42,6 +42,14 @@ import kotlinx.coroutines.withContext
  */
 data class CountryPathData(val code: String, val path: Path, val bounds: Rect)
 
+/**
+ * Process-level cache for parsed SVG paths so they survive recomposition and navigation.
+ */
+private object WorldMapPathCache {
+    @Volatile
+    var paths: List<CountryPathData>? = null
+}
+
 // Shimmer highlight positioning constants
 private const val HIGHLIGHT_CENTER_X_RATIO = 0.3f
 private const val HIGHLIGHT_CENTER_Y_RATIO = 0.2f
@@ -73,19 +81,17 @@ fun WorldMapCanvas(
 ) {
     val context = LocalContext.current
 
-    // Load map data from assets on first composition
+    // Use cached paths if available, otherwise start with empty list
+    var countryPaths by remember { mutableStateOf(WorldMapPathCache.paths ?: emptyList()) }
+
+    // Parse paths once and cache for the lifetime of the process
     LaunchedEffect(Unit) {
-        if (!WorldMapPathData.isLoaded) {
-            WorldMapPathData.loadCountryPaths(context)
+        if (WorldMapPathCache.paths != null) {
+            countryPaths = WorldMapPathCache.paths!!
+            return@LaunchedEffect
         }
-    }
 
-    // Parse all country paths asynchronously on a background thread
-    var countryPaths by remember { mutableStateOf<List<CountryPathData>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        countryPaths = withContext(Dispatchers.Default) {
-            // Ensure data is loaded before accessing
+        val parsed = withContext(Dispatchers.Default) {
             if (!WorldMapPathData.isLoaded) {
                 WorldMapPathData.loadCountryPaths(context)
             }
@@ -98,6 +104,8 @@ fun WorldMapCanvas(
                 }.getOrNull()
             }
         }
+        WorldMapPathCache.paths = parsed
+        countryPaths = parsed
     }
 
     // Build semantic description for accessibility and testing

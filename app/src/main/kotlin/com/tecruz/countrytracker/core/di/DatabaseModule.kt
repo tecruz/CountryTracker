@@ -38,21 +38,27 @@ object DatabaseModule {
                 super.onCreate(db)
                 try {
                     val countries = CountryDataLoader.loadCountriesFromAssets(context)
-                    countries.forEach { country ->
-                        db.insert(
-                            "countries",
-                            SQLiteDatabase.CONFLICT_REPLACE,
-                            ContentValues().apply {
-                                put("code", country.code)
-                                put("name", country.name)
-                                put("region", country.region)
-                                put("visited", if (country.visited) 1 else 0)
-                                putNull("visitedDate")
-                                put("notes", country.notes)
-                                put("rating", country.rating)
-                                put("flagEmoji", country.flagEmoji)
-                            },
-                        )
+                    db.beginTransaction()
+                    try {
+                        countries.forEach { country ->
+                            db.insert(
+                                "countries",
+                                SQLiteDatabase.CONFLICT_REPLACE,
+                                ContentValues().apply {
+                                    put("code", country.code)
+                                    put("name", country.name)
+                                    put("region", country.region)
+                                    put("visited", if (country.visited) 1 else 0)
+                                    putNull("visitedDate")
+                                    put("notes", country.notes)
+                                    put("rating", country.rating)
+                                    put("flagEmoji", country.flagEmoji)
+                                },
+                            )
+                        }
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
                     }
                 } catch (e: IOException) {
                     Log.e("DatabaseModule", "Failed to seed database", e)
