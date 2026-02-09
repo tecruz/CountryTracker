@@ -7,9 +7,19 @@ A modern Android application for tracking countries you've visited around the wo
 
 ## Screenshots
 
-| Country List | World Map | Country Detail |
+| Country List | World Map | Country Detail   
 |:---:|:---:|:---:|
 | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/e3ed1c94-36dd-4df2-b418-550722f5eb15" /> | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/744f6c5d-2845-4425-8a24-2a13decb9eea" /> | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/96902965-f22d-43d0-ab06-e2fdfae7d05d" /> |
+
+| Tablet portrait | Tablet landscape |
+|:---:|:---:|
+|<img width="800" height="1280" alt="image" src="https://github.com/user-attachments/assets/5bb68a63-d862-47d2-9d86-eee6ea428dba" /> | <img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/7ce985f5-dc1e-480b-bb31-3e77d13cb374" />
+
+| Foldable portrait | Foldable landscape |
+|:---:|:---:|
+|<img width="1104" height="920" alt="image" src="https://github.com/user-attachments/assets/115fca64-d317-44d5-a57c-efdb10eb1955" /> | <img width="920" height="1104" alt="image" src="https://github.com/user-attachments/assets/cafea5bf-e0be-4b2e-8849-31479764e34f" />
+
+
 
 ## Features
 
