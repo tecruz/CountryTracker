@@ -36,14 +36,19 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   ├── designsystem/
 │   │   ├── Color.kt
 │   │   ├── Theme.kt
-│   │   └── Type.kt
+│   │   ├── Type.kt
+│   │   └── component/
+│   │       ├── AdaptiveGrid.kt        # Responsive grid/list component
+│   │       ├── AdaptiveScaffold.kt    # Responsive scaffold with nav rail
+│   │       └── ResponsiveCard.kt      # Size-adaptive card component
 │   ├── di/
 │   │   └── DatabaseModule.kt          # Database + DAO providers
 │   ├── navigation/
 │   │   ├── CountryTrackerNavHost.kt
 │   │   └── Screen.kt                  # Type-safe navigation routes
 │   └── util/
-│       └── SvgPathParser.kt           # SVG path parsing for map
+│       ├── SvgPathParser.kt           # SVG path parsing for map
+│       └── WindowSizeClassExt.kt      # WindowSizeClass extension functions
 │
 ├── features/
 │   ├── countrylist/                    # Country List feature
@@ -267,7 +272,10 @@ State is preserved across process death using:
    ```
 
 ### Adaptive Layouts
-`WindowSizeClass` is provided via `CompositionLocal` for responsive design:
+`WindowSizeClass` is provided via `CompositionLocal` for responsive design across three breakpoints:
+- **Compact** (0-599dp): Phone - single column, bottom navigation, 48dp touch targets
+- **Medium** (600-839dp): Tablet portrait / foldable - two-column grid, navigation rail, 52dp touch targets
+- **Expanded** (840dp+): Tablet landscape / desktop - three-column grid, navigation rail, 56dp touch targets
 
 ```kotlin
 val LocalWindowSizeClass = staticCompositionLocalOf<WindowSizeClass> { ... }
@@ -280,6 +288,18 @@ when (windowSizeClass.windowWidthSizeClass) {
     WindowWidthSizeClass.EXPANDED -> // Tablet landscape / Desktop
 }
 ```
+
+#### Reusable Adaptive Components
+- `AdaptiveScaffold` - Responsive scaffold with optional navigation rail for medium/expanded
+- `ResponsiveCard` - Card with adaptive padding, corner radius, and elevation
+- `AdaptiveGrid` - Switches between LazyColumn (compact) and LazyVerticalGrid (medium/expanded)
+- `WindowSizeClassExt` - Extension functions for responsive padding, spacing, grid columns, and touch targets
+
+#### Foldable Support
+State is preserved across fold/unfold transitions via:
+- `SavedStateHandle` in ViewModels for business state
+- `rememberSaveable` in Composables for UI state (dialog visibility, tab selection)
+- Keyed `LazyColumn`/`LazyVerticalGrid` items for stable recomposition
 
 ## Benefits of This Architecture
 

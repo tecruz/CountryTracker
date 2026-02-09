@@ -21,14 +21,19 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -87,8 +92,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.Background
 import com.tecruz.countrytracker.core.designsystem.CountryItemNeutralEnd
@@ -109,9 +116,14 @@ import com.tecruz.countrytracker.core.designsystem.StatsLabelColor
 import com.tecruz.countrytracker.core.designsystem.StatsValueColor
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientEnd
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientStart
+import com.tecruz.countrytracker.core.util.contentPadding
+import com.tecruz.countrytracker.core.util.gridColumns
+import com.tecruz.countrytracker.core.util.horizontalPadding
+import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.presentation.components.WorldMapCanvas
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 
 /**
  * Tab item data class
@@ -129,6 +141,10 @@ fun CountryListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val errorDismissText = stringResource(R.string.error_dismiss)
     val scope = rememberCoroutineScope()
+    val windowSizeClass = LocalWindowSizeClass.current
+    val hPadding = windowSizeClass.horizontalPadding()
+    val cPadding = windowSizeClass.contentPadding()
+    val iSpacing = windowSizeClass.itemSpacing()
 
     // Tab state
     val tabItems = listOf(
@@ -165,7 +181,7 @@ fun CountryListScreen(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             Box(
                 modifier = Modifier
@@ -290,9 +306,13 @@ fun CountryListScreen(
                         onSearchQueryChange = viewModel::updateSearchQuery,
                         onToggleVisited = viewModel::toggleShowOnlyVisited,
                         onRegionSelect = viewModel::selectRegion,
+                        contentPadding = cPadding,
+                        itemSpacing = iSpacing,
+                        gridColumns = windowSizeClass.gridColumns(),
                     )
                     1 -> MapTab(
                         uiState = uiState,
+                        horizontalPadding = hPadding,
                     )
                 }
             }
@@ -305,7 +325,11 @@ fun CountryListScreen(
  * Uses scrollable layout to handle landscape orientation properly
  */
 @Composable
-private fun MapTab(uiState: CountryListUiState, modifier: Modifier = Modifier) {
+private fun MapTab(
+    uiState: CountryListUiState,
+    modifier: Modifier = Modifier,
+    horizontalPadding: androidx.compose.ui.unit.Dp = 16.dp,
+) {
     // Use visitedCountryCodes from uiState (computed from ALL countries, not filtered)
     val visitedCountryCodes = uiState.visitedCountryCodes
     val scrollState = rememberScrollState()
@@ -325,7 +349,7 @@ private fun MapTab(uiState: CountryListUiState, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = horizontalPadding),
             shape = RoundedCornerShape(20.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -345,7 +369,7 @@ private fun MapTab(uiState: CountryListUiState, modifier: Modifier = Modifier) {
             visitedCount = uiState.visitedCount,
             totalCount = uiState.totalCount,
             percentage = uiState.percentage,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 12.dp),
         )
 
         // Hint text with better styling (only show if not empty)
@@ -354,7 +378,7 @@ private fun MapTab(uiState: CountryListUiState, modifier: Modifier = Modifier) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = horizontalPadding),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White.copy(alpha = 0.6f),
@@ -368,7 +392,7 @@ private fun MapTab(uiState: CountryListUiState, modifier: Modifier = Modifier) {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(horizontal = horizontalPadding, vertical = 12.dp),
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -388,8 +412,12 @@ private fun ListTab(
     onToggleVisited: () -> Unit,
     onRegionSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: androidx.compose.ui.unit.Dp = 20.dp,
+    itemSpacing: androidx.compose.ui.unit.Dp = 12.dp,
+    gridColumns: Int = 1,
 ) {
     val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
 
     // Scroll to top when filters change
     LaunchedEffect(uiState.searchQuery, uiState.selectedRegion, uiState.showOnlyVisited) {
@@ -407,10 +435,10 @@ private fun ListTab(
         SearchBar(
             query = uiState.searchQuery,
             onQueryChange = onSearchQueryChange,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = contentPadding),
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(itemSpacing))
 
         // Filter Chips
         FilterChips(
@@ -419,10 +447,10 @@ private fun ListTab(
             showOnlyVisited = uiState.showOnlyVisited,
             onToggleVisited = onToggleVisited,
             onRegionSelect = onRegionSelect,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = contentPadding),
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(itemSpacing))
 
         // Country List
         if (uiState.isLoading) {
@@ -445,42 +473,84 @@ private fun ListTab(
             }
         } else {
             val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 8.dp,
-                    bottom = 8.dp + navBarPadding.calculateBottomPadding(),
-                ),
-            ) {
-                itemsIndexed(
-                    items = uiState.countries,
-                    key = { _, country -> country.code },
-                ) { index, country ->
-                    AnimatedVisibility(
-                        visible = true,
-                        enter = slideInVertically(
-                            initialOffsetY = { it / 2 },
-                            animationSpec = tween(
-                                durationMillis = 500,
-                                delayMillis = index * 50,
+            val listContentPadding = PaddingValues(
+                start = contentPadding,
+                end = contentPadding,
+                top = 8.dp,
+                bottom = 8.dp + navBarPadding.calculateBottomPadding(),
+            )
+
+            if (gridColumns > 1) {
+                // T035: Multi-column grid layout for medium/expanded screens
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(gridColumns),
+                    state = gridState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = listContentPadding,
+                    verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                    horizontalArrangement = Arrangement.spacedBy(itemSpacing),
+                ) {
+                    gridItemsIndexed(
+                        items = uiState.countries,
+                        key = { _, country -> country.code },
+                    ) { index, country ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = slideInVertically(
+                                initialOffsetY = { it / 2 },
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    delayMillis = index * 50,
+                                ),
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    delayMillis = index * 50,
+                                ),
                             ),
-                        ) + fadeIn(
-                            animationSpec = tween(
-                                durationMillis = 500,
-                                delayMillis = index * 50,
-                            ),
-                        ),
-                    ) {
-                        CountryListItem(
-                            country = country,
-                            onClick = { onCountryClick(country.code) },
-                            modifier = Modifier.animateItem(),
-                        )
+                        ) {
+                            CountryListItem(
+                                country = country,
+                                onClick = { onCountryClick(country.code) },
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            } else {
+                // Compact: single-column LazyColumn
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = listContentPadding,
+                ) {
+                    itemsIndexed(
+                        items = uiState.countries,
+                        key = { _, country -> country.code },
+                    ) { index, country ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = slideInVertically(
+                                initialOffsetY = { it / 2 },
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    delayMillis = index * 50,
+                                ),
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    delayMillis = index * 50,
+                                ),
+                            ),
+                        ) {
+                            CountryListItem(
+                                country = country,
+                                onClick = { onCountryClick(country.code) },
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(itemSpacing))
+                    }
                 }
             }
         }
@@ -593,7 +663,8 @@ fun StatItem(icon: ImageVector, value: String, label: String, iconTint: Color, m
 @Composable
 fun SearchBar(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -791,6 +862,7 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp) // T018: Ensure minimum 48dp touch target
             .testTag("country_item_${country.name}")
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
@@ -832,13 +904,15 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Country Info
+                // Country Info - T019: prevent text truncation on compact screens
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = country.name,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = OnSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -846,6 +920,8 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = OnSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
