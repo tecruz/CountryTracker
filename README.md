@@ -7,7 +7,7 @@ A modern Android application for tracking countries you've visited around the wo
 
 ## Screenshots
 
-| Country List | World Map | Country Detail   
+| Country List | World Map | Country Detail |  
 |:---:|:---:|:---:|
 | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/e3ed1c94-36dd-4df2-b418-550722f5eb15" /> | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/744f6c5d-2845-4425-8a24-2a13decb9eea" /> | <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/96902965-f22d-43d0-ab06-e2fdfae7d05d" /> |
 
