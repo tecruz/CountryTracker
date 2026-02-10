@@ -10,14 +10,17 @@ import org.junit.Test
 
 class WindowSizeClassExtTest {
 
+    // Compact: < 600dp width
     private fun compactWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 400f, heightDp = 800f) // Compact: < 600dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 400f, heightDp = 800f)
 
+    // Medium: 600-839dp width
     private fun mediumWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f) // Medium: 600-839dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f)
 
+    // Expanded: >= 840dp width
     private fun expandedWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f) // Expanded: >= 840dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f)
 
     @Test
     fun `isCompact returns true for compact window`() {
