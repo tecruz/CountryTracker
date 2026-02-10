@@ -43,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.Background
 import com.tecruz.countrytracker.core.designsystem.HeroCardGradientEnd
@@ -54,6 +55,8 @@ import com.tecruz.countrytracker.core.designsystem.SecondaryContainer
 import com.tecruz.countrytracker.core.designsystem.StarYellow
 import com.tecruz.countrytracker.core.designsystem.Surface
 import com.tecruz.countrytracker.core.designsystem.VisitStatusGradientEnd
+import com.tecruz.countrytracker.core.util.contentPadding
+import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import com.tecruz.countrytracker.features.countrydetail.presentation.model.CountryDetailUi
 
@@ -67,6 +70,9 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
     var showUnvisitedConfirmation by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val errorDismissText = stringResource(R.string.error_dismiss)
+    val windowSizeClass = LocalWindowSizeClass.current
+    val cPadding = windowSizeClass.contentPadding()
+    val iSpacing = windowSizeClass.itemSpacing()
 
     val country = uiState.country
 
@@ -134,7 +140,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                 .background(Background)
                 .verticalScroll(rememberScrollState())
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(20.dp),
+                .padding(cPadding),
         ) {
             // Hero Card
             HeroCard(
@@ -142,7 +148,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(cPadding))
 
             if (country.visited) {
                 // Visit Status Card
@@ -153,7 +159,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(iSpacing))
 
                 // Rating Card
                 RatingCard(
@@ -162,7 +168,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(iSpacing))
 
                 // Notes Card
                 NotesCard(
