@@ -11,20 +11,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
-data class CountryListUiState(
-    val countries: List<CountryListItem> = emptyList(),
-    val visitedCountryCodes: Set<String> = emptySet(),
-    val visitedCount: Int = 0,
-    val totalCount: Int = 0,
-    val percentage: Int = 0,
-    val selectedRegion: String = "All",
-    val searchQuery: String = "",
-    val showOnlyVisited: Boolean = false,
-    val isLoading: Boolean = true,
-    val allRegions: List<String> = emptyList(),
-    val error: String? = null,
-)
-
 private const val KEY_SEARCH_QUERY = "search_query"
 private const val KEY_SELECTED_REGION = "selected_region"
 private const val KEY_SHOW_ONLY_VISITED = "show_only_visited"

@@ -63,6 +63,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         warningsAsErrors = false
         abortOnError = false
@@ -165,6 +171,21 @@ val jacocoExcludes =
         "**/theme/*.*",
     )
 
+/**
+ * Collects all debug class directories that may exist under intermediates.
+ * AGP versions place compiled classes in different paths; using multiple
+ * candidates ensures we find them regardless of AGP version.
+ */
+fun debugClassDirectories(): ConfigurableFileCollection =
+    files(
+        fileTree(
+            "${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes",
+        ) { exclude(jacocoExcludes) },
+        fileTree(
+            "${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug",
+        ) { exclude(jacocoExcludes) },
+    )
+
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generates code coverage report for unit tests"
@@ -181,20 +202,13 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/html"))
     }
 
-    val debugTree =
-        fileTree(
-            "${project.layout.buildDirectory.get()}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs",
-        ) {
-            exclude(jacocoExcludes)
-        }
-
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
+    classDirectories.setFrom(debugClassDirectories())
     executionData.setFrom(
         fileTree(project.layout.buildDirectory.get()) {
-            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+            include("outputs/unit_test_code_coverage/**/*.exec")
         },
     )
 }
@@ -219,20 +233,13 @@ tasks.register<JacocoReport>("jacocoAndroidTestReport") {
         )
     }
 
-    val debugTree =
-        fileTree(
-            "${project.layout.buildDirectory.get()}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs",
-        ) {
-            exclude(jacocoExcludes)
-        }
-
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
+    classDirectories.setFrom(debugClassDirectories())
     executionData.setFrom(
         fileTree(project.layout.buildDirectory.get()) {
-            include("outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
+            include("outputs/code_coverage/**/connected/**/*.ec")
         },
     )
 }
@@ -253,22 +260,15 @@ tasks.register<JacocoReport>("jacocoCombinedReport") {
         html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoCombinedReport/html"))
     }
 
-    val debugTree =
-        fileTree(
-            "${project.layout.buildDirectory.get()}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs",
-        ) {
-            exclude(jacocoExcludes)
-        }
-
     val mainSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
+    classDirectories.setFrom(debugClassDirectories())
     executionData.setFrom(
         fileTree(project.layout.buildDirectory.get()) {
             include(
-                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
-                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec",
+                "outputs/unit_test_code_coverage/**/*.exec",
+                "outputs/code_coverage/**/connected/**/*.ec",
             )
         },
     )
@@ -281,24 +281,17 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
 
     dependsOn("jacocoTestReport")
 
-    val debugTree =
-        fileTree(
-            "${project.layout.buildDirectory.get()}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs",
-        ) {
-            exclude(jacocoExcludes)
-        }
-
-    classDirectories.setFrom(files(debugTree))
+    classDirectories.setFrom(debugClassDirectories())
     executionData.setFrom(
         fileTree(project.layout.buildDirectory.get()) {
-            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+            include("outputs/unit_test_code_coverage/**/*.exec")
         },
     )
 
     violationRules {
         rule {
             limit {
-                minimum = "0.80".toBigDecimal() // 50% minimum coverage
+                minimum = "0.80".toBigDecimal()
             }
         }
         rule {
@@ -314,6 +307,34 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
                 counter = "LINE"
                 value = "COVEREDRATIO"
                 minimum = "0.40".toBigDecimal()
+            }
+        }
+    }
+}
+
+/**
+ * Convenience task: prints the location of every .exec and .ec file
+ * produced by the build so you can verify JaCoCo data paths.
+ */
+tasks.register("listCoverageFiles") {
+    group = "verification"
+    description = "Lists all JaCoCo execution-data files found in the build directory"
+    doLast {
+        val buildDir =
+            project.layout.buildDirectory
+                .get()
+                .asFile
+        val extensions = listOf("exec", "ec")
+        val execFiles =
+            buildDir
+                .walkTopDown()
+                .filter { it.extension in extensions }
+                .toList()
+        if (execFiles.isEmpty()) {
+            logger.lifecycle("No .exec / .ec files found under $buildDir")
+        } else {
+            execFiles.forEach {
+                logger.lifecycle("  Found: ${it.relativeTo(buildDir)}")
             }
         }
     }
@@ -350,6 +371,10 @@ dependencies {
 
     // Unit Testing
     testImplementation(libs.bundles.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Android Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))
