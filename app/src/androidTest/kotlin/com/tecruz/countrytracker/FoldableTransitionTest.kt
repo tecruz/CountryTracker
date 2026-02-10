@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrydetail.presentation.HeroCard
 import com.tecruz.countrytracker.features.countrydetail.presentation.NotesCard
@@ -34,8 +35,10 @@ class FoldableTransitionTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val unfoldedWindowSizeClass = WindowSizeClass.compute(900f, 1200f) // Expanded
-    private val foldedWindowSizeClass = WindowSizeClass.compute(400f, 800f) // Compact
+    private val unfoldedWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f) // Expanded
+    private val foldedWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 400f, heightDp = 800f) // Compact
 
     private val testCountry = CountryDetailUi(
         code = "JP",

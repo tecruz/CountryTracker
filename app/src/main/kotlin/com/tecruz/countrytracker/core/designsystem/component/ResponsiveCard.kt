@@ -15,7 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
+import com.tecruz.countrytracker.core.util.isExpanded
+import com.tecruz.countrytracker.core.util.isMedium
 
 /**
  * A card component that adapts padding, spacing, elevation, and corner radius
@@ -58,10 +59,8 @@ fun ResponsiveCard(
 /**
  * Returns responsive card values (padding, corner radius, elevation) based on window size.
  */
-private fun responsiveCardValues(windowSizeClass: WindowSizeClass): Triple<Dp, Dp, Dp> =
-    when (windowSizeClass.windowWidthSizeClass) {
-        WindowWidthSizeClass.COMPACT -> Triple(16.dp, 16.dp, 2.dp)
-        WindowWidthSizeClass.MEDIUM -> Triple(20.dp, 20.dp, 3.dp)
-        WindowWidthSizeClass.EXPANDED -> Triple(24.dp, 24.dp, 4.dp)
-        else -> Triple(16.dp, 16.dp, 2.dp)
-    }
+private fun responsiveCardValues(windowSizeClass: WindowSizeClass): Triple<Dp, Dp, Dp> = when {
+    windowSizeClass.isExpanded() -> Triple(24.dp, 24.dp, 4.dp)
+    windowSizeClass.isMedium() -> Triple(20.dp, 20.dp, 3.dp)
+    else -> Triple(16.dp, 16.dp, 2.dp)
+}

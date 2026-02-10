@@ -1,16 +1,29 @@
 package com.tecruz.countrytracker.core.designsystem.component
 
+import androidx.compose.material3.Text
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
-import org.junit.Assert.assertEquals
+import com.tecruz.countrytracker.core.util.isCompact
+import com.tecruz.countrytracker.core.util.isExpanded
+import com.tecruz.countrytracker.core.util.isMedium
+import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
- * Unit tests for ResponsiveCard responsive logic.
- * Verifies that padding, corner radius, and elevation scale correctly
- * across compact, medium, and expanded window sizes.
+ * Unit tests for ResponsiveCard composable.
+ * Uses Robolectric to render the composable and verify layout behavior.
  */
+@RunWith(RobolectricTestRunner::class)
 class ResponsiveCardTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
     private fun compactWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(400f, 800f)
 
@@ -18,35 +31,90 @@ class ResponsiveCardTest {
 
     private fun expandedWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(900f, 1200f)
 
+    // --- Pure logic tests ---
+
     @Test
-    fun `compact window produces compact card values`() {
-        val wsc = compactWindowSizeClass()
-        assertEquals(WindowWidthSizeClass.COMPACT, wsc.windowWidthSizeClass)
+    fun `compact window is classified as compact`() {
+        assertTrue(compactWindowSizeClass().isCompact())
     }
 
     @Test
-    fun `medium window produces medium card values`() {
-        val wsc = mediumWindowSizeClass()
-        assertEquals(WindowWidthSizeClass.MEDIUM, wsc.windowWidthSizeClass)
+    fun `medium window is classified as medium`() {
+        assertTrue(mediumWindowSizeClass().isMedium())
     }
 
     @Test
-    fun `expanded window produces expanded card values`() {
-        val wsc = expandedWindowSizeClass()
-        assertEquals(WindowWidthSizeClass.EXPANDED, wsc.windowWidthSizeClass)
+    fun `expanded window is classified as expanded`() {
+        assertTrue(expandedWindowSizeClass().isExpanded())
+    }
+
+    // --- Composable rendering tests ---
+
+    @Test
+    fun `responsive card renders content on compact screen`() {
+        composeTestRule.setContent {
+            ResponsiveCard(windowSizeClass = compactWindowSizeClass()) {
+                Text("Compact Card Content")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Compact Card Content").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders content on medium screen`() {
+        composeTestRule.setContent {
+            ResponsiveCard(windowSizeClass = mediumWindowSizeClass()) {
+                Text("Medium Card Content")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Medium Card Content").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders content on expanded screen`() {
+        composeTestRule.setContent {
+            ResponsiveCard(windowSizeClass = expandedWindowSizeClass()) {
+                Text("Expanded Card Content")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Expanded Card Content").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders with custom minHeight`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = compactWindowSizeClass(),
+                minHeight = 100.dp,
+            ) {
+                Text("With Min Height")
+            }
+        }
+
+        composeTestRule.onNodeWithText("With Min Height").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders without minHeight`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = mediumWindowSizeClass(),
+                minHeight = null,
+            ) {
+                Text("No Min Height")
+            }
+        }
+
+        composeTestRule.onNodeWithText("No Min Height").assertIsDisplayed()
     }
 
     @Test
     fun `card values scale progressively from compact to expanded`() {
-        val compact = compactWindowSizeClass()
-        val medium = mediumWindowSizeClass()
-        val expanded = expandedWindowSizeClass()
-
-        // Compact < Medium < Expanded (in terms of width class ordinal)
-        val sizes = listOf(compact, medium, expanded)
-        val widthClasses = sizes.map { it.windowWidthSizeClass }
-        assertEquals(WindowWidthSizeClass.COMPACT, widthClasses[0])
-        assertEquals(WindowWidthSizeClass.MEDIUM, widthClasses[1])
-        assertEquals(WindowWidthSizeClass.EXPANDED, widthClasses[2])
+        assertTrue(compactWindowSizeClass().isCompact())
+        assertTrue(mediumWindowSizeClass().isMedium())
+        assertTrue(expandedWindowSizeClass().isExpanded())
     }
 }

@@ -63,6 +63,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         warningsAsErrors = false
         abortOnError = false
@@ -350,6 +356,10 @@ dependencies {
 
     // Unit Testing
     testImplementation(libs.bundles.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Android Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))

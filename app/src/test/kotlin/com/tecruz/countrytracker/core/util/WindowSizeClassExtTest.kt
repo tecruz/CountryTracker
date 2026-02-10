@@ -55,6 +55,16 @@ class WindowSizeClassExtTest {
     }
 
     @Test
+    fun `isExpanded returns false for medium window`() {
+        assertFalse(mediumWindowSizeClass().isExpanded())
+    }
+
+    @Test
+    fun `isMedium returns false for expanded window`() {
+        assertFalse(expandedWindowSizeClass().isMedium())
+    }
+
+    @Test
     fun `gridColumns returns 1 for compact`() {
         assertEquals(1, compactWindowSizeClass().gridColumns())
     }

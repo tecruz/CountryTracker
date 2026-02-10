@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
@@ -28,7 +29,8 @@ class CountryListScreenCompactTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val compactWindowSizeClass = WindowSizeClass.compute(375f, 667f)
+    private val compactWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 375f, heightDp = 667f)
 
     private val testCountries = listOf(
         CountryListItem(

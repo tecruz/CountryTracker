@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
 import org.junit.Rule
@@ -77,7 +78,8 @@ class OrientationChangeTest {
     @Test
     fun statsCard_transitionsFromPortraitToLandscapePreservesData() {
         // Start with portrait
-        val portraitCompact = WindowSizeClass.compute(375f, 667f)
+        val portraitCompact =
+            WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 375f, heightDp = 667f)
 
         composeTestRule.setContent {
             CountryTrackerTheme {

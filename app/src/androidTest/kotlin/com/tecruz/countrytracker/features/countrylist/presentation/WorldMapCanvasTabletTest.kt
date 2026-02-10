@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.presentation.components.WorldMapCanvas
@@ -28,8 +29,10 @@ class WorldMapCanvasTabletTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val mediumWindowSizeClass = WindowSizeClass.compute(700f, 900f)
-    private val expandedWindowSizeClass = WindowSizeClass.compute(900f, 1200f)
+    private val mediumWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f)
+    private val expandedWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f)
 
     @Test
     fun worldMap_displaysOnMediumScreen() {

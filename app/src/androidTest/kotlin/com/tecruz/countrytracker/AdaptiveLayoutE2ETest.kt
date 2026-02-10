@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
@@ -32,9 +33,12 @@ class AdaptiveLayoutE2ETest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val compactWindowSizeClass = WindowSizeClass.compute(375f, 667f)
-    private val mediumWindowSizeClass = WindowSizeClass.compute(700f, 900f)
-    private val expandedWindowSizeClass = WindowSizeClass.compute(900f, 1200f)
+    private val compactWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 375f, heightDp = 667f)
+    private val mediumWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f)
+    private val expandedWindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f)
 
     private val testCountry = CountryListItem(
         code = "BR",
