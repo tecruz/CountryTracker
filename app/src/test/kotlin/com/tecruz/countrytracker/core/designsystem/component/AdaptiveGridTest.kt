@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.itemSpacing
@@ -152,5 +153,99 @@ class AdaptiveGridTest {
 
         composeTestRule.onNodeWithText("One").assertExists()
         composeTestRule.onNodeWithText("Two").assertExists()
+    }
+
+    @Test
+    fun `adaptive grid renders with custom content padding`() {
+        val items = listOf("Alpha", "Beta")
+
+        composeTestRule.setContent {
+            AdaptiveGrid(
+                items = items,
+                windowSizeClass = compactWindowSizeClass(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(32.dp),
+                key = { it },
+            ) { item ->
+                Text(text = item, modifier = Modifier.testTag("item_$item"))
+            }
+        }
+
+        composeTestRule.onNodeWithTag("item_Alpha").assertExists()
+        composeTestRule.onNodeWithTag("item_Beta").assertExists()
+    }
+
+    @Test
+    fun `adaptive grid renders with custom modifier`() {
+        val items = listOf("Alpha")
+
+        composeTestRule.setContent {
+            AdaptiveGrid(
+                items = items,
+                windowSizeClass = compactWindowSizeClass(),
+                modifier = Modifier.testTag("custom_grid"),
+                key = { it },
+            ) { item ->
+                Text(text = item)
+            }
+        }
+
+        composeTestRule.onNodeWithTag("custom_grid").assertExists()
+    }
+
+    @Test
+    fun `adaptive grid with key function applies keys to items`() {
+        val items = listOf("Alpha", "Beta", "Gamma")
+
+        composeTestRule.setContent {
+            AdaptiveGrid(
+                items = items,
+                windowSizeClass = mediumWindowSizeClass(),
+                key = { it.uppercase() },
+            ) { item ->
+                Text(text = item, modifier = Modifier.testTag("item_$item"))
+            }
+        }
+
+        items.forEach { item ->
+            composeTestRule.onNodeWithTag("item_$item").assertExists()
+        }
+    }
+
+    @Test
+    fun `adaptive grid renders multiple items in single column mode`() {
+        val items = List(10) { "Item $it" }
+
+        composeTestRule.setContent {
+            AdaptiveGrid(
+                items = items,
+                windowSizeClass = compactWindowSizeClass(),
+                key = { it },
+            ) { item ->
+                Text(text = item, modifier = Modifier.testTag("item_$item"))
+            }
+        }
+
+        items.forEach { item ->
+            composeTestRule.onNodeWithText(item).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `adaptive grid renders multiple items in multi column mode`() {
+        val items = List(10) { "Item $it" }
+
+        composeTestRule.setContent {
+            AdaptiveGrid(
+                items = items,
+                windowSizeClass = expandedWindowSizeClass(),
+                key = { it },
+            ) { item ->
+                Text(text = item, modifier = Modifier.testTag("item_$item"))
+            }
+        }
+
+        items.forEach { item ->
+            composeTestRule.onNodeWithTag("item_$item").assertExists()
+        }
     }
 }

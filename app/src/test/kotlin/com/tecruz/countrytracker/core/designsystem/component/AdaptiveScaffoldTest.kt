@@ -1,8 +1,11 @@
 package com.tecruz.countrytracker.core.designsystem.component
 
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.core.util.isCompact
@@ -130,5 +133,48 @@ class AdaptiveScaffoldTest {
         assertTrue(compactWindowSizeClass().isCompact())
         assertFalse(mediumWindowSizeClass().isCompact())
         assertFalse(expandedWindowSizeClass().isCompact())
+    }
+
+    @Test
+    fun `adaptive scaffold renders with custom modifier`() {
+        composeTestRule.setContent {
+            AdaptiveScaffold(
+                windowSizeClass = compactWindowSizeClass(),
+                modifier = Modifier.testTag("custom_scaffold"),
+            ) {
+                Text("Scaffold with Modifier")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Scaffold with Modifier").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("custom_scaffold").assertExists()
+    }
+
+    @Test
+    fun `adaptive scaffold with null nav rail shows content on expanded`() {
+        composeTestRule.setContent {
+            AdaptiveScaffold(
+                windowSizeClass = expandedWindowSizeClass(),
+                navigationRail = null,
+            ) {
+                Text("Expanded No Rail Content")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Expanded No Rail Content").assertIsDisplayed()
+    }
+
+    @Test
+    fun `adaptive scaffold without nav rail shows content on medium`() {
+        composeTestRule.setContent {
+            AdaptiveScaffold(
+                windowSizeClass = mediumWindowSizeClass(),
+                navigationRail = null,
+            ) {
+                Text("Medium No Rail Content")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Medium No Rail Content").assertIsDisplayed()
     }
 }

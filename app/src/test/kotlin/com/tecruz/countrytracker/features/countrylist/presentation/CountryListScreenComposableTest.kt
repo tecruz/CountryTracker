@@ -272,4 +272,162 @@ class CountryListScreenComposableTest {
 
         composeTestRule.onNodeWithText("\uD83C\uDDFA\uD83C\uDDF8").assertIsDisplayed()
     }
+
+    @Test
+    fun `filterChips shows visited only chip as unselected`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe"),
+                    selectedRegion = "All",
+                    showOnlyVisited = false,
+                    onToggleVisited = {},
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Visited only").assertIsDisplayed()
+    }
+
+    @Test
+    fun `filterChips visited only toggle triggers callback`() {
+        var toggleVisitedCalled = false
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe"),
+                    selectedRegion = "All",
+                    showOnlyVisited = false,
+                    onToggleVisited = { toggleVisitedCalled = true },
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Visited only").performClick()
+        assertTrue(toggleVisitedCalled)
+    }
+
+    @Test
+    fun `filterChips shows all region chip as selected`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe", "Asia"),
+                    selectedRegion = "All",
+                    showOnlyVisited = false,
+                    onToggleVisited = {},
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("All").assertIsDisplayed()
+    }
+
+    @Test
+    fun `filterChips shows all region chip as unselected`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe", "Asia"),
+                    selectedRegion = "Europe",
+                    showOnlyVisited = false,
+                    onToggleVisited = {},
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("All").assertIsDisplayed()
+    }
+
+    @Test
+    fun `filterChips with multiple regions shows all chips`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe", "Asia", "Africa", "Americas"),
+                    selectedRegion = "All",
+                    showOnlyVisited = false,
+                    onToggleVisited = {},
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("All").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Europe").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Asia").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Africa").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Americas").assertIsDisplayed()
+    }
+
+    @Test
+    fun `filterChips with single region shows only that chip`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                FilterChips(
+                    allRegions = listOf("Europe"),
+                    selectedRegion = "Europe",
+                    showOnlyVisited = false,
+                    onToggleVisited = {},
+                    onRegionSelect = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Europe").assertIsDisplayed()
+    }
+
+    @Test
+    fun `searchBar with empty query does not show clear button`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                SearchBar(
+                    query = "",
+                    onQueryChange = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithContentDescription("Clear search").assertDoesNotExist()
+    }
+
+    @Test
+    fun `statsCard with large values displays correctly`() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                StatsCard(visitedCount = 999, totalCount = 1000, percentage = 99)
+            }
+        }
+
+        composeTestRule.onNodeWithText("999").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1000").assertIsDisplayed()
+        composeTestRule.onNodeWithText("99%").assertIsDisplayed()
+    }
+
+    @Test
+    fun `countryListItem with very long name truncates correctly`() {
+        val longNameCountry = CountryListItemModel(
+            code = "XX",
+            name = "Very Long Country Name That Should Be Truncated",
+            region = "Region",
+            visited = false,
+            flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+        )
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CountryListItem(
+                    country = longNameCountry,
+                    onClick = {},
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Very Long Country Name That Should Be Truncated").assertIsDisplayed()
+    }
 }

@@ -1,8 +1,11 @@
 package com.tecruz.countrytracker.core.designsystem.component
 
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
@@ -116,5 +119,73 @@ class ResponsiveCardTest {
         assertTrue(compactWindowSizeClass().isCompact())
         assertTrue(mediumWindowSizeClass().isMedium())
         assertTrue(expandedWindowSizeClass().isExpanded())
+    }
+
+    @Test
+    fun `responsive card renders with custom colors`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = compactWindowSizeClass(),
+                colors = androidx.compose.material3.CardDefaults.cardColors(
+                    containerColor = androidx.compose.ui.graphics.Color.Red,
+                ),
+            ) {
+                Text("Custom Colors")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Custom Colors").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders with custom elevation`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = mediumWindowSizeClass(),
+                elevation = androidx.compose.material3.CardDefaults.cardElevation(
+                    defaultElevation = 8.dp,
+                ),
+            ) {
+                Text("Custom Elevation")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Custom Elevation").assertIsDisplayed()
+    }
+
+    @Test
+    fun `responsive card renders with custom modifier`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = expandedWindowSizeClass(),
+                modifier = Modifier.testTag("custom_card"),
+            ) {
+                Text("Custom Modifier")
+            }
+        }
+
+        composeTestRule.onNodeWithText("Custom Modifier").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("custom_card").assertExists()
+    }
+
+    @Test
+    fun `responsive card with all custom parameters renders correctly`() {
+        composeTestRule.setContent {
+            ResponsiveCard(
+                windowSizeClass = compactWindowSizeClass(),
+                modifier = Modifier.testTag("full_custom"),
+                colors = androidx.compose.material3.CardDefaults.cardColors(
+                    containerColor = androidx.compose.ui.graphics.Color.Blue,
+                ),
+                elevation = androidx.compose.material3.CardDefaults.cardElevation(
+                    defaultElevation = 6.dp,
+                ),
+                minHeight = 80.dp,
+            ) {
+                Text("All Custom")
+            }
+        }
+
+        composeTestRule.onNodeWithText("All Custom").assertIsDisplayed()
     }
 }
