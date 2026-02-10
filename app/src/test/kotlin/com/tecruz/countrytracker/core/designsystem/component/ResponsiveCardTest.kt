@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.util.isCompact
 import com.tecruz.countrytracker.core.util.isExpanded
 import com.tecruz.countrytracker.core.util.isMedium
@@ -28,11 +29,14 @@ class ResponsiveCardTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun compactWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(400f, 800f)
+    private fun compactWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 400f, heightDp = 800f)
 
-    private fun mediumWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(700f, 900f)
+    private fun mediumWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f)
 
-    private fun expandedWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(900f, 1200f)
+    private fun expandedWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f)
 
     // --- Pure logic tests ---
 
