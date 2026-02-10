@@ -179,10 +179,10 @@ val jacocoExcludes =
 fun debugClassDirectories(): ConfigurableFileCollection =
     files(
         fileTree(
-            "${project.layout.buildDirectory.get()}/intermediates/javac/debug/classes",
+            "${project.layout.buildDirectory.get()}/intermediates/javac/debug/compileDebugJavaWithJavac/classes",
         ) { exclude(jacocoExcludes) },
         fileTree(
-            "${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug",
+            "${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
         ) { exclude(jacocoExcludes) },
     )
 
