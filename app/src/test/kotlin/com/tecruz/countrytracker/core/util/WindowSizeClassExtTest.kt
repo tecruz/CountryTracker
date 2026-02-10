@@ -2,6 +2,7 @@ package com.tecruz.countrytracker.core.util
 
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -9,15 +10,14 @@ import org.junit.Test
 
 class WindowSizeClassExtTest {
 
-    // WindowSizeClass.compute(widthDp, heightDp) creates appropriate size class
     private fun compactWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.compute(400f, 800f) // Compact: < 600dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 400f, heightDp = 800f) // Compact: < 600dp width
 
     private fun mediumWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.compute(700f, 900f) // Medium: 600-839dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f) // Medium: 600-839dp width
 
     private fun expandedWindowSizeClass(): WindowSizeClass =
-        WindowSizeClass.compute(900f, 1200f) // Expanded: >= 840dp width
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f) // Expanded: >= 840dp width
 
     @Test
     fun `isCompact returns true for compact window`() {

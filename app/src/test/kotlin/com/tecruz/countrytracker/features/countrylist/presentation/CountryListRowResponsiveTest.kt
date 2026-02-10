@@ -1,6 +1,7 @@
 package com.tecruz.countrytracker.features.countrylist.presentation
 
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.core.util.minTouchTarget
 import org.junit.Assert.assertEquals
@@ -14,11 +15,14 @@ import org.junit.Test
  */
 class CountryListRowResponsiveTest {
 
-    private fun compactWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(375f, 667f)
+    private fun compactWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.Companion.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 375f, heightDp = 667f)
 
-    private fun mediumWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(700f, 900f)
+    private fun mediumWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.Companion.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 700f, heightDp = 900f)
 
-    private fun expandedWindowSizeClass(): WindowSizeClass = WindowSizeClass.compute(900f, 1200f)
+    private fun expandedWindowSizeClass(): WindowSizeClass =
+        WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 900f, heightDp = 1200f)
 
     @Test
     fun `compact screen has minimum 48dp touch target`() {

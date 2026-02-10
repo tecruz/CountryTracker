@@ -30,7 +30,8 @@ class OrientationChangeTest {
 
     @Test
     fun statsCard_displaysInPortraitCompact() {
-        val portraitCompact = WindowSizeClass.compute(375f, 667f)
+        val portraitCompact =
+            WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 375f, heightDp = 667f)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
@@ -54,7 +55,8 @@ class OrientationChangeTest {
     @Test
     fun statsCard_displaysInLandscapeCompact() {
         // Landscape compact: wider but still compact width class
-        val landscapeCompact = WindowSizeClass.compute(568f, 320f)
+        val landscapeCompact =
+            WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(widthDp = 568f, heightDp = 320f)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
