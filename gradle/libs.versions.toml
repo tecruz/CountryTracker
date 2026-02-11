@@ -11,6 +11,7 @@ ksp = "2.3.5"
 detekt = "1.23.8"
 spotless = "8.2.1"
 ktlint = "1.5.0"
+kover = "0.9.7"
 
 # AndroidX Core
 coreKtx = "1.17.0"
@@ -23,7 +24,7 @@ material3Expressive = "1.5.0-alpha13"
 material3Adaptive = "1.2.0"
 
 # Navigation
-navigationCompose = "2.9.6"
+navigationCompose = "2.9.7"
 
 # Room
 room = "2.8.4"
@@ -163,3 +164,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
