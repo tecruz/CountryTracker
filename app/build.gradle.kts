@@ -167,6 +167,7 @@ kover {
                     "*.entity",
                     "*.navigation",
                     "*.theme",
+                    "*.preview",
                 )
                 annotatedBy(
                     "dagger.internal.DaggerGenerated",
@@ -225,6 +226,7 @@ val jacocoExcludes =
         "**/navigation/*.*",
         // Theme
         "**/theme/*.*",
+        "**/preview/*.*",
     )
 
 fun debugClassDirectories(): ConfigurableFileCollection =
