@@ -118,7 +118,7 @@ jobs:
           disable-animations: true
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Generate combined coverage report
+      - name: Generate coverage report
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
@@ -130,17 +130,15 @@ jobs:
 
       - name: Upload combined coverage report
         uses: actions/upload-artifact@v6
-        if: always()
         with:
-          name: combined-coverage-report
+          name: coverage-report
           path: app/build/reports/jacoco/jacocoCombinedReport/
           retention-days: 7
 
-      - name: Upload combined coverage to Codecov
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           files: app/build/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml
-          flags: combined
           fail_ci_if_error: false
           verbose: true
         env:
