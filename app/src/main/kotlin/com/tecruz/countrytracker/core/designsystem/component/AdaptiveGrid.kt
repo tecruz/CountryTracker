@@ -2,6 +2,8 @@ package com.tecruz.countrytracker.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -11,10 +13,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.tecruz.countrytracker.LocalWindowSizeClass
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.itemSpacing
 
@@ -75,6 +82,28 @@ fun <T> AdaptiveGrid(
                 key = key?.let { keyFn -> { item -> keyFn(item) } },
             ) { item ->
                 itemContent(item)
+            }
+        }
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun AdaptiveGridPreview() {
+    PreviewWrapper {
+        val windowSizeClass = LocalWindowSizeClass.current
+        val sampleItems = (1..12).map { "Item $it" }
+        AdaptiveGrid(
+            items = sampleItems,
+            windowSizeClass = windowSizeClass,
+            contentPadding = PaddingValues(16.dp),
+            key = { it },
+        ) { item ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = item,
+                    modifier = Modifier.padding(16.dp),
+                )
             }
         }
     }

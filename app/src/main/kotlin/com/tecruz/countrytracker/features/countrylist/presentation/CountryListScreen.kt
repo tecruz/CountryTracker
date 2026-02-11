@@ -116,6 +116,10 @@ import com.tecruz.countrytracker.core.designsystem.StatsLabelColor
 import com.tecruz.countrytracker.core.designsystem.StatsValueColor
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientEnd
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientStart
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewCountryListItems
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
+import com.tecruz.countrytracker.core.designsystem.preview.previewRegions
 import com.tecruz.countrytracker.core.util.contentPadding
 import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.horizontalPadding
@@ -938,3 +942,96 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
         }
     }
 }
+
+// region Previews
+
+@DevicePreviews
+@Composable
+private fun StatsCardPreview() {
+    PreviewWrapper {
+        StatsCard(
+            visitedCount = 42,
+            totalCount = 195,
+            percentage = 22,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun StatItemPreview() {
+    PreviewWrapper {
+        StatItem(
+            icon = Icons.Default.Flag,
+            value = "42",
+            label = "VISITED",
+            iconTint = StatsIconVisited,
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun SearchBarPreview() {
+    PreviewWrapper {
+        Column(modifier = Modifier.padding(16.dp)) {
+            SearchBar(query = "", onQueryChange = {})
+            Spacer(modifier = Modifier.height(8.dp))
+            SearchBar(query = "Japan", onQueryChange = {})
+        }
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun FilterChipsPreview() {
+    PreviewWrapper {
+        FilterChips(
+            allRegions = previewRegions,
+            selectedRegion = "Europe",
+            showOnlyVisited = false,
+            onToggleVisited = {},
+            onRegionSelect = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun CountryListItemVisitedPreview() {
+    PreviewWrapper {
+        CountryListItem(
+            country = PreviewCountryListItems.visited,
+            onClick = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun CountryListItemUnvisitedPreview() {
+    PreviewWrapper {
+        CountryListItem(
+            country = PreviewCountryListItems.unvisited,
+            onClick = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun CountryListItemLongNamePreview() {
+    PreviewWrapper {
+        CountryListItem(
+            country = PreviewCountryListItems.longName,
+            onClick = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+// endregion

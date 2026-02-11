@@ -1,6 +1,9 @@
 package com.tecruz.countrytracker.features.countrylist.presentation.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.tecruz.countrytracker.core.designsystem.CountryShadow
 import com.tecruz.countrytracker.core.designsystem.LandColor
 import com.tecruz.countrytracker.core.designsystem.LandShadow
@@ -205,4 +209,18 @@ fun WorldMapCanvas(
                 }
             },
     )
+}
+
+@com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+@Composable
+private fun WorldMapCanvasPreview() {
+    com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper {
+        WorldMapCanvas(
+            visitedCountryCodes = setOf("US", "JP", "FR", "BR", "AU"),
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f)
+                .padding(16.dp),
+        )
+    }
 }

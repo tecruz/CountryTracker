@@ -1,11 +1,21 @@
 package com.tecruz.countrytracker.core.designsystem.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.tecruz.countrytracker.LocalWindowSizeClass
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.isCompact
 
 /**
@@ -38,6 +48,35 @@ fun AdaptiveScaffold(
             navigationRail()
             Box(modifier = Modifier.weight(1f)) {
                 content()
+            }
+        }
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun AdaptiveScaffoldPreview() {
+    PreviewWrapper {
+        val windowSizeClass = LocalWindowSizeClass.current
+        AdaptiveScaffold(
+            windowSizeClass = windowSizeClass,
+            navigationRail = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(80.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Rail")
+                }
+            },
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("Content Area")
             }
         }
     }

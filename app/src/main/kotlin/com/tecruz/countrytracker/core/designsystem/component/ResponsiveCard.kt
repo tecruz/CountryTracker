@@ -10,11 +10,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.tecruz.countrytracker.LocalWindowSizeClass
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.isExpanded
 import com.tecruz.countrytracker.core.util.isMedium
 
@@ -63,4 +69,22 @@ private fun responsiveCardValues(windowSizeClass: WindowSizeClass): Triple<Dp, D
     windowSizeClass.isExpanded() -> Triple(24.dp, 24.dp, 4.dp)
     windowSizeClass.isMedium() -> Triple(20.dp, 20.dp, 3.dp)
     else -> Triple(16.dp, 16.dp, 2.dp)
+}
+
+@DevicePreviews
+@Composable
+private fun ResponsiveCardPreview() {
+    PreviewWrapper {
+        val windowSizeClass = LocalWindowSizeClass.current
+        ResponsiveCard(
+            windowSizeClass = windowSizeClass,
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Text(
+                text = "Responsive Card Content",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+    }
 }
