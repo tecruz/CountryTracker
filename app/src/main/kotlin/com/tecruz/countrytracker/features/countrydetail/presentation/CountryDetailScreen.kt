@@ -55,6 +55,9 @@ import com.tecruz.countrytracker.core.designsystem.SecondaryContainer
 import com.tecruz.countrytracker.core.designsystem.StarYellow
 import com.tecruz.countrytracker.core.designsystem.Surface
 import com.tecruz.countrytracker.core.designsystem.VisitStatusGradientEnd
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewCountryDetails
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.contentPadding
 import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
@@ -595,3 +598,66 @@ fun NotesCard(notes: String, onEditNotes: () -> Unit, modifier: Modifier = Modif
         }
     }
 }
+
+// region Previews
+
+@DevicePreviews
+@Composable
+private fun HeroCardPreview() {
+    PreviewWrapper {
+        HeroCard(
+            country = PreviewCountryDetails.visitedWithNotes,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun VisitStatusCardPreview() {
+    PreviewWrapper {
+        VisitStatusCard(
+            country = PreviewCountryDetails.visitedWithNotes,
+            onEditDate = {},
+            onMarkAsUnvisited = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun RatingCardPreview() {
+    PreviewWrapper {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            RatingCard(rating = 4, onRatingChange = {})
+            RatingCard(rating = 0, onRatingChange = {})
+        }
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun NotesCardWithContentPreview() {
+    PreviewWrapper {
+        NotesCard(
+            notes = PreviewCountryDetails.visitedWithNotes.notes,
+            onEditNotes = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun NotesCardEmptyPreview() {
+    PreviewWrapper {
+        NotesCard(
+            notes = "",
+            onEditNotes = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+// endregion

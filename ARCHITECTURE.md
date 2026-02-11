@@ -37,10 +37,14 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   ├── Color.kt
 │   │   ├── Theme.kt
 │   │   ├── Type.kt
-│   │   └── component/
-│   │       ├── AdaptiveGrid.kt        # Responsive grid/list component
-│   │       ├── AdaptiveScaffold.kt    # Responsive scaffold with nav rail
-│   │       └── ResponsiveCard.kt      # Size-adaptive card component
+│   │   ├── component/
+│   │   │   ├── AdaptiveGrid.kt        # Responsive grid/list component
+│   │   │   ├── AdaptiveScaffold.kt    # Responsive scaffold with nav rail
+│   │   │   └── ResponsiveCard.kt      # Size-adaptive card component
+│   │   └── preview/
+│   │       ├── DevicePreviews.kt      # Multi-device preview annotations
+│   │       ├── PreviewData.kt         # Sample data & parameter providers
+│   │       └── PreviewUtil.kt         # Theme + WindowSizeClass wrapper
 │   ├── di/
 │   │   └── DatabaseModule.kt          # Database + DAO providers
 │   ├── navigation/
@@ -301,6 +305,24 @@ State is preserved across fold/unfold transitions via:
 - `rememberSaveable` in Composables for UI state (dialog visibility, tab selection)
 - Keyed `LazyColumn`/`LazyVerticalGrid` items for stable recomposition
 
+### Compose Previews
+
+All public UI components include `@Preview` annotations rendered at the three supported screen sizes (Phone 360dp, Foldable 700dp, Tablet 1100dp).
+
+#### Preview Infrastructure (`core/designsystem/preview/`)
+- **`@DevicePreviews`** - Multi-preview annotation generating Phone, Foldable, and Tablet previews
+- **`@DeviceThemePreviews`** - Generates all device sizes in both light and dark themes
+- **`PreviewWrapper`** - Composable that provides `CountryTrackerTheme` and `LocalWindowSizeClass` computed from preview dimensions
+- **`PreviewData`** - Sample `CountryListItem` and `CountryDetailUi` instances plus `PreviewParameterProvider` implementations
+
+#### Previewed Components
+| Screen / Package | Components |
+|------------------|------------|
+| Design System | `ResponsiveCard`, `AdaptiveScaffold`, `AdaptiveGrid` |
+| Country List | `StatsCard`, `StatItem`, `SearchBar`, `FilterChips`, `CountryListItem` (visited/unvisited/long name) |
+| Country Detail | `HeroCard`, `VisitStatusCard`, `RatingCard`, `NotesCard` (with content/empty) |
+| World Map | `WorldMapCanvas` |
+
 ## Benefits of This Architecture
 
 ### 1. Separation of Concerns
@@ -386,35 +408,44 @@ app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests
 
 ```bash
 # Unit tests
-./gradlew test
+./gradlew testDebugUnitTest
 
 # Instrumented tests (requires connected device or emulator)
-./gradlew connectedAndroidTest
+./gradlew connectedDebugAndroidTest
 
-# Combined coverage report (unit + instrumented, requires device)
+# Unit test coverage (Kover - Compose-aware)
+./gradlew koverHtmlReport
+
+# Instrumented test coverage (JaCoCo)
+./gradlew jacocoAndroidTestReport
+
+# Combined coverage report (JaCoCo - unit + instrumented, requires device)
 ./gradlew jacocoCombinedReport
 ```
 
 ### Code Coverage
 
-Coverage is collected with JaCoCo 0.8.12 and reported via three Gradle tasks:
+The project uses a hybrid coverage setup:
 
-| Task | Scope | Execution data |
-|------|-------|----------------|
-| `jacocoTestReport` | Unit tests only | `.exec` |
-| `jacocoAndroidTestReport` | Instrumented tests only | `.ec` |
-| `jacocoCombinedReport` | Both | `.exec` + `.ec` |
+- **Kover 0.9.7** for unit test coverage (Compose-aware instrumentation, accurate for `@Composable` functions)
+- **JaCoCo 0.8.12** for instrumented test coverage and combined reports
 
-`jacocoCoverageVerification` enforces a minimum of 80% overall line coverage and 40% per-class.
+| Task | Engine | Scope |
+|------|--------|-------|
+| `koverHtmlReport` / `koverXmlReport` | Kover | Unit tests (Compose-aware) |
+| `jacocoAndroidTestReport` | JaCoCo | Instrumented tests only |
+| `jacocoCombinedReport` | JaCoCo | Unit + instrumented (merged `.exec` + `.ec`) |
+
+Both Kover and JaCoCo reports are uploaded to Codecov. Codecov merges them and picks the highest coverage per line, giving accurate numbers for Compose code (from Kover) alongside instrumented test coverage (from JaCoCo).
 
 ### CI Pipeline
 
-The GitHub Actions workflow (`.github/workflows/ci.yml`) runs five parallel jobs after the initial build:
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs parallel jobs after the initial build:
 
 | Job | Description |
 |-----|-------------|
-| **Build & Unit Tests** | Compiles debug APK and runs unit tests |
-| **Code Coverage** | Boots an API 30 emulator, runs `jacocoCombinedReport` (unit + instrumented), uploads to Codecov |
+| **Build & Unit Tests** | Compiles debug APK, runs unit tests, generates Kover coverage report, uploads to Codecov |
+| **Code Coverage** | Boots an API 30 emulator, runs `jacocoCombinedReport` (unit + instrumented via JaCoCo), uploads to Codecov |
 | **Android Lint** | Static analysis via `lintDebug` |
 | **Detekt Analysis** | Kotlin static analysis |
 | **Code Formatting** | Checks formatting via Spotless |
