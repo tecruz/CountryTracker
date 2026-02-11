@@ -218,7 +218,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
         )
 
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -229,14 +229,13 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                                 viewModel.markAsVisited(date, country.notes, country.rating)
                             }
                         }
-                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok), color = PrimaryGreen)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -257,92 +256,105 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
 
     // Unvisited Confirmation Dialog
     if (showUnvisitedConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showUnvisitedConfirmation = false },
-            title = { Text(stringResource(R.string.confirm_unvisit_title)) },
-            text = { Text(stringResource(R.string.confirm_unvisit_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.markAsUnvisited()
-                        showUnvisitedConfirmation = false
-                    },
-                ) {
-                    Text(
-                        stringResource(R.string.confirm_unvisit_action),
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
+        UnvisitedConfirmationDialog(
+            onConfirm = {
+                viewModel.markAsUnvisited()
             },
-            dismissButton = {
-                TextButton(onClick = { showUnvisitedConfirmation = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            containerColor = Surface,
+            onDismiss = { },
         )
     }
 
     // Notes Dialog
     if (showNotesDialog) {
-        var tempNotes by remember { mutableStateOf(country.notes) }
-        val maxLength = CountryDetail.MAX_NOTES_LENGTH
-        val isOverLimit = tempNotes.length > maxLength
-
-        AlertDialog(
-            onDismissRequest = { showNotesDialog = false },
-            title = { Text(stringResource(R.string.edit_notes)) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = tempNotes,
-                        onValueChange = { newValue ->
-                            // Allow typing but show error if over limit
-                            tempNotes = newValue
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 150.dp),
-                        placeholder = { Text(stringResource(R.string.notes_placeholder)) },
-                        minLines = 5,
-                        maxLines = 10,
-                        shape = RoundedCornerShape(12.dp),
-                        isError = isOverLimit,
-                        supportingText = {
-                            Text(
-                                text = stringResource(R.string.notes_character_count, tempNotes.length, maxLength),
-                                color = if (isOverLimit) MaterialTheme.colorScheme.error else OnSurfaceVariant,
-                            )
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isOverLimit) MaterialTheme.colorScheme.error else PrimaryGreen,
-                            errorBorderColor = MaterialTheme.colorScheme.error,
-                        ),
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.updateNotes(tempNotes)
-                        showNotesDialog = false
-                    },
-                    enabled = !isOverLimit,
-                ) {
-                    Text(
-                        stringResource(R.string.save),
-                        color = if (isOverLimit) OnSurfaceVariant else PrimaryGreen,
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showNotesDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            containerColor = Surface,
+        NotesDialog(
+            currentNotes = country.notes,
+            onDismiss = { },
+            onSave = viewModel::updateNotes,
         )
     }
+}
+
+@Composable
+fun NotesDialog(currentNotes: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var tempNotes by remember { mutableStateOf(currentNotes) }
+    val maxLength = CountryDetail.MAX_NOTES_LENGTH
+    val isOverLimit = tempNotes.length > maxLength
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_notes)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = tempNotes,
+                    onValueChange = { newValue ->
+                        tempNotes = newValue
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 150.dp),
+                    placeholder = { Text(stringResource(R.string.notes_placeholder)) },
+                    minLines = 5,
+                    maxLines = 10,
+                    shape = RoundedCornerShape(12.dp),
+                    isError = isOverLimit,
+                    supportingText = {
+                        Text(
+                            text = stringResource(R.string.notes_character_count, tempNotes.length, maxLength),
+                            color = if (isOverLimit) MaterialTheme.colorScheme.error else OnSurfaceVariant,
+                        )
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = if (isOverLimit) MaterialTheme.colorScheme.error else PrimaryGreen,
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                    ),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(tempNotes)
+                    onDismiss()
+                },
+                enabled = !isOverLimit,
+            ) {
+                Text(
+                    stringResource(R.string.save),
+                    color = if (isOverLimit) OnSurfaceVariant else PrimaryGreen,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        containerColor = Surface,
+    )
+}
+
+@Composable
+fun UnvisitedConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.confirm_unvisit_title)) },
+        text = { Text(stringResource(R.string.confirm_unvisit_message)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    stringResource(R.string.confirm_unvisit_action),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        containerColor = Surface,
+    )
 }
 
 @Composable
@@ -656,6 +668,41 @@ private fun NotesCardEmptyPreview() {
             notes = "",
             onEditNotes = {},
             modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun NotesDialogPreview() {
+    PreviewWrapper {
+        NotesDialog(
+            currentNotes = "Amazing trip to NYC! The food was incredible and the people were so friendly.",
+            onDismiss = {},
+            onSave = {},
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun NotesDialogEmptyPreview() {
+    PreviewWrapper {
+        NotesDialog(
+            currentNotes = "",
+            onDismiss = {},
+            onSave = {},
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun UnvisitedConfirmationDialogPreview() {
+    PreviewWrapper {
+        UnvisitedConfirmationDialog(
+            onConfirm = {},
+            onDismiss = {},
         )
     }
 }
