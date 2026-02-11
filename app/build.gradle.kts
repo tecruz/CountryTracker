@@ -172,6 +172,8 @@ kover {
                 annotatedBy(
                     "dagger.internal.DaggerGenerated",
                     "androidx.room.Database",
+                    "com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews",
+                    "com.tecruz.countrytracker.core.designsystem.preview.DeviceThemePreviews",
                 )
             }
         }
