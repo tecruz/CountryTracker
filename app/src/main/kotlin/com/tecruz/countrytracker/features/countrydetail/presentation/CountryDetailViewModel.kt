@@ -12,20 +12,12 @@ import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisi
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryNotesUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryRatingUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.presentation.model.CountryDetailUi
 import com.tecruz.countrytracker.features.countrydetail.presentation.model.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class CountryDetailUiState(
-    val country: CountryDetailUi? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null,
-    val isSaving: Boolean = false,
-)
 
 @HiltViewModel
 class CountryDetailViewModel @Inject constructor(
