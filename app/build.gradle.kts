@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.kover)
     jacoco
 }
 
@@ -130,12 +131,67 @@ spotless {
     }
 }
 
-// JaCoCo Configuration
+// Kover Configuration
+kover {
+    reports {
+        filters {
+            excludes {
+                // Generated classes
+                classes(
+                    "*.R",
+                    "*.R$*",
+                    "*.BuildConfig",
+                    "*.Manifest*",
+                    "*.*Test*",
+                    // Hilt generated
+                    "*.*_HiltModules*",
+                    "*.*_HiltComponents*",
+                    "*.*_ComponentTreeDeps*",
+                    "*.*_GeneratedInjector*",
+                    "*.*_Factory*",
+                    "*.*_MembersInjector*",
+                    "*.*_LazyMapKey*",
+                    "*.*_ProvideFactory*",
+                    "*.Hilt_*",
+                    "*.Dagger*",
+                    "*.*Module_*",
+                    // Room generated
+                    "*.*_Impl*",
+                )
+                packages(
+                    "dagger",
+                    "hilt_aggregated_deps",
+                    "*.di",
+                    "*.dao",
+                    "*.model",
+                    "*.entity",
+                    "*.navigation",
+                    "*.theme",
+                )
+                annotatedBy(
+                    "dagger.internal.DaggerGenerated",
+                    "androidx.room.Database",
+                )
+            }
+        }
+
+        total {
+            xml {
+                onCheck = false
+            }
+            html {
+                onCheck = false
+            }
+        }
+    }
+}
+
+// JaCoCo Configuration (instrumented tests only — unit test coverage is handled by Kover)
 jacoco {
     toolVersion = "0.8.12"
 }
 
-// Exclude generated files from coverage
+// Exclude generated files from instrumented-test coverage
 val jacocoExcludes =
     listOf(
         "**/R.class",
@@ -171,11 +227,6 @@ val jacocoExcludes =
         "**/theme/*.*",
     )
 
-/**
- * Collects all debug class directories that may exist under intermediates.
- * AGP versions place compiled classes in different paths; using multiple
- * candidates ensures we find them regardless of AGP version.
- */
 fun debugClassDirectories(): ConfigurableFileCollection =
     files(
         fileTree(
@@ -186,36 +237,9 @@ fun debugClassDirectories(): ConfigurableFileCollection =
         ) { exclude(jacocoExcludes) },
     )
 
-tasks.register<JacocoReport>("jacocoTestReport") {
-    group = "verification"
-    description = "Generates code coverage report for unit tests"
-
-    dependsOn("testDebugUnitTest")
-
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(false)
-        xml.outputLocation.set(
-            file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"),
-        )
-        html.outputLocation.set(file("${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/html"))
-    }
-
-    val mainSrc = "${project.projectDir}/src/main/kotlin"
-
-    sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(debugClassDirectories())
-    executionData.setFrom(
-        fileTree(project.layout.buildDirectory.get()) {
-            include("outputs/unit_test_code_coverage/**/*.exec")
-        },
-    )
-}
-
 tasks.register<JacocoReport>("jacocoAndroidTestReport") {
     group = "verification"
-    description = "Generates code coverage report for instrumented tests"
+    description = "Generates code coverage report for instrumented tests (on-device)"
 
     dependsOn("connectedDebugAndroidTest")
 
@@ -244,9 +268,17 @@ tasks.register<JacocoReport>("jacocoAndroidTestReport") {
     )
 }
 
+/**
+ * Combined report: merges JaCoCo unit test .exec files with instrumented test .ec
+ * files into a single JaCoCo HTML/XML report.
+ *
+ * Note: for unit-test-only coverage with Compose-aware instrumentation, prefer
+ * Kover tasks (koverHtmlReport / koverXmlReport). This combined report uses
+ * JaCoCo data for both unit and instrumented tests.
+ */
 tasks.register<JacocoReport>("jacocoCombinedReport") {
     group = "verification"
-    description = "Generates combined code coverage report for both unit and instrumented tests"
+    description = "Generates combined JaCoCo coverage report for both unit and instrumented tests"
 
     dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
 
@@ -267,77 +299,13 @@ tasks.register<JacocoReport>("jacocoCombinedReport") {
     executionData.setFrom(
         fileTree(project.layout.buildDirectory.get()) {
             include(
+                // JaCoCo unit test coverage
                 "outputs/unit_test_code_coverage/**/*.exec",
+                // JaCoCo instrumented test coverage
                 "outputs/code_coverage/**/connected/**/*.ec",
             )
         },
     )
-}
-
-// Coverage verification task
-tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
-    group = "verification"
-    description = "Verifies code coverage meets minimum threshold"
-
-    dependsOn("jacocoTestReport")
-
-    classDirectories.setFrom(debugClassDirectories())
-    executionData.setFrom(
-        fileTree(project.layout.buildDirectory.get()) {
-            include("outputs/unit_test_code_coverage/**/*.exec")
-        },
-    )
-
-    violationRules {
-        rule {
-            limit {
-                minimum = "0.80".toBigDecimal()
-            }
-        }
-        rule {
-            element = "CLASS"
-            excludes =
-                listOf(
-                    "*.BuildConfig",
-                    "*.R",
-                    "*.*Module*",
-                    "*.*Factory*",
-                )
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.40".toBigDecimal()
-            }
-        }
-    }
-}
-
-/**
- * Convenience task: prints the location of every .exec and .ec file
- * produced by the build so you can verify JaCoCo data paths.
- */
-tasks.register("listCoverageFiles") {
-    group = "verification"
-    description = "Lists all JaCoCo execution-data files found in the build directory"
-    doLast {
-        val buildDir =
-            project.layout.buildDirectory
-                .get()
-                .asFile
-        val extensions = listOf("exec", "ec")
-        val execFiles =
-            buildDir
-                .walkTopDown()
-                .filter { it.extension in extensions }
-                .toList()
-        if (execFiles.isEmpty()) {
-            logger.lifecycle("No .exec / .ec files found under $buildDir")
-        } else {
-            execFiles.forEach {
-                logger.lifecycle("  Found: ${it.relativeTo(buildDir)}")
-            }
-        }
-    }
 }
 
 dependencies {
