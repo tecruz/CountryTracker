@@ -67,7 +67,7 @@ A modern Android application for tracking countries you've visited around the wo
 | Navigation | Navigation Compose | 2.9.6 |
 | Code Formatting | Spotless + ktlint | 7.0.2 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
-| Code Coverage | JaCoCo | 0.8.12 |
+| Code Coverage | Kover + JaCoCo | 0.9.7 / 0.8.12 |
 | Build System | Gradle (Kotlin DSL) | 9.1.0 |
 | Annotation Processing | KSP | 2.3.4 |
 
@@ -81,7 +81,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   ├── data/
 │   │   ├── database/          # Room database, DAO, Entity
 │   │   └── datasource/        # Data loaders
-│   ├── designsystem/          # Theme, Colors, Typography
+│   ├── designsystem/          # Theme, Colors, Typography, Previews
 │   ├── di/                    # Core DI modules
 │   ├── navigation/            # Navigation graph
 │   └── util/                  # Shared utilities
@@ -125,8 +125,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 # Instrumented tests
 ./gradlew connectedDebugAndroidTest
 
-# Code coverage report
-./gradlew jacocoTestReport
+# Unit test coverage (Kover - Compose-aware)
+./gradlew koverHtmlReport
+
+# Instrumented test coverage (JaCoCo)
+./gradlew jacocoAndroidTestReport
+
+# Combined coverage (JaCoCo - unit + instrumented)
+./gradlew jacocoCombinedReport
 ```
 
 ### Test Coverage
@@ -146,12 +152,11 @@ The CI pipeline runs on every push and pull request:
 
 | Job | Description |
 |-----|-------------|
-| **Build & Unit Tests** | Compiles debug APK and runs unit tests |
+| **Build & Unit Tests** | Compiles debug APK, runs unit tests, generates Kover coverage report |
 | **Code Formatting** | Verifies code style with Spotless + ktlint |
 | **Android Lint** | Runs Android lint checks |
 | **Detekt Analysis** | Static code analysis |
-| **Code Coverage** | Generates JaCoCo report, uploads to Codecov |
-| **Instrumented Tests** | Runs UI tests on emulator |
+| **Code Coverage** | Boots emulator, runs combined JaCoCo report (unit + instrumented), uploads to Codecov |
 | **Build Release APK** | Builds release APK (main/master only) |
 
 ## Build Variants
