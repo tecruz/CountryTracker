@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.isExpanded
 import com.tecruz.countrytracker.core.util.isMedium
@@ -71,6 +72,7 @@ private fun responsiveCardValues(windowSizeClass: WindowSizeClass): Triple<Dp, D
     else -> Triple(16.dp, 16.dp, 2.dp)
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun ResponsiveCardPreview() {

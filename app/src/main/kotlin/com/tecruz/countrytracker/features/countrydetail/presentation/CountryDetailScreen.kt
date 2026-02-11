@@ -56,6 +56,7 @@ import com.tecruz.countrytracker.core.designsystem.StarYellow
 import com.tecruz.countrytracker.core.designsystem.Surface
 import com.tecruz.countrytracker.core.designsystem.VisitStatusGradientEnd
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewCountryDetails
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.contentPadding
@@ -613,6 +614,7 @@ fun NotesCard(notes: String, onEditNotes: () -> Unit, modifier: Modifier = Modif
 
 // region Previews
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun HeroCardPreview() {
@@ -624,6 +626,7 @@ private fun HeroCardPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun VisitStatusCardPreview() {
@@ -637,6 +640,7 @@ private fun VisitStatusCardPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun RatingCardPreview() {
@@ -648,6 +652,7 @@ private fun RatingCardPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun NotesCardWithContentPreview() {
@@ -660,6 +665,7 @@ private fun NotesCardWithContentPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun NotesCardEmptyPreview() {
@@ -672,6 +678,7 @@ private fun NotesCardEmptyPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun NotesDialogPreview() {
@@ -684,6 +691,7 @@ private fun NotesDialogPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun NotesDialogEmptyPreview() {
@@ -696,6 +704,7 @@ private fun NotesDialogEmptyPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun UnvisitedConfirmationDialogPreview() {

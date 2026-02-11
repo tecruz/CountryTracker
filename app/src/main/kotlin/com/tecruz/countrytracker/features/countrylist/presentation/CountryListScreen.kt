@@ -117,6 +117,7 @@ import com.tecruz.countrytracker.core.designsystem.StatsValueColor
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientEnd
 import com.tecruz.countrytracker.core.designsystem.TopBarGradientStart
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewCountryListItems
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.designsystem.preview.previewRegions
@@ -945,6 +946,7 @@ fun CountryListItem(country: CountryListItem, onClick: () -> Unit, modifier: Mod
 
 // region Previews
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun StatsCardPreview() {
@@ -958,6 +960,7 @@ private fun StatsCardPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun StatItemPreview() {
@@ -971,6 +974,7 @@ private fun StatItemPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun SearchBarPreview() {
@@ -983,6 +987,7 @@ private fun SearchBarPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun FilterChipsPreview() {
@@ -998,6 +1003,7 @@ private fun FilterChipsPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun CountryListItemVisitedPreview() {
@@ -1010,6 +1016,7 @@ private fun CountryListItemVisitedPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun CountryListItemUnvisitedPreview() {
@@ -1022,6 +1029,7 @@ private fun CountryListItemUnvisitedPreview() {
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun CountryListItemLongNamePreview() {
