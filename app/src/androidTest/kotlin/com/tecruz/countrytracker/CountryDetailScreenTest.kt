@@ -14,7 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -560,6 +564,91 @@ class CountryDetailScreenTest {
             composeTestRule.onAllNodesWithText("Test notes", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onAllNodesWithText("Test notes", useUnmergedTree = true)[1].assertIsDisplayed()
+    }
+
+    @Test
+    fun notesDialog_showsPlaceholderWhenEmpty() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                NotesDialog(
+                    currentNotes = "",
+                    onDismiss = {},
+                    onSave = {},
+                )
+            }
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText(
+                "Edit Notes",
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            "Write your memories here\u2026",
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+        composeTestRule.onNodeWithText("0 / 500", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNode(hasText("Save") and hasClickAction()).assertIsEnabled()
+    }
+
+    @Test
+    fun notesDialog_disablesSaveWhenOverLimit() {
+        val overLimitNotes = "A".repeat(501)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                NotesDialog(
+                    currentNotes = overLimitNotes,
+                    onDismiss = {},
+                    onSave = {},
+                )
+            }
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText(
+                "Edit Notes",
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("501 / 500", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNode(hasText("Save") and hasClickAction()).assertIsNotEnabled()
+    }
+
+    @Test
+    fun notesDialog_saveReEnabledWhenBackUnderLimit() {
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                NotesDialog(
+                    currentNotes = "A".repeat(501),
+                    onDismiss = {},
+                    onSave = {},
+                )
+            }
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText(
+                "Edit Notes",
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Save should be disabled while over limit
+        composeTestRule.onNode(hasText("Save") and hasClickAction()).assertIsNotEnabled()
+
+        // Replace with text under limit
+        composeTestRule.onAllNodesWithText(
+            "A".repeat(501),
+            useUnmergedTree = true,
+        )[0].performTextReplacement("Short note")
+
+        // Save should now be enabled
+        composeTestRule.onNodeWithText("10 / 500", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNode(hasText("Save") and hasClickAction()).assertIsEnabled()
     }
 
     @Test

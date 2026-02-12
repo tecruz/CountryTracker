@@ -22,11 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Tests that cover the dialog if-branches in CountryDetailScreen (lines 259 and 269):
- * - `if (showUnvisitedConfirmation)` -> UnvisitedConfirmationDialog
- * - `if (showNotesDialog)` -> NotesDialog
- */
 @RunWith(AndroidJUnit4::class)
 class CountryDetailScreenDialogsTest {
 
@@ -62,11 +57,6 @@ class CountryDetailScreenDialogsTest {
         }
     }
 
-    /**
-     * Covers line 259: `if (showUnvisitedConfirmation)`
-     * When a visited country is displayed and the user taps "Mark as not visited",
-     * the UnvisitedConfirmationDialog should appear.
-     */
     @Test
     fun countryDetailScreen_showsUnvisitedConfirmationDialog_whenMarkAsUnvisitedClicked() {
         val viewModel = createMockViewModel(visitedCountry)
@@ -129,11 +119,6 @@ class CountryDetailScreenDialogsTest {
         verify { viewModel.markAsUnvisited() }
     }
 
-    /**
-     * Covers line 269: `if (showNotesDialog)`
-     * When a visited country is displayed and the user taps the edit notes button,
-     * the NotesDialog should appear.
-     */
     @Test
     fun countryDetailScreen_showsNotesDialog_whenEditNotesClicked() {
         val viewModel = createMockViewModel(visitedCountry)
@@ -164,9 +149,6 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).assertIsDisplayed()
     }
 
-    /**
-     * Covers line 269: `if (showNotesDialog)` - save action calls viewModel.updateNotes()
-     */
     @Test
     fun countryDetailScreen_notesDialog_saveCallsViewModel() {
         val viewModel = createMockViewModel(visitedCountry)
