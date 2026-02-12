@@ -351,6 +351,7 @@ dependencies {
     // Android Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.android.testing)
+    androidTestImplementation(libs.mockk.android)
     kspAndroidTest(libs.hilt.compiler)
 
     // Debug
