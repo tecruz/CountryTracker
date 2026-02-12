@@ -172,6 +172,8 @@ kover {
                 annotatedBy(
                     "dagger.internal.DaggerGenerated",
                     "androidx.room.Database",
+                    "com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews",
+                    "com.tecruz.countrytracker.core.designsystem.preview.DeviceThemePreviews",
                 )
             }
         }
@@ -349,6 +351,7 @@ dependencies {
     // Android Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.android.testing)
+    androidTestImplementation(libs.mockk.android)
     kspAndroidTest(libs.hilt.compiler)
 
     // Debug

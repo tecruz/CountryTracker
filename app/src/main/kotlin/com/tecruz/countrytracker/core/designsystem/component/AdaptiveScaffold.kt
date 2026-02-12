@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.isCompact
 
@@ -53,6 +54,7 @@ fun AdaptiveScaffold(
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun AdaptiveScaffoldPreview() {

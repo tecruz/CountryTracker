@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.itemSpacing
@@ -87,6 +88,7 @@ fun <T> AdaptiveGrid(
     }
 }
 
+@ExcludeFromGeneratedCoverageReport
 @DevicePreviews
 @Composable
 private fun AdaptiveGridPreview() {
