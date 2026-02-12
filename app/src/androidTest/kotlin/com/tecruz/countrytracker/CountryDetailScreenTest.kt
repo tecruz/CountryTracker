@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import android.provider.Settings
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -26,6 +27,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
@@ -69,6 +71,41 @@ class CountryDetailScreenTest {
 
         composeTestRule.onNodeWithText("United States").assertIsDisplayed()
         composeTestRule.onNodeWithText("North America").assertIsDisplayed()
+    }
+
+    @Test
+    fun heroCard_displaysWithAnimationsEnabled() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val uiAutomation = instrumentation.uiAutomation
+
+        // Read current scale to restore later
+        val originalScale = Settings.Global.getFloat(
+            instrumentation.targetContext.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f,
+        )
+
+        try {
+            // Enable animations so the animationsEnabled=true branch is covered
+            uiAutomation.executeShellCommand("settings put global animator_duration_scale 1")
+                .close()
+            // Allow the setting to propagate
+            Thread.sleep(200)
+
+            composeTestRule.setContent {
+                CountryTrackerTheme {
+                    HeroCard(country = testCountry)
+                }
+            }
+
+            composeTestRule.onNodeWithText("United States").assertIsDisplayed()
+            composeTestRule.onNodeWithText("North America").assertIsDisplayed()
+        } finally {
+            // Restore original scale
+            uiAutomation.executeShellCommand(
+                "settings put global animator_duration_scale $originalScale",
+            ).close()
+        }
     }
 
     @Test
