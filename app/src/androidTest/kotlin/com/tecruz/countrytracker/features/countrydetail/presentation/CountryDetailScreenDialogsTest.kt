@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
@@ -148,8 +149,8 @@ class CountryDetailScreenDialogsTest {
             }
         }
 
-        // Tap the edit notes button to trigger showNotesDialog = true
-        composeTestRule.onNodeWithContentDescription("Edit notes").performClick()
+        // Scroll to and tap the edit notes button to trigger showNotesDialog = true
+        composeTestRule.onNodeWithContentDescription("Edit notes").performScrollTo().performClick()
 
         // Verify the NotesDialog is displayed (line 269 branch)
         composeTestRule.waitUntil(timeoutMillis = 5000) {
@@ -181,7 +182,7 @@ class CountryDetailScreenDialogsTest {
             }
         }
 
-        composeTestRule.onNodeWithContentDescription("Edit notes").performClick()
+        composeTestRule.onNodeWithContentDescription("Edit notes").performScrollTo().performClick()
         composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule.onAllNodesWithText(
                 "Edit Notes",

@@ -3,6 +3,7 @@ package com.tecruz.countrytracker.core.designsystem.preview
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 
@@ -16,9 +17,9 @@ import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
  */
 @Composable
 fun PreviewWrapper(widthDp: Int = 360, heightDp: Int = 640, content: @Composable () -> Unit) {
-    val windowSizeClass = WindowSizeClass.compute(
-        dpWidth = widthDp.toFloat(),
-        dpHeight = heightDp.toFloat(),
+    val windowSizeClass = WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(
+        widthDp = widthDp.toFloat(),
+        heightDp = heightDp.toFloat(),
     )
     CountryTrackerTheme(dynamicColor = false) {
         CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
