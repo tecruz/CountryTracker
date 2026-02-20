@@ -305,4 +305,225 @@ class CountryDetailScreenDialogsTest {
         // Verify clearError was called after the snackbar was dismissed
         verify { viewModel.clearError() }
     }
+
+    /**
+     * Verifies DatePickerDialog is dismissed after tapping "OK" to confirm.
+     * Regression test: previously the confirm button had an empty onClick lambda
+     * and never set showDatePicker = false, so the dialog stayed open.
+     */
+    @Test
+    fun countryDetailScreen_datePickerDialog_dismissesAfterConfirm() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the DatePicker
+        composeTestRule.onNodeWithContentDescription("Edit visit date").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("OK", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("OK", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "OK" to confirm
+        composeTestRule.onNodeWithText("OK", useUnmergedTree = true).performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed — "Cancel" button should no longer be visible
+        composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    /**
+     * Verifies DatePickerDialog is dismissed after tapping "Cancel".
+     * Regression test: previously the dismiss button had an empty onClick lambda.
+     */
+    @Test
+    fun countryDetailScreen_datePickerDialog_dismissesAfterCancel() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the DatePicker
+        composeTestRule.onNodeWithContentDescription("Edit visit date").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Cancel", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "Cancel"
+        composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed — "OK" button should no longer be visible
+        composeTestRule.onNodeWithText("OK", useUnmergedTree = true).assertDoesNotExist()
+
+        // Verify markAsVisited was NOT called
+        verify(exactly = 0) { viewModel.markAsVisited(any(), any(), any()) }
+    }
+
+    /**
+     * Verifies UnvisitedConfirmationDialog is dismissed after tapping "Remove" to confirm.
+     * Regression test: previously onConfirm never set showUnvisitedConfirmation = false.
+     */
+    @Test
+    fun countryDetailScreen_unvisitedConfirmationDialog_dismissesAfterConfirm() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the confirmation dialog
+        composeTestRule.onNodeWithText("Mark as not visited").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Remove visit?", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Remove visit?", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "Remove" to confirm
+        composeTestRule.onAllNodesWithText("Remove", useUnmergedTree = true)[0].performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed
+        composeTestRule.onNodeWithText("Remove visit?", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    /**
+     * Verifies UnvisitedConfirmationDialog is dismissed after tapping "Cancel".
+     * Regression test: previously onDismiss was an empty lambda.
+     */
+    @Test
+    fun countryDetailScreen_unvisitedConfirmationDialog_dismissesAfterCancel() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the confirmation dialog
+        composeTestRule.onNodeWithText("Mark as not visited").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Remove visit?", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Remove visit?", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "Cancel"
+        composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed
+        composeTestRule.onNodeWithText("Remove visit?", useUnmergedTree = true).assertDoesNotExist()
+
+        // Verify markAsUnvisited was NOT called
+        verify(exactly = 0) { viewModel.markAsUnvisited() }
+    }
+
+    /**
+     * Verifies NotesDialog is dismissed after tapping "Save".
+     * Regression test: previously onDismiss was an empty lambda, so the internal
+     * onDismiss() call after save did nothing.
+     */
+    @Test
+    fun countryDetailScreen_notesDialog_dismissesAfterSave() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the notes dialog
+        composeTestRule.onNodeWithContentDescription("Edit notes").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Edit Notes", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "Save"
+        composeTestRule.onAllNodesWithText("Save", useUnmergedTree = true)[0].performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    /**
+     * Verifies NotesDialog is dismissed after tapping "Cancel".
+     * Regression test: previously onDismiss was an empty lambda.
+     */
+    @Test
+    fun countryDetailScreen_notesDialog_dismissesAfterCancel() {
+        val (viewModel, _) = createMockViewModel(visitedCountry)
+
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                    CountryDetailScreen(
+                        onNavigateBack = {},
+                        viewModel = viewModel,
+                    )
+                }
+            }
+        }
+
+        // Open the notes dialog
+        composeTestRule.onNodeWithContentDescription("Edit notes").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Edit Notes", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertIsDisplayed()
+
+        // Tap "Cancel"
+        composeTestRule.onAllNodesWithText("Cancel", useUnmergedTree = true)[0].performClick()
+        composeTestRule.waitForIdle()
+
+        // Dialog must be dismissed
+        composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertDoesNotExist()
+
+        // Verify updateNotes was NOT called
+        verify(exactly = 0) { viewModel.updateNotes(any()) }
+    }
 }
