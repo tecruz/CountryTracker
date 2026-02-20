@@ -21,7 +21,7 @@ activityCompose = "1.12.4"
 
 # Compose
 composeBom = "2026.02.00"
-material3Expressive = "1.5.0-alpha13"
+material3Expressive = "1.5.0-alpha14"
 material3Adaptive = "1.2.0"
 
 # Navigation
