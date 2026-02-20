@@ -1,6 +1,7 @@
 package com.tecruz.countrytracker.features.countrylist.data.datasource
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import org.json.JSONObject
 
 /**
@@ -48,5 +49,14 @@ object WorldMapPathData {
         }
 
         return _countryPaths!!.size
+    }
+
+    /**
+     * Reset loaded state for testing purposes only.
+     */
+    @VisibleForTesting
+    @Synchronized
+    fun reset() {
+        _countryPaths = null
     }
 }

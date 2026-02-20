@@ -4,8 +4,10 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -429,5 +431,28 @@ class CountryTrackerE2ETest {
         // Step 8: Verify statistics are displayed
         composeTestRule.onNodeWithText("VISITED", substring = true).assertIsDisplayed()
         composeTestRule.onNodeWithText("TOTAL", substring = true).assertIsDisplayed()
+    }
+
+    /**
+     * Verifies that WorldMapPathData is pre-loaded by the time the main UI appears.
+     * This confirms the splash screen successfully loads map data before dismissing.
+     */
+    @Test
+    fun appStartup_mapDataIsPreLoaded_afterSplashScreen() {
+        // Wait for the app to fully load (splash screen has dismissed)
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // WorldMapPathData should already be loaded by the splash screen
+        assertTrue(
+            "WorldMapPathData should be pre-loaded after app startup",
+            WorldMapPathData.isLoaded,
+        )
+        assertTrue(
+            "WorldMapPathData should contain country paths",
+            WorldMapPathData.countryPaths.isNotEmpty(),
+        )
     }
 }

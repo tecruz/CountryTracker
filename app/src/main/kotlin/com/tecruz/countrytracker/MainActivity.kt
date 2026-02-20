@@ -13,11 +13,17 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
+import com.tecruz.countrytracker.core.designsystem.PRIMARY_GREEN_ARGB
 import com.tecruz.countrytracker.core.navigation.CountryTrackerNavHost
+import com.tecruz.countrytracker.core.util.DispatcherProvider
 import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * CompositionLocal to provide WindowSizeClass throughout the app for adaptive layouts.
@@ -26,9 +32,6 @@ val LocalWindowSizeClass = staticCompositionLocalOf<WindowSizeClass> {
     error("WindowSizeClass not provided")
 }
 
-// Primary green color for status bar (matches PrimaryGreen in Color.kt)
-private const val PRIMARY_GREEN = 0xFF00845D.toInt()
-
 /**
  * Main Activity with Hilt dependency injection.
  * Entry point for the app.
@@ -36,20 +39,38 @@ private const val PRIMARY_GREEN = 0xFF00845D.toInt()
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
+
+    @Volatile
+    private var isMapDataReady = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen before super.onCreate() as required by the API.
+        // The splash stays visible while map path data is loading on a background thread.
+        val splashScreen = installSplashScreen()
+
         // Enable edge-to-edge with themed status bar
         // Uses dark status bar style (light icons) with primary green color
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(PRIMARY_GREEN),
+            statusBarStyle = SystemBarStyle.dark(PRIMARY_GREEN_ARGB),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
 
-        // Eagerly load map path JSON from assets so it's ready before the Map tab is opened.
-        // This is fast (~IO read) and avoids any delay when the user first views the map.
-        if (!WorldMapPathData.isLoaded) {
-            WorldMapPathData.loadCountryPaths(this)
+        // Load map path JSON from assets on a background coroutine during the splash animation.
+        if (WorldMapPathData.isLoaded) {
+            isMapDataReady = true
+        } else {
+            lifecycleScope.launch(dispatchers.io) {
+                WorldMapPathData.loadCountryPaths(this@MainActivity)
+                isMapDataReady = true
+            }
         }
+
+        // Keep the splash screen visible until the map data has finished loading.
+        splashScreen.setKeepOnScreenCondition { !isMapDataReady }
 
         setContent {
             val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass

@@ -3,6 +3,7 @@ package com.tecruz.countrytracker.core.designsystem
 import androidx.compose.ui.graphics.Color
 
 // Light Theme Colors
+const val PRIMARY_GREEN_ARGB = 0xFF00845D.toInt()
 val PrimaryGreen = Color(0xFF00845D)
 val PrimaryLight = Color(0xFF6CDBAC)
 val PrimaryContainer = Color(0xFF89F8C7)
