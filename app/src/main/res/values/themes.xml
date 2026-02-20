@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base app theme (used after splash screen) -->
     <style name="Theme.CountryTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Splash screen theme (used at cold start) -->
+    <style name="Theme.CountryTracker.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.CountryTracker</item>
+    </style>
 </resources>
