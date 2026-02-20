@@ -219,7 +219,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
         )
 
         DatePickerDialog(
-            onDismissRequest = { },
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -230,13 +230,14 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
                                 viewModel.markAsVisited(date, country.notes, country.rating)
                             }
                         }
+                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok), color = PrimaryGreen)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { showDatePicker = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -260,8 +261,9 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
         UnvisitedConfirmationDialog(
             onConfirm = {
                 viewModel.markAsUnvisited()
+                showUnvisitedConfirmation = false
             },
-            onDismiss = { },
+            onDismiss = { showUnvisitedConfirmation = false },
         )
     }
 
@@ -269,7 +271,7 @@ fun CountryDetailScreen(onNavigateBack: () -> Unit, viewModel: CountryDetailView
     if (showNotesDialog) {
         NotesDialog(
             currentNotes = country.notes,
-            onDismiss = { },
+            onDismiss = { showNotesDialog = false },
             onSave = viewModel::updateNotes,
         )
     }

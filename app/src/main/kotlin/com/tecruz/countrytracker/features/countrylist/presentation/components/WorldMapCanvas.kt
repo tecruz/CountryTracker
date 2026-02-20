@@ -5,11 +5,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -38,8 +34,6 @@ import com.tecruz.countrytracker.core.designsystem.OceanGradientMid
 import com.tecruz.countrytracker.core.designsystem.OceanGradientStart
 import com.tecruz.countrytracker.core.util.SvgPathParser
 import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * Data class holding a parsed country path with its bounding box for hit testing.
@@ -85,31 +79,24 @@ fun WorldMapCanvas(
 ) {
     val context = LocalContext.current
 
-    // Use cached paths if available, otherwise start with empty list
-    var countryPaths by remember { mutableStateOf(WorldMapPathCache.paths ?: emptyList()) }
-
-    // Parse paths once and cache for the lifetime of the process
-    LaunchedEffect(Unit) {
-        if (WorldMapPathCache.paths != null) {
-            countryPaths = WorldMapPathCache.paths!!
-            return@LaunchedEffect
-        }
-
-        val parsed = withContext(Dispatchers.Default) {
+    // Parse paths synchronously so the map renders immediately without delay.
+    // The result is cached in a process-level singleton to avoid re-parsing.
+    val countryPaths = remember {
+        WorldMapPathCache.paths ?: run {
             if (!WorldMapPathData.isLoaded) {
                 WorldMapPathData.loadCountryPaths(context)
             }
 
-            WorldMapPathData.countryPaths.mapNotNull { (code, pathData) ->
+            val parsed = WorldMapPathData.countryPaths.mapNotNull { (code, pathData) ->
                 runCatching {
                     val path = SvgPathParser.parse(pathData)
                     val bounds = path.getBounds()
                     CountryPathData(code, path, bounds)
                 }.getOrNull()
             }
+            WorldMapPathCache.paths = parsed
+            parsed
         }
-        WorldMapPathCache.paths = parsed
-        countryPaths = parsed
     }
 
     // Build semantic description for accessibility and testing

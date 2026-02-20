@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.window.core.layout.WindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.core.navigation.CountryTrackerNavHost
+import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -43,6 +44,13 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
+
+        // Eagerly load map path JSON from assets so it's ready before the Map tab is opened.
+        // This is fast (~IO read) and avoids any delay when the user first views the map.
+        if (!WorldMapPathData.isLoaded) {
+            WorldMapPathData.loadCountryPaths(this)
+        }
+
         setContent {
             val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
             CountryTrackerTheme {
