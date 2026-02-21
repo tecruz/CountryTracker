@@ -1,5 +1,6 @@
 package com.tecruz.countrytracker.features.countrylist.domain
 
+import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
 import com.tecruz.countrytracker.features.countrylist.domain.repository.CountryListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -22,5 +23,3 @@ class GetCountryStatisticsUseCase @Inject constructor(private val repository: Co
         )
     }
 }
-
-data class CountryStatistics(val visitedCount: Int, val totalCount: Int, val percentage: Int)

@@ -126,14 +126,10 @@ import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.horizontalPadding
 import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
-import com.tecruz.countrytracker.features.countrylist.presentation.components.WorldMapCanvas
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapCanvas
+import com.tecruz.countrytracker.features.countrylist.presentation.model.TabItem
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
-
-/**
- * Tab item data class
- */
-private data class TabItem(val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
