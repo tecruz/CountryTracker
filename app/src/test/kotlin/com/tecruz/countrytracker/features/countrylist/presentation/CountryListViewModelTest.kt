@@ -2,10 +2,10 @@ package com.tecruz.countrytracker.features.countrylist.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
