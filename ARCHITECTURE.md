@@ -8,13 +8,16 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 
 | Technology | Version |
 |------------|---------|
-| Kotlin | 2.3.0 |
-| Jetpack Compose BOM | 2026.01.00 |
-| Material 3 Adaptive | 1.1.0 |
+| Kotlin | 2.3.10 |
+| Jetpack Compose BOM | 2026.02.00 |
+| Material 3 Expressive | 1.5.0-alpha14 |
+| Material 3 Adaptive | 1.2.0 |
 | Room | 2.8.4 |
-| Hilt | 2.59 |
-| Navigation Compose | 2.9.6 |
+| Hilt | 2.59.1 |
+| Navigation Compose | 2.9.7 |
 | Coroutines | 1.10.2 |
+| AGP | 9.0.1 |
+| KSP | 2.3.5 |
 | Target SDK | 36 |
 | Min SDK | 24 |
 
@@ -43,6 +46,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   │   └── ResponsiveCard.kt      # Size-adaptive card component
 │   │   └── preview/
 │   │       ├── DevicePreviews.kt      # Multi-device preview annotations
+│   │       ├── ExcludeFromGeneratedCoverageReport.kt # Coverage exclusion annotation
 │   │       ├── PreviewData.kt         # Sample data & parameter providers
 │   │       └── PreviewUtil.kt         # Theme + WindowSizeClass wrapper
 │   ├── di/
@@ -51,6 +55,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   ├── CountryTrackerNavHost.kt
 │   │   └── Screen.kt                  # Type-safe navigation routes
 │   └── util/
+│       ├── DispatcherProvider.kt      # Coroutine dispatcher abstraction
 │       ├── SvgPathParser.kt           # SVG path parsing for map
 │       └── WindowSizeClassExt.kt      # WindowSizeClass extension functions
 │
@@ -67,14 +72,22 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   │       └── CountryListRepositoryImpl.kt
 │   │   ├── domain/
 │   │   │   ├── model/
-│   │   │   │   └── CountryListItem.kt
+│   │   │   │   ├── CountryListItem.kt
+│   │   │   │   └── CountryStatistics.kt   # Statistics data (visited/total/percentage)
 │   │   │   ├── repository/
 │   │   │   │   └── CountryListRepository.kt
 │   │   │   ├── GetAllCountriesUseCase.kt
 │   │   │   └── GetCountryStatisticsUseCase.kt
 │   │   └── presentation/
 │   │       ├── components/
-│   │       │   └── WorldMapCanvas.kt
+│   │       │   └── worldmap/              # World map rendering package
+│   │       │       ├── WorldMapCanvas.kt  # SVG-based world map composable
+│   │       │       └── model/
+│   │       │           ├── CountryPathData.kt      # Parsed path with bounds
+│   │       │           ├── TransformedCountry.kt   # Scaled fill/shadow paths
+│   │       │           └── WorldMapPathCache.kt    # Process-level SVG cache
+│   │       ├── model/
+│   │       │   └── TabItem.kt             # Tab item data class
 │   │       ├── CountryListScreen.kt
 │   │       └── CountryListViewModel.kt
 │   │
@@ -109,7 +122,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 **Purpose**: Contains business logic and is independent of frameworks
 
 **Components**:
-- **Models**: Pure Kotlin data classes (`CountryListItem`, `CountryDetail`)
+- **Models**: Pure Kotlin data classes (`CountryListItem`, `CountryStatistics`, `CountryDetail`)
 - **Repository Interfaces**: Contracts for data operations (`CountryListRepository`, `CountryDetailRepository`)
 - **Use Cases**: Single-responsibility business operations
   - Country List: `GetAllCountriesUseCase`, `GetCountryStatisticsUseCase`
@@ -355,7 +368,14 @@ All public UI components include `@Preview` annotations rendered at the three su
 ### Test Structure
 
 ```
-app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests
+app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests (17 files)
+├── core/
+│   ├── designsystem/component/
+│   │   ├── AdaptiveGridTest.kt                # Adaptive grid component tests
+│   │   ├── AdaptiveScaffoldTest.kt            # Adaptive scaffold component tests
+│   │   └── ResponsiveCardTest.kt              # Responsive card component tests
+│   └── util/
+│       └── WindowSizeClassExtTest.kt          # Window size class extension tests
 ├── features/
 │   ├── countrylist/
 │   │   ├── data/repository/
@@ -364,6 +384,8 @@ app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests
 │   │   │   ├── GetAllCountriesUseCaseTest.kt
 │   │   │   └── GetCountryStatisticsUseCaseTest.kt
 │   │   └── presentation/
+│   │       ├── CountryListScreenComposableTest.kt  # Composable UI tests (Robolectric)
+│   │       ├── CountryListRowResponsiveTest.kt     # Responsive row layout tests
 │   │       └── CountryListViewModelTest.kt
 │   └── countrydetail/
 │       ├── data/repository/
@@ -377,17 +399,34 @@ app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests
 │       └── presentation/
 │           └── CountryDetailViewModelTest.kt
 
-app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests
+app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests (19 files)
 ├── core/data/database/
 │   └── CountryDaoTest.kt                      # DAO integration tests
 ├── features/
-│   ├── countrylist/data/repository/
-│   │   └── CountryListRepositoryIntegrationTest.kt
-│   └── countrydetail/data/repository/
-│       └── CountryDetailRepositoryIntegrationTest.kt
+│   ├── countrylist/
+│   │   ├── data/
+│   │   │   ├── datasource/
+│   │   │   │   └── WorldMapPathDataTest.kt    # SVG path data loading tests
+│   │   │   └── repository/
+│   │   │       └── CountryListRepositoryIntegrationTest.kt
+│   │   └── presentation/
+│   │       ├── CountryListScreenCompactTest.kt    # Compact layout UI tests
+│   │       ├── CountryListScreenMediumTest.kt     # Medium layout UI tests
+│   │       ├── WorldMapCanvasCompactTest.kt       # World map compact tests
+│   │       └── WorldMapCanvasTabletTest.kt        # World map tablet tests
+│   └── countrydetail/
+│       ├── data/repository/
+│       │   └── CountryDetailRepositoryIntegrationTest.kt
+│       └── presentation/
+│           ├── CountryDetailScreenCompactTest.kt  # Detail screen compact tests
+│           ├── CountryDetailScreenDialogsTest.kt  # Dialog interaction tests
+│           └── CountryDetailScreenTabletTest.kt   # Detail screen tablet tests
 ├── CountryListScreenTest.kt                   # UI tests
 ├── CountryDetailScreenTest.kt
 ├── CountryTrackerE2ETest.kt                   # End-to-end tests
+├── AdaptiveLayoutE2ETest.kt                   # Adaptive layout E2E tests
+├── OrientationChangeTest.kt                   # Orientation change tests
+├── FoldableTransitionTest.kt                  # Foldable transition tests
 ├── WorldMapColoringTest.kt
 └── HiltTestRunner.kt                          # Custom test runner
 ```
@@ -397,10 +436,11 @@ app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests
 | Library | Purpose |
 |---------|---------|
 | JUnit 4.13.2 | Unit test framework |
-| MockK 1.14.7 | Mocking library |
+| MockK 1.14.9 | Mocking library |
 | Turbine 1.2.1 | Flow testing |
 | Coroutines Test 1.10.2 | Coroutine testing |
 | Arch Core Testing 2.2.0 | Architecture component testing |
+| Robolectric 4.16.1 | JVM-based Android framework simulation |
 | Compose UI Test | Compose UI testing |
 | Room Testing | Room in-memory database testing |
 
@@ -473,16 +513,17 @@ The **Build Release APK** job runs only on pushes to `main`/`master` after build
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Kotlin | 2.3.0 | Primary language |
-| Jetpack Compose | 2026.01.00 | Declarative UI framework |
-| Material 3 Adaptive | 1.1.0 | Responsive layouts for all screen sizes |
+| Kotlin | 2.3.10 | Primary language |
+| Jetpack Compose (BOM) | 2026.02.00 | Declarative UI framework |
+| Material 3 Expressive | 1.5.0-alpha14 | Design system |
+| Material 3 Adaptive | 1.2.0 | Responsive layouts for all screen sizes |
 | Room | 2.8.4 | Local SQLite database |
-| Hilt | 2.59 | Dependency injection |
+| Hilt | 2.59.1 | Dependency injection |
 | Coroutines | 1.10.2 | Asynchronous operations |
 | Flow | (with Coroutines) | Reactive data streams |
-| Material 3 | Latest | Design system |
-| Navigation Compose | 2.9.6 | Screen navigation |
+| Navigation Compose | 2.9.7 | Screen navigation |
 | DataStore | 1.2.0 | Preferences storage |
+| Splash Screen | 1.0.1 | Native splash screen API |
 | SavedStateHandle | (with Lifecycle) | Process death survival |
 
 ## Future Enhancements

@@ -14,7 +14,7 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
-import com.tecruz.countrytracker.features.countrylist.presentation.components.WorldMapCanvas
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapCanvas
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

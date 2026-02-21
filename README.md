@@ -31,6 +31,7 @@ A modern Android application for tracking countries you've visited around the wo
 - **Travel Notes** - Add personal notes up to 500 characters per country
 - **75+ Countries** - Pre-populated database across 6 continents
 - **Dark/Light Theme** - Material 3 dynamic theming support
+- **Splash Screen** - Native splash screen with background data loading
 - **Edge-to-Edge Display** - Modern immersive UI with themed status bar
 - **Process Death Handling** - Filter states and UI preserved across configuration changes
 - **Adaptive Layouts** - WindowSizeClass support for responsive tablet/foldable experiences
@@ -56,20 +57,20 @@ A modern Android application for tracking countries you've visited around the wo
 
 | Category | Technology | Version |
 |----------|------------|---------|
-| Language | Kotlin | 2.3.0 |
-| UI Framework | Jetpack Compose | 2026.01.00 |
-| Design System | Material 3 Expressive | 1.5.0-alpha |
-| Adaptive UI | Material 3 Adaptive | 1.1.0 |
+| Language | Kotlin | 2.3.10 |
+| UI Framework | Jetpack Compose (BOM) | 2026.02.00 |
+| Design System | Material 3 Expressive | 1.5.0-alpha14 |
+| Adaptive UI | Material 3 Adaptive | 1.2.0 |
 | Architecture | Clean Architecture + MVVM | - |
-| DI | Hilt | 2.59 |
+| DI | Hilt | 2.59.1 |
 | Database | Room | 2.8.4 |
 | Async | Coroutines + Flow | 1.10.2 |
-| Navigation | Navigation Compose | 2.9.6 |
-| Code Formatting | Spotless + ktlint | 7.0.2 / 1.5.0 |
+| Navigation | Navigation Compose | 2.9.7 |
+| Code Formatting | Spotless + ktlint | 8.2.1 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
 | Code Coverage | Kover + JaCoCo | 0.9.7 / 0.8.12 |
-| Build System | Gradle (Kotlin DSL) | 9.1.0 |
-| Annotation Processing | KSP | 2.3.4 |
+| Build System | Gradle (Kotlin DSL) | 9.0.1 |
+| Annotation Processing | KSP | 2.3.5 |
 
 ## Project Structure
 
@@ -79,21 +80,21 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 ├── MainActivity.kt
 ├── core/
 │   ├── data/
-│   │   ├── database/          # Room database, DAO, Entity
-│   │   └── datasource/        # Data loaders
-│   ├── designsystem/          # Theme, Colors, Typography, Previews
-│   ├── di/                    # Core DI modules
-│   ├── navigation/            # Navigation graph
-│   └── util/                  # Shared utilities
+│   │   ├── database/              # Room database, DAO, Entity
+│   │   └── datasource/            # Data loaders
+│   ├── designsystem/              # Theme, Colors, Typography, Previews
+│   ├── di/                        # Core DI modules
+│   ├── navigation/                # Navigation graph
+│   └── util/                      # Shared utilities (SVG parser, dispatchers, window size)
 └── features/
     ├── countrydetail/
-    │   ├── data/              # Repository impl, mappers, DI
-    │   ├── domain/            # Use cases, models, repository interface
-    │   └── presentation/      # Screen, ViewModel, UI model
+    │   ├── data/                  # Repository impl, mappers, DI
+    │   ├── domain/                # Use cases, models, repository interface
+    │   └── presentation/          # Screen, ViewModel, UI model
     └── countrylist/
-        ├── data/              # Repository impl, mappers, datasource, DI
-        ├── domain/            # Use cases, models, repository interface
-        └── presentation/      # Screen, ViewModel, components
+        ├── data/                  # Repository impl, mappers, datasource, DI
+        ├── domain/                # Use cases, models (CountryListItem, CountryStatistics)
+        └── presentation/          # Screen, ViewModel, tab model, world map components
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
@@ -140,11 +141,15 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 | Layer | Tests |
 |-------|-------|
 | **Data** | `CountryListRepositoryImplTest`, `CountryDetailRepositoryImplTest` |
-| **Domain** | `GetAllCountriesUseCaseTest`, `GetCountryStatisticsUseCaseTest`, `MarkCountryAsVisitedUseCaseTest` |
-| **Presentation** | `CountryListViewModelTest`, `CountryDetailViewModelTest` |
-| **UI (Instrumented)** | `CountryListScreenTest`, `CountryDetailScreenTest`, `WorldMapColoringTest`, `CountryTrackerE2ETest` |
+| **Domain** | `GetAllCountriesUseCaseTest`, `GetCountryStatisticsUseCaseTest`, `MarkCountryAsVisitedUseCaseTest`, `MarkCountryAsUnvisitedUseCaseTest`, `UpdateCountryNotesUseCaseTest`, `UpdateCountryRatingUseCaseTest`, `GetCountryByCodeUseCaseTest` |
+| **Presentation** | `CountryListViewModelTest`, `CountryDetailViewModelTest`, `CountryListScreenComposableTest`, `CountryListRowResponsiveTest` |
+| **Design System** | `AdaptiveScaffoldTest`, `AdaptiveGridTest`, `ResponsiveCardTest`, `WindowSizeClassExtTest` |
+| **UI (Instrumented)** | `CountryListScreenTest`, `CountryListScreenCompactTest`, `CountryListScreenMediumTest`, `CountryDetailScreenTest`, `CountryDetailScreenCompactTest`, `CountryDetailScreenTabletTest`, `CountryDetailScreenDialogsTest` |
+| **World Map** | `WorldMapColoringTest`, `WorldMapCanvasCompactTest`, `WorldMapCanvasTabletTest`, `WorldMapPathDataTest` |
+| **Integration** | `CountryDaoTest`, `CountryListRepositoryIntegrationTest`, `CountryDetailRepositoryIntegrationTest` |
+| **E2E & Adaptive** | `CountryTrackerE2ETest`, `AdaptiveLayoutE2ETest`, `OrientationChangeTest`, `FoldableTransitionTest` |
 
-Testing libraries: JUnit 4, MockK, Turbine, Coroutines Test, Compose UI Test
+Testing libraries: JUnit 4, MockK, Turbine, Coroutines Test, Compose UI Test, Robolectric
 
 ### CI Pipeline
 

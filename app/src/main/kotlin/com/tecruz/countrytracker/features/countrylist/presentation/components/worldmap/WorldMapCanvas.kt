@@ -1,4 +1,4 @@
-package com.tecruz.countrytracker.features.countrylist.presentation.components
+package com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -32,21 +31,13 @@ import com.tecruz.countrytracker.core.designsystem.MapVisitedLight
 import com.tecruz.countrytracker.core.designsystem.OceanGradientEnd
 import com.tecruz.countrytracker.core.designsystem.OceanGradientMid
 import com.tecruz.countrytracker.core.designsystem.OceanGradientStart
+import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.SvgPathParser
 import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
-
-/**
- * Data class holding a parsed country path with its bounding box for hit testing.
- */
-data class CountryPathData(val code: String, val path: Path, val bounds: Rect)
-
-/**
- * Process-level cache for parsed SVG paths so they survive recomposition and navigation.
- */
-private object WorldMapPathCache {
-    @Volatile
-    var paths: List<CountryPathData>? = null
-}
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.CountryPathData
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.TransformedCountry
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.WorldMapPathCache
 
 // Shimmer highlight positioning constants
 private const val HIGHLIGHT_CENTER_X_RATIO = 0.3f
@@ -126,8 +117,6 @@ fun WorldMapCanvas(
                 val offsetY = (canvasHeight - scaledHeight) / 2
 
                 // Pre-compute transformed paths (runs only on size change)
-                data class TransformedCountry(val code: String, val fillPath: Path, val shadowPath: Path)
-
                 val transformedCountries = countryPaths.map { countryData ->
                     val fillPath = Path().apply {
                         addPath(countryData.path)
@@ -198,10 +187,10 @@ fun WorldMapCanvas(
     )
 }
 
-@com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
+@DevicePreviews
 @Composable
 private fun WorldMapCanvasPreview() {
-    com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper {
+    PreviewWrapper {
         WorldMapCanvas(
             visitedCountryCodes = setOf("US", "JP", "FR", "BR", "AU"),
             modifier = Modifier

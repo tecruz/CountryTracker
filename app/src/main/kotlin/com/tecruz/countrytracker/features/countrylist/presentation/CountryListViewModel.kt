@@ -6,9 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 private const val KEY_SEARCH_QUERY = "search_query"
@@ -50,12 +57,12 @@ class CountryListViewModel @Inject constructor(
             getCountryStatisticsUseCase()
                 .catch {
                     _manualError.value = it.message ?: "Failed to load statistics"
-                    emit(com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics(0, 0, 0))
+                    emit(CountryStatistics(0, 0, 0))
                 },
             _searchQuery,
         ) {
                 countries: List<CountryListItem>,
-                stats: com.tecruz.countrytracker.features.countrylist.domain.CountryStatistics,
+                stats: CountryStatistics,
                 immediateSearchQuery: String,
             ->
             Triple(countries, stats, immediateSearchQuery)
@@ -130,9 +137,5 @@ class CountryListViewModel @Inject constructor(
 
     fun toggleShowOnlyVisited() {
         savedStateHandle[KEY_SHOW_ONLY_VISITED] = !_showOnlyVisited.value
-    }
-
-    fun clearError() {
-        _manualError.value = null
     }
 }
