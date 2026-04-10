@@ -11,7 +11,7 @@ ksp = "2.3.6"
 detekt = "1.23.8"
 spotless = "8.4.0"
 ktlint = "1.5.0"
-kover = "0.9.7"
+kover = "0.9.8"
 
 # AndroidX Core
 coreKtx = "1.18.0"
