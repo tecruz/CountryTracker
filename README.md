@@ -57,20 +57,20 @@ A modern Android application for tracking countries you've visited around the wo
 
 | Category | Technology | Version |
 |----------|------------|---------|
-| Language | Kotlin | 2.3.10 |
-| UI Framework | Jetpack Compose (BOM) | 2026.02.00 |
-| Design System | Material 3 Expressive | 1.5.0-alpha14 |
+| Language | Kotlin | 2.3.20 |
+| UI Framework | Jetpack Compose (BOM) | 2026.03.01 |
+| Design System | Material 3 Expressive | 1.5.0-alpha17 |
 | Adaptive UI | Material 3 Adaptive | 1.2.0 |
 | Architecture | Clean Architecture + MVVM | - |
-| DI | Hilt | 2.59.1 |
+| DI | Koin | 4.0.0 |
 | Database | Room | 2.8.4 |
 | Async | Coroutines + Flow | 1.10.2 |
 | Navigation | Navigation Compose | 2.9.7 |
-| Code Formatting | Spotless + ktlint | 8.2.1 / 1.5.0 |
+| Code Formatting | Spotless + ktlint | 8.4.0 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
-| Code Coverage | Kover + JaCoCo | 0.9.7 / 0.8.12 |
-| Build System | Gradle (Kotlin DSL) | 9.0.1 |
-| Annotation Processing | KSP | 2.3.5 |
+| Code Coverage | Kover + JaCoCo | 0.9.8 / 0.8.12 |
+| Build System | Gradle (Kotlin DSL) | 9.1.0 |
+| Annotation Processing | KSP | 2.3.6 |
 
 ## Project Structure
 
@@ -81,20 +81,22 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 ├── core/
 │   ├── data/
 │   │   ├── database/              # Room database, DAO, Entity
-│   │   └── datasource/            # Data loaders
+│   │   └── datasource/            # World map data and pre-population
 │   ├── designsystem/              # Theme, Colors, Typography, Previews
-│   ├── di/                        # Core DI modules
-│   ├── navigation/                # Navigation graph
-│   └── util/                      # Shared utilities (SVG parser, dispatchers, window size)
+│   ├── di/                        # Core DI module (Database, Dispatchers)
+│   ├── domain/                    # Global domain models (Result, Error handling)
+│   ├── navigation/                # Navigation graph and routes
+│   ├── presentation/              # Global UI models (UiText, Error extensions)
+│   └── util/                      # Shared utilities (SVG parser, window size)
 └── features/
     ├── countrydetail/
     │   ├── data/                  # Repository impl, mappers, DI
-    │   ├── domain/                # Use cases, models, repository interface
-    │   └── presentation/          # Screen, ViewModel, UI model
+    │   ├── domain/                # Use cases, models, repository interface, DI
+    │   └── presentation/          # Screen, ViewModel, UI model, components, DI
     └── countrylist/
-        ├── data/                  # Repository impl, mappers, datasource, DI
-        ├── domain/                # Use cases, models (CountryListItem, CountryStatistics)
-        └── presentation/          # Screen, ViewModel, tab model, world map components
+        ├── data/                  # Repository impl, mappers, DI
+        ├── domain/                # Use cases, models, repository interface, DI
+        └── presentation/          # Screen, ViewModel, components, DI
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.

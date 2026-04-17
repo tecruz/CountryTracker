@@ -16,14 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.window.core.layout.WindowSizeClass
+import com.tecruz.countrytracker.core.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.core.designsystem.PRIMARY_GREEN_ARGB
 import com.tecruz.countrytracker.core.navigation.CountryTrackerNavHost
 import com.tecruz.countrytracker.core.util.DispatcherProvider
-import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 /**
  * CompositionLocal to provide WindowSizeClass throughout the app for adaptive layouts.
@@ -33,15 +32,13 @@ val LocalWindowSizeClass = staticCompositionLocalOf<WindowSizeClass> {
 }
 
 /**
- * Main Activity with Hilt dependency injection.
+ * Main Activity with Koin dependency injection.
  * Entry point for the app.
  * Supports edge-to-edge display and adaptive layouts.
  */
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider by inject()
 
     @Volatile
     private var isMapDataReady = false

@@ -1,4 +1,4 @@
-package com.tecruz.countrytracker.features.countrylist.data.datasource
+package com.tecruz.countrytracker.core.data.datasource
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

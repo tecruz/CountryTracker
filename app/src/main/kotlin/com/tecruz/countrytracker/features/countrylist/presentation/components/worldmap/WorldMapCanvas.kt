@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.tecruz.countrytracker.core.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.core.designsystem.CountryShadow
 import com.tecruz.countrytracker.core.designsystem.LandColor
 import com.tecruz.countrytracker.core.designsystem.LandShadow
@@ -34,7 +35,6 @@ import com.tecruz.countrytracker.core.designsystem.OceanGradientStart
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
 import com.tecruz.countrytracker.core.util.SvgPathParser
-import com.tecruz.countrytracker.features.countrylist.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.CountryPathData
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.TransformedCountry
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.WorldMapPathCache

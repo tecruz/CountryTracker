@@ -1,16 +1,16 @@
 package com.tecruz.countrytracker
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
-import com.tecruz.countrytracker.features.countrylist.presentation.CountryListItem
-import com.tecruz.countrytracker.features.countrylist.presentation.FilterChips
-import com.tecruz.countrytracker.features.countrylist.presentation.SearchBar
-import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
+import com.tecruz.countrytracker.features.countrylist.presentation.components.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.FilterChips
+import com.tecruz.countrytracker.features.countrylist.presentation.components.SearchBar
+import com.tecruz.countrytracker.features.countrylist.presentation.components.StatsCard
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

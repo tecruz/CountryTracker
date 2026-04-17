@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
@@ -17,11 +17,11 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
-import com.tecruz.countrytracker.features.countrylist.presentation.StatsCard
+import com.tecruz.countrytracker.features.countrylist.presentation.components.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.StatsCard
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.tecruz.countrytracker.features.countrylist.presentation.CountryListItem as CountryListItemComposable
 
 /**
  * T060-T064: End-to-end adaptive layout tests.
@@ -87,7 +87,7 @@ class AdaptiveLayoutE2ETest {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     Box(modifier = Modifier.width(if (windowSizeClass == mediumWindowSizeClass) 700.dp else 900.dp)) {
-                        CountryListItemComposable(
+                        CountryListItem(
                             country = testCountry,
                             onClick = {},
                         )
@@ -117,7 +117,7 @@ class AdaptiveLayoutE2ETest {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     Box(modifier = Modifier.width(if (windowSizeClass == expandedWindowSizeClass) 900.dp else 375.dp)) {
-                        CountryListItemComposable(
+                        CountryListItem(
                             country = testCountry,
                             onClick = {},
                         )

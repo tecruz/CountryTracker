@@ -1,4 +1,4 @@
-package com.tecruz.countrytracker.features.countrylist.data.datasource
+package com.tecruz.countrytracker.core.data.datasource
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting

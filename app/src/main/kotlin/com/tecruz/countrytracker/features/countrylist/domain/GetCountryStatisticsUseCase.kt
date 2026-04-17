@@ -4,14 +4,13 @@ import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatis
 import com.tecruz.countrytracker.features.countrylist.domain.repository.CountryListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /**
  * Use case for retrieving country statistics.
  * Combines visited count and total count to provide comprehensive stats.
  */
-class GetCountryStatisticsUseCase @Inject constructor(private val repository: CountryListRepository) {
+class GetCountryStatisticsUseCase(private val repository: CountryListRepository) {
     operator fun invoke(): Flow<CountryStatistics> = combine(
         repository.getVisitedCount(),
         repository.getTotalCount(),

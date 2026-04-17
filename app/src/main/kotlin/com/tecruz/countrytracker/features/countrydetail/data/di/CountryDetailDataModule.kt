@@ -2,22 +2,10 @@ package com.tecruz.countrytracker.features.countrydetail.data.di
 
 import com.tecruz.countrytracker.features.countrydetail.data.repository.CountryDetailRepositoryImpl
 import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
-/**
- * Hilt module for providing CountryDetail data dependencies.
- */
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class CountryDetailDataModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindCountryDetailRepository(
-        countryDetailRepositoryImpl: CountryDetailRepositoryImpl,
-    ): CountryDetailRepository
+val countryDetailDataModule = module {
+    singleOf(::CountryDetailRepositoryImpl) bind CountryDetailRepository::class
 }
