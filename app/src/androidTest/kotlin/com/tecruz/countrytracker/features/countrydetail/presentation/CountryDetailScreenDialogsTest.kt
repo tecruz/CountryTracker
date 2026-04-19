@@ -1,6 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.presentation
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -60,31 +61,32 @@ class CountryDetailScreenDialogsTest {
         country: CountryDetailUi,
         isSaving: Boolean = false,
         error: String? = null,
-    ): Pair<CountryDetailViewModel, MutableStateFlow<CountryDetailUiState>> {
-        val uiStateFlow = MutableStateFlow(
-            CountryDetailUiState(
+    ): Pair<CountryDetailViewModel, MutableStateFlow<CountryDetailState>> {
+        val stateFlow = MutableStateFlow(
+            CountryDetailState(
                 country = country,
                 isLoading = false,
-                error = error,
+                error = error?.let { com.tecruz.countrytracker.core.presentation.UiText.DynamicString(it) },
                 isSaving = isSaving,
             ),
         )
         val viewModel = mockk<CountryDetailViewModel>(relaxed = true) {
-            every { uiState } returns uiStateFlow
+            every { state } returns stateFlow
         }
-        return viewModel to uiStateFlow
+        return viewModel to stateFlow
     }
 
     @Test
     fun countryDetailScreen_showsUnvisitedConfirmationDialog_whenMarkAsUnvisitedClicked() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -105,19 +107,17 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("Cancel", useUnmergedTree = true).assertIsDisplayed()
     }
 
-    /**
-     * Covers line 259: `if (showUnvisitedConfirmation)` - confirm action calls viewModel.markAsUnvisited()
-     */
     @Test
     fun countryDetailScreen_unvisitedConfirmationDialog_confirmCallsViewModel() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -134,19 +134,22 @@ class CountryDetailScreenDialogsTest {
         // Tap "Remove" to confirm
         composeTestRule.onAllNodesWithText("Remove", useUnmergedTree = true)[0].performClick()
 
-        verify { viewModel.markAsUnvisited() }
+        val actionSlot = slot<CountryDetailAction>()
+        verify { viewModel.onAction(capture(actionSlot)) }
+        assert(actionSlot.captured is CountryDetailAction.OnMarkAsUnvisited)
     }
 
     @Test
     fun countryDetailScreen_showsNotesDialog_whenEditNotesClicked() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -169,14 +172,15 @@ class CountryDetailScreenDialogsTest {
 
     @Test
     fun countryDetailScreen_notesDialog_saveCallsViewModel() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -193,7 +197,10 @@ class CountryDetailScreenDialogsTest {
         // Tap "Save" to save notes
         composeTestRule.onAllNodesWithText("Save", useUnmergedTree = true)[0].performClick()
 
-        verify { viewModel.updateNotes("Amazing trip!") }
+        val actionSlot = slot<CountryDetailAction>()
+        verify { viewModel.onAction(capture(actionSlot)) }
+        val action = actionSlot.captured as CountryDetailAction.OnUpdateNotes
+        assert(action.notes == "Amazing trip!")
     }
 
     /**
@@ -203,14 +210,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_datePickerConfirm_callsMarkAsVisitedWithExistingNotesAndRating() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -231,11 +239,12 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("OK", useUnmergedTree = true).performClick()
 
         // Verify markAsVisited was called with the existing notes and rating
-        val dateSlot = slot<Long>()
-        verify {
-            viewModel.markAsVisited(capture(dateSlot), "Amazing trip!", 4)
-        }
-        assert(dateSlot.captured > 0L)
+        val actionSlot = slot<CountryDetailAction>()
+        verify { viewModel.onAction(capture(actionSlot)) }
+        val action = actionSlot.captured as CountryDetailAction.OnMarkAsVisited
+        assert(action.notes == "Amazing trip!")
+        assert(action.rating == 4)
+        assert(action.date > 0L)
     }
 
     /**
@@ -244,14 +253,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_showsLoadingIndicator_whenUnvisitedAndSaving() {
-        val (viewModel, _) = createMockViewModel(unvisitedCountry, isSaving = true)
+        val (viewModel, stateFlow) = createMockViewModel(unvisitedCountry, isSaving = true)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -268,7 +278,7 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_showsErrorSnackbar_whenErrorPresent() {
-        val (viewModel, _) = createMockViewModel(
+        val (viewModel, stateFlow) = createMockViewModel(
             visitedCountry,
             error = "Failed to update notes",
         )
@@ -277,8 +287,9 @@ class CountryDetailScreenDialogsTest {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -303,7 +314,9 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.waitForIdle()
 
         // Verify clearError was called after the snackbar was dismissed
-        verify { viewModel.clearError() }
+        val actionSlot = slot<CountryDetailAction>()
+        verify { viewModel.onAction(capture(actionSlot)) }
+        assert(actionSlot.captured is CountryDetailAction.OnClearError)
     }
 
     /**
@@ -313,14 +326,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_datePickerDialog_dismissesAfterConfirm() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -348,14 +362,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_datePickerDialog_dismissesAfterCancel() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -377,7 +392,7 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("OK", useUnmergedTree = true).assertDoesNotExist()
 
         // Verify markAsVisited was NOT called
-        verify(exactly = 0) { viewModel.markAsVisited(any(), any(), any()) }
+        verify(exactly = 0) { viewModel.onAction(any()) }
     }
 
     /**
@@ -386,14 +401,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_unvisitedConfirmationDialog_dismissesAfterConfirm() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -421,14 +437,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_unvisitedConfirmationDialog_dismissesAfterCancel() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -450,7 +467,7 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("Remove visit?", useUnmergedTree = true).assertDoesNotExist()
 
         // Verify markAsUnvisited was NOT called
-        verify(exactly = 0) { viewModel.markAsUnvisited() }
+        verify(exactly = 0) { viewModel.onAction(any()) }
     }
 
     /**
@@ -460,14 +477,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_notesDialog_dismissesAfterSave() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -495,14 +513,15 @@ class CountryDetailScreenDialogsTest {
      */
     @Test
     fun countryDetailScreen_notesDialog_dismissesAfterCancel() {
-        val (viewModel, _) = createMockViewModel(visitedCountry)
+        val (viewModel, stateFlow) = createMockViewModel(visitedCountry)
 
         composeTestRule.setContent {
             CountryTrackerTheme {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     CountryDetailScreen(
+                        state = stateFlow.collectAsState().value,
+                        onAction = { viewModel.onAction(it) },
                         onNavigateBack = {},
-                        viewModel = viewModel,
                     )
                 }
             }
@@ -524,6 +543,6 @@ class CountryDetailScreenDialogsTest {
         composeTestRule.onNodeWithText("Edit Notes", useUnmergedTree = true).assertDoesNotExist()
 
         // Verify updateNotes was NOT called
-        verify(exactly = 0) { viewModel.updateNotes(any()) }
+        verify(exactly = 0) { viewModel.onAction(any()) }
     }
 }

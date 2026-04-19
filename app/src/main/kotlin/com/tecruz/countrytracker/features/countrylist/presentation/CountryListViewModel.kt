@@ -3,28 +3,29 @@ package com.tecruz.countrytracker.features.countrylist.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tecruz.countrytracker.core.presentation.UiText
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 private const val KEY_SEARCH_QUERY = "search_query"
 private const val KEY_SELECTED_REGION = "selected_region"
 private const val KEY_SHOW_ONLY_VISITED = "show_only_visited"
 
 @OptIn(FlowPreview::class)
-@HiltViewModel
-class CountryListViewModel @Inject constructor(
+class CountryListViewModel(
     private val getAllCountriesUseCase: GetAllCountriesUseCase,
     private val getCountryStatisticsUseCase: GetCountryStatisticsUseCase,
     private val savedStateHandle: SavedStateHandle,
@@ -36,7 +37,11 @@ class CountryListViewModel @Inject constructor(
     private val _showOnlyVisited = savedStateHandle.getStateFlow(KEY_SHOW_ONLY_VISITED, false)
 
     // Manual error flow for clearError support
-    private val _manualError = MutableStateFlow<String?>(null)
+    private val _manualError = MutableStateFlow<UiText?>(null)
+
+    // Event channel for one-time events
+    private val _events = Channel<CountryListEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
     // Debounced search query - waits 300ms after user stops typing
     private val debouncedSearchQuery = _searchQuery
@@ -47,24 +52,20 @@ class CountryListViewModel @Inject constructor(
             initialValue = "",
         )
 
-    val uiState: StateFlow<CountryListUiState> = combine(
+    val state: StateFlow<CountryListState> = combine(
         combine(
             getAllCountriesUseCase()
-                .catch {
-                    _manualError.value = it.message ?: "Failed to load countries"
+                .catch { e ->
+                    _manualError.value = UiText.DynamicString(e.message ?: "Failed to load countries")
                     emit(emptyList())
                 },
             getCountryStatisticsUseCase()
-                .catch {
-                    _manualError.value = it.message ?: "Failed to load statistics"
+                .catch { e ->
+                    _manualError.value = UiText.DynamicString(e.message ?: "Failed to load statistics")
                     emit(CountryStatistics(0, 0, 0))
                 },
             _searchQuery,
-        ) {
-                countries: List<CountryListItem>,
-                stats: CountryStatistics,
-                immediateSearchQuery: String,
-            ->
+        ) { countries: List<CountryListItem>, stats: CountryStatistics, immediateSearchQuery: String ->
             Triple(countries, stats, immediateSearchQuery)
         },
         combine(
@@ -93,7 +94,7 @@ class CountryListViewModel @Inject constructor(
             // Compute visited country codes from ALL countries (not filtered)
             val visitedCodes = countries.filter { it.visited }.map { it.code }.toSet()
 
-            CountryListUiState(
+            CountryListState(
                 countries = filteredCountries,
                 visitedCountryCodes = visitedCodes,
                 visitedCount = stats.visitedCount,
@@ -107,35 +108,55 @@ class CountryListViewModel @Inject constructor(
                 error = manualError,
             )
         } catch (e: Exception) {
-            _manualError.value = e.message ?: "An unexpected error occurred"
-            CountryListUiState(
+            _manualError.value = UiText.DynamicString(e.message ?: "An unexpected error occurred")
+            CountryListState(
                 isLoading = false,
-                error = e.message ?: "An unexpected error occurred",
+                error = _manualError.value,
             )
         }
     }.catch { e ->
-        _manualError.value = e.message ?: "Failed to load countries"
+        _manualError.value = UiText.DynamicString(e.message ?: "Failed to load countries")
         emit(
-            CountryListUiState(
+            CountryListState(
                 isLoading = false,
-                error = e.message ?: "Failed to load countries",
+                error = _manualError.value,
             ),
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CountryListUiState(),
+        initialValue = CountryListState(),
     )
 
-    fun updateSearchQuery(query: String) {
+    fun onAction(action: CountryListAction) {
+        when (action) {
+            is CountryListAction.OnSearchQueryChange -> updateSearchQuery(action.query)
+            is CountryListAction.OnRegionSelect -> selectRegion(action.region)
+            is CountryListAction.OnToggleShowOnlyVisited -> toggleShowOnlyVisited()
+            is CountryListAction.OnCountryClick -> onCountryClick(action.code)
+            is CountryListAction.OnClearError -> clearError()
+        }
+    }
+
+    private fun updateSearchQuery(query: String) {
         savedStateHandle[KEY_SEARCH_QUERY] = query
     }
 
-    fun selectRegion(region: String) {
+    private fun selectRegion(region: String) {
         savedStateHandle[KEY_SELECTED_REGION] = region
     }
 
-    fun toggleShowOnlyVisited() {
+    private fun toggleShowOnlyVisited() {
         savedStateHandle[KEY_SHOW_ONLY_VISITED] = !_showOnlyVisited.value
+    }
+
+    private fun onCountryClick(countryCode: String) {
+        viewModelScope.launch {
+            _events.send(CountryListEvent.NavigateToDetail(countryCode))
+        }
+    }
+
+    private fun clearError() {
+        _manualError.value = null
     }
 }

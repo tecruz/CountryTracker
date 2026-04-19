@@ -1,11 +1,12 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.tecruz.countrytracker.features.countrydetail.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tecruz.countrytracker.core.navigation.Screen
+import com.tecruz.countrytracker.core.domain.DataError
+import com.tecruz.countrytracker.core.presentation.UiText
+import com.tecruz.countrytracker.core.presentation.toUiText
+import com.tecruz.countrytracker.core.util.DispatcherProvider
 import com.tecruz.countrytracker.features.countrydetail.domain.GetCountryByCodeUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsUnvisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
@@ -13,130 +14,149 @@ import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryNote
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryRatingUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import com.tecruz.countrytracker.features.countrydetail.presentation.model.toUi
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class CountryDetailViewModel @Inject constructor(
+class CountryDetailViewModel(
     private val getCountryByCodeUseCase: GetCountryByCodeUseCase,
     private val markCountryAsVisitedUseCase: MarkCountryAsVisitedUseCase,
     private val markCountryAsUnvisitedUseCase: MarkCountryAsUnvisitedUseCase,
     private val updateCountryNotesUseCase: UpdateCountryNotesUseCase,
     private val updateCountryRatingUseCase: UpdateCountryRatingUseCase,
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
-    private val countryCode: String = checkNotNull(savedStateHandle[Screen.CountryDetail.ARG_COUNTRY_CODE])
+    private val countryCode: String = checkNotNull(savedStateHandle["countryCode"])
 
-    private val _refreshTrigger = MutableStateFlow(0)
-    private val _error = MutableStateFlow<String?>(null)
-    private val _isSaving = MutableStateFlow(false)
+    private val _state = MutableStateFlow(CountryDetailState())
+    val state: StateFlow<CountryDetailState> = _state.asStateFlow()
 
-    // Thread-safe storage of domain model for operations
-    private val _currentCountryDomain = MutableStateFlow<CountryDetail?>(null)
+    private val _events = Channel<CountryDetailEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
-    val uiState: StateFlow<CountryDetailUiState> = combine(
-        _refreshTrigger.flatMapLatest {
-            flow {
+    private var currentCountryDomain: CountryDetail? = null
+
+    init {
+        loadCountry()
+    }
+
+    private fun loadCountry() {
+        viewModelScope.launch(dispatcherProvider.main) {
+            _state.update { it.copy(isLoading = true) }
+            try {
                 val country = getCountryByCodeUseCase(countryCode)
-                _currentCountryDomain.value = country
-                emit(country)
-            }.catch { e ->
-                _error.value = e.message ?: "Failed to load country"
-                emit(null)
+                if (country != null) {
+                    currentCountryDomain = country
+                    _state.update {
+                        it.copy(
+                            country = country.toUi(),
+                            isLoading = false,
+                            error = null,
+                        )
+                    }
+                } else {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = DataError.Local.NOT_FOUND.toUiText(),
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("CountryDetailVM", "Failed to load country", e)
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = DataError.Local.UNKNOWN.toUiText(),
+                    )
+                }
             }
-        },
-        _error,
-        _isSaving,
-    ) { country, error, isSaving ->
-        CountryDetailUiState(
-            country = country?.toUi(),
-            isLoading = false,
-            error = error,
-            isSaving = isSaving,
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CountryDetailUiState(),
-    )
+        }
+    }
 
-    fun markAsVisited(date: Long, notes: String, rating: Int) {
-        val country = _currentCountryDomain.value ?: return
-        viewModelScope.launch {
-            _isSaving.value = true
-            _error.value = null
+    fun onAction(action: CountryDetailAction) {
+        when (action) {
+            is CountryDetailAction.OnMarkAsVisited -> markAsVisited(action.date, action.notes, action.rating)
+            is CountryDetailAction.OnMarkAsUnvisited -> markAsUnvisited()
+            is CountryDetailAction.OnUpdateNotes -> updateNotes(action.notes)
+            is CountryDetailAction.OnUpdateRating -> updateRating(action.rating)
+            is CountryDetailAction.OnClearError -> _state.update { it.copy(error = null) }
+        }
+    }
+
+    private fun markAsVisited(date: Long, notes: String, rating: Int) {
+        val country = currentCountryDomain ?: return
+        viewModelScope.launch(dispatcherProvider.io) {
+            _state.update { it.copy(isSaving = true) }
             try {
                 markCountryAsVisitedUseCase(country, date, notes, rating)
-                refreshCountry()
+                loadCountry()
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to mark as visited"
+                android.util.Log.e("CountryDetailVM", "Failed to mark as visited", e)
+                _state.update { it.copy(error = DataError.Local.UNKNOWN.toUiText()) }
             } finally {
-                _isSaving.value = false
+                _state.update { it.copy(isSaving = false) }
             }
         }
     }
 
-    fun markAsUnvisited() {
-        val country = _currentCountryDomain.value ?: return
-        viewModelScope.launch {
-            _isSaving.value = true
-            _error.value = null
+    private fun markAsUnvisited() {
+        val country = currentCountryDomain ?: return
+        viewModelScope.launch(dispatcherProvider.io) {
+            _state.update { it.copy(isSaving = true) }
             try {
                 markCountryAsUnvisitedUseCase(country)
-                refreshCountry()
+                loadCountry()
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to mark as unvisited"
+                android.util.Log.e("CountryDetailVM", "Failed to mark as unvisited", e)
+                _state.update { it.copy(error = DataError.Local.UNKNOWN.toUiText()) }
             } finally {
-                _isSaving.value = false
+                _state.update { it.copy(isSaving = false) }
             }
         }
     }
 
-    fun updateNotes(notes: String) {
-        val country = _currentCountryDomain.value ?: return
-        viewModelScope.launch {
-            _isSaving.value = true
-            _error.value = null
+    private fun updateNotes(notes: String) {
+        val country = currentCountryDomain ?: return
+        viewModelScope.launch(dispatcherProvider.io) {
+            _state.update { it.copy(isSaving = true) }
             try {
                 updateCountryNotesUseCase(country, notes)
-                refreshCountry()
+                loadCountry()
             } catch (e: IllegalArgumentException) {
-                _error.value = e.message ?: "Invalid notes"
+                android.util.Log.e("CountryDetailVM", "Invalid notes", e)
+                _state.update { it.copy(error = UiText.DynamicString(e.message ?: "Invalid notes")) }
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to update notes"
+                android.util.Log.e("CountryDetailVM", "Failed to update notes", e)
+                _state.update { it.copy(error = DataError.Local.UNKNOWN.toUiText()) }
             } finally {
-                _isSaving.value = false
+                _state.update { it.copy(isSaving = false) }
             }
         }
     }
 
-    fun updateRating(rating: Int) {
-        val country = _currentCountryDomain.value ?: return
-        viewModelScope.launch {
-            _isSaving.value = true
-            _error.value = null
+    private fun updateRating(rating: Int) {
+        val country = currentCountryDomain ?: return
+        viewModelScope.launch(dispatcherProvider.io) {
+            _state.update { it.copy(isSaving = true) }
             try {
                 updateCountryRatingUseCase(country, rating)
-                refreshCountry()
+                loadCountry()
             } catch (e: IllegalArgumentException) {
-                _error.value = e.message ?: "Invalid rating"
+                android.util.Log.e("CountryDetailVM", "Invalid rating", e)
+                _state.update { it.copy(error = UiText.DynamicString(e.message ?: "Invalid rating")) }
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to update rating"
+                android.util.Log.e("CountryDetailVM", "Failed to update rating", e)
+                _state.update { it.copy(error = DataError.Local.UNKNOWN.toUiText()) }
             } finally {
-                _isSaving.value = false
+                _state.update { it.copy(isSaving = false) }
             }
         }
-    }
-
-    fun clearError() {
-        _error.value = null
-    }
-
-    private fun refreshCountry() {
-        _refreshTrigger.value++
     }
 }

@@ -6,12 +6,11 @@ import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListIt
 import com.tecruz.countrytracker.features.countrylist.domain.repository.CountryListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 /**
  * Implementation of CountryListRepository.
  */
-class CountryListRepositoryImpl @Inject constructor(private val countryDao: CountryDao) : CountryListRepository {
+class CountryListRepositoryImpl(private val countryDao: CountryDao) : CountryListRepository {
 
     override fun getAllCountries(): Flow<List<CountryListItem>> = countryDao.getAllCountries().map { entities ->
         entities.map { it.toCountryListItem() }

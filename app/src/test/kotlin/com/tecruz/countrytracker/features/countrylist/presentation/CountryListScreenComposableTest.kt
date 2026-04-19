@@ -7,11 +7,18 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
+import com.tecruz.countrytracker.features.countrylist.presentation.components.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.FilterChips
+import com.tecruz.countrytracker.features.countrylist.presentation.components.SearchBar
+import com.tecruz.countrytracker.features.countrylist.presentation.components.StatItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.StatsCard
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem as CountryListItemModel
 
@@ -24,6 +31,11 @@ class CountryListScreenComposableTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
 
     private val testCountry = CountryListItemModel(
         code = "US",

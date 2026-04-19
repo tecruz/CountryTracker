@@ -1,8 +1,6 @@
 package com.tecruz.countrytracker.core.util
 
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -15,15 +13,14 @@ import kotlin.coroutines.CoroutineContext
  *
  * Usage:
  * ```
- * @Inject lateinit var dispatchers: DispatcherProvider
+ * private val dispatchers: DispatcherProvider by inject()
  *
  * lifecycleScope.launch(dispatchers.io) {
  *     // I/O operations
  * }
  * ```
  */
-@Singleton
-class DispatcherProvider @Inject constructor() {
+class DispatcherProvider {
 
     val io: CoroutineContext = Dispatchers.IO
     val default: CoroutineContext = Dispatchers.Default

@@ -5,12 +5,11 @@ import com.tecruz.countrytracker.features.countrydetail.data.mapper.toCountryDet
 import com.tecruz.countrytracker.features.countrydetail.data.mapper.toEntity
 import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
-import javax.inject.Inject
 
 /**
  * Implementation of CountryDetailRepository.
  */
-class CountryDetailRepositoryImpl @Inject constructor(private val countryDao: CountryDao) : CountryDetailRepository {
+class CountryDetailRepositoryImpl(private val countryDao: CountryDao) : CountryDetailRepository {
 
     override suspend fun getCountryByCode(code: String): CountryDetail? =
         countryDao.getCountryByCode(code)?.toCountryDetail()

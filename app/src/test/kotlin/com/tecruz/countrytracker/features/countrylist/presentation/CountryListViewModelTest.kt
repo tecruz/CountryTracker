@@ -64,13 +64,13 @@ class CountryListViewModelTest {
 
     @Test
     fun `initial state should be loading`() {
-        val state = viewModel.uiState.value
+        val state = viewModel.state.value
         assertTrue(state.isLoading)
     }
 
     @Test
     fun `should load countries successfully`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             val state = awaitItem()
             assertFalse(state.isLoading)
             assertEquals(4, state.countries.size)
@@ -82,10 +82,10 @@ class CountryListViewModelTest {
 
     @Test
     fun `should update search query in state`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.updateSearchQuery("france")
+            viewModel.onAction(CountryListAction.OnSearchQueryChange("france"))
 
             val state = awaitItem()
             assertEquals("france", state.searchQuery)
@@ -96,10 +96,10 @@ class CountryListViewModelTest {
 
     @Test
     fun `should filter countries by region`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.selectRegion("Europe")
+            viewModel.onAction(CountryListAction.OnRegionSelect("Europe"))
 
             val state = awaitItem()
             assertEquals("Europe", state.selectedRegion)
@@ -110,10 +110,10 @@ class CountryListViewModelTest {
 
     @Test
     fun `should filter visited countries only`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.toggleShowOnlyVisited()
+            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited)
 
             val state = awaitItem()
             assertTrue(state.showOnlyVisited)
@@ -124,13 +124,13 @@ class CountryListViewModelTest {
 
     @Test
     fun `should toggle visited filter off`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.toggleShowOnlyVisited() // Turn on
+            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited) // Turn on
             awaitItem()
 
-            viewModel.toggleShowOnlyVisited() // Turn off
+            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited) // Turn off
 
             val state = awaitItem()
             assertFalse(state.showOnlyVisited)
@@ -140,7 +140,7 @@ class CountryListViewModelTest {
 
     @Test
     fun `should extract unique regions from countries`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             val state = awaitItem()
             assertEquals(4, state.allRegions.size)
             assertTrue(state.allRegions.containsAll(listOf("Asia", "Europe", "North America", "South America")))
@@ -149,13 +149,13 @@ class CountryListViewModelTest {
 
     @Test
     fun `should combine multiple filters correctly`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.selectRegion("South America")
+            viewModel.onAction(CountryListAction.OnRegionSelect("South America"))
             awaitItem()
 
-            viewModel.toggleShowOnlyVisited()
+            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited)
 
             val state = awaitItem()
             assertEquals(1, state.countries.size)
@@ -165,18 +165,28 @@ class CountryListViewModelTest {
 
     @Test
     fun `should reset region filter to All`() = runTest {
-        viewModel.uiState.test {
+        viewModel.state.test {
             awaitItem() // Initial loaded state
 
-            viewModel.selectRegion("Europe")
+            viewModel.onAction(CountryListAction.OnRegionSelect("Europe"))
             val filteredState = awaitItem()
             assertEquals(1, filteredState.countries.size)
 
-            viewModel.selectRegion("All")
+            viewModel.onAction(CountryListAction.OnRegionSelect("All"))
 
             val state = awaitItem()
             assertEquals("All", state.selectedRegion)
             assertEquals(4, state.countries.size)
+        }
+    }
+
+    @Test
+    fun `should navigate on country click`() = runTest {
+        viewModel.onAction(CountryListAction.OnCountryClick("US"))
+
+        viewModel.events.test {
+            val event = awaitItem()
+            assertTrue(event is CountryListEvent.NavigateToDetail)
         }
     }
 }

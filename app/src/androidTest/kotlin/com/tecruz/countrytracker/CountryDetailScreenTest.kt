@@ -20,7 +20,7 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -31,12 +31,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
-import com.tecruz.countrytracker.features.countrydetail.presentation.HeroCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.NotesCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.NotesDialog
-import com.tecruz.countrytracker.features.countrydetail.presentation.RatingCard
-import com.tecruz.countrytracker.features.countrydetail.presentation.UnvisitedConfirmationDialog
-import com.tecruz.countrytracker.features.countrydetail.presentation.VisitStatusCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.HeroCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.NotesCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.NotesDialog
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.RatingCard
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.UnvisitedConfirmationDialog
+import com.tecruz.countrytracker.features.countrydetail.presentation.components.VisitStatusCard
 import com.tecruz.countrytracker.features.countrydetail.presentation.model.CountryDetailUi
 import kotlinx.coroutines.launch
 import org.junit.Rule

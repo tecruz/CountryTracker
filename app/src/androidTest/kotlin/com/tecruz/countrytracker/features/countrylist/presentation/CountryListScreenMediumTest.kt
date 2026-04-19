@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
@@ -15,6 +15,9 @@ import androidx.window.core.layout.computeWindowSizeClass
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.presentation.components.SearchBar
+import com.tecruz.countrytracker.features.countrylist.presentation.components.StatsCard
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

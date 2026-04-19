@@ -8,16 +8,16 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 
 | Technology | Version |
 |------------|---------|
-| Kotlin | 2.3.10 |
-| Jetpack Compose BOM | 2026.02.00 |
-| Material 3 Expressive | 1.5.0-alpha14 |
+| Kotlin | 2.3.20 |
+| Jetpack Compose BOM | 2026.03.01 |
+| Material 3 Expressive | 1.5.0-alpha17 |
 | Material 3 Adaptive | 1.2.0 |
 | Room | 2.8.4 |
-| Hilt | 2.59.1 |
+| Koin | 4.0.0 |
 | Navigation Compose | 2.9.7 |
 | Coroutines | 1.10.2 |
-| AGP | 9.0.1 |
-| KSP | 2.3.5 |
+| AGP | 9.1.0 |
+| KSP | 2.3.6 |
 | Target SDK | 36 |
 | Min SDK | 24 |
 
@@ -25,7 +25,7 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 
 ```
 app/src/main/kotlin/com/tecruz/countrytracker/
-├── CountryTrackerApplication.kt        # Hilt Application entry point
+├── CountryTrackerApplication.kt        # Koin Application entry point
 ├── MainActivity.kt                     # Single Activity entry
 │
 ├── core/                               # Shared infrastructure
@@ -35,7 +35,8 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   │   ├── CountryDatabase.kt     # Room Database configuration
 │   │   │   └── CountryEntity.kt       # Database entity
 │   │   └── datasource/
-│   │       └── CountryDataLoader.kt   # Pre-populates database
+│   │       ├── CountryDataLoader.kt   # Pre-populates database
+│   │       └── WorldMapPathData.kt    # Loads SVG path data from assets
 │   ├── designsystem/
 │   │   ├── Color.kt
 │   │   ├── Theme.kt
@@ -50,10 +51,17 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │       ├── PreviewData.kt         # Sample data & parameter providers
 │   │       └── PreviewUtil.kt         # Theme + WindowSizeClass wrapper
 │   ├── di/
-│   │   └── DatabaseModule.kt          # Database + DAO providers
+│   │   └── CoreDataModule.kt          # Database, DAO, and DataStore providers
+│   ├── domain/
+│   │   ├── DataError.kt               # Domain error hierarchy
+│   │   ├── Result.kt                  # Functional result wrapper
+│   │   └── ResultExtensions.kt        # Convenience functions for Result
 │   ├── navigation/
 │   │   ├── CountryTrackerNavHost.kt
 │   │   └── Screen.kt                  # Type-safe navigation routes
+│   ├── presentation/
+│   │   ├── DataErrorExt.kt            # Error-to-UiText mapping
+│   │   └── UiText.kt                  # String resource abstraction
 │   └── util/
 │       ├── DispatcherProvider.kt      # Coroutine dispatcher abstraction
 │       ├── SvgPathParser.kt           # SVG path parsing for map
@@ -62,8 +70,6 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 ├── features/
 │   ├── countrylist/                    # Country List feature
 │   │   ├── data/
-│   │   │   ├── datasource/
-│   │   │   │   └── WorldMapPathData.kt
 │   │   │   ├── di/
 │   │   │   │   └── CountryListDataModule.kt
 │   │   │   ├── mapper/
@@ -76,19 +82,31 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   │   │   └── CountryStatistics.kt   # Statistics data (visited/total/percentage)
 │   │   │   ├── repository/
 │   │   │   │   └── CountryListRepository.kt
+│   │   │   ├── di/
+│   │   │   │   └── CountryListDomainModule.kt
 │   │   │   ├── GetAllCountriesUseCase.kt
 │   │   │   └── GetCountryStatisticsUseCase.kt
 │   │   └── presentation/
 │   │       ├── components/
-│   │       │   └── worldmap/              # World map rendering package
-│   │       │       ├── WorldMapCanvas.kt  # SVG-based world map composable
-│   │       │       └── model/
-│   │       │           ├── CountryPathData.kt      # Parsed path with bounds
-│   │       │           ├── TransformedCountry.kt   # Scaled fill/shadow paths
-│   │       │           └── WorldMapPathCache.kt    # Process-level SVG cache
+│   │       │   ├── worldmap/              # World map rendering package
+│   │       │   │   ├── WorldMapCanvas.kt  # SVG-based world map composable
+│   │       │   │   └── model/
+│   │       │   │       ├── CountryPathData.kt      # Parsed path with bounds
+│   │       │   │       ├── TransformedCountry.kt   # Scaled fill/shadow paths
+│   │       │   │       └── WorldMapPathCache.kt    # Process-level SVG cache
+│   │       │   ├── CountryListItem.kt
+│   │       │   ├── FilterChips.kt
+│   │       │   ├── SearchBar.kt
+│   │       │   └── StatsCard.kt
 │   │       ├── model/
 │   │       │   └── TabItem.kt             # Tab item data class
+│   │       ├── di/
+│   │       │   └── CountryListPresentationModule.kt
+│   │       ├── CountryListAction.kt
+│   │       ├── CountryListEvent.kt
 │   │       ├── CountryListScreen.kt
+│   │       ├── CountryListState.kt
+│   │       ├── CountryListUiState.kt
 │   │       └── CountryListViewModel.kt
 │   │
 │   └── countrydetail/                  # Country Detail feature
@@ -104,15 +122,30 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │       │   │   └── CountryDetail.kt
 │       │   ├── repository/
 │       │   │   └── CountryDetailRepository.kt
+│       │   ├── di/
+│       │   │   └── CountryDetailDomainModule.kt
 │       │   ├── GetCountryByCodeUseCase.kt
 │       │   ├── MarkCountryAsVisitedUseCase.kt
 │       │   ├── MarkCountryAsUnvisitedUseCase.kt
 │       │   ├── UpdateCountryNotesUseCase.kt
 │       │   └── UpdateCountryRatingUseCase.kt
 │       └── presentation/
+│           ├── components/
+│           │   ├── HeroCard.kt
+│           │   ├── NotesCard.kt
+│           │   ├── NotesDialog.kt
+│           │   ├── RatingCard.kt
+│           │   ├── UnvisitedConfirmationDialog.kt
+│           │   └── VisitStatusCard.kt
+│           ├── di/
+│           │   └── CountryDetailPresentationModule.kt
 │           ├── model/
 │           │   └── CountryDetailUi.kt
+│           ├── CountryDetailAction.kt
+│           ├── CountryDetailEvent.kt
 │           ├── CountryDetailScreen.kt
+│           ├── CountryDetailState.kt
+│           ├── CountryDetailUiState.kt
 │           └── CountryDetailViewModel.kt
 ```
 
@@ -182,16 +215,20 @@ Presentation → Domain ← Data
 - Data depends on Domain
 - Domain depends on nothing
 
-## Dependency Injection with Hilt
+## Dependency Injection with Koin
 
 ### Modules:
-1. **DatabaseModule** (core): Provides Room database and DAO
-2. **CountryListDataModule**: Binds `CountryListRepository` to `CountryListRepositoryImpl`
-3. **CountryDetailDataModule**: Binds `CountryDetailRepository` to `CountryDetailRepositoryImpl`
+1. **CoreDataModule** (core): Provides Room database, DAO, DataStore, and Dispatchers.
+2. **CountryListDataModule**: Binds `CountryListRepository`.
+3. **CountryListDomainModule**: Provides List use cases.
+4. **CountryListPresentationModule**: Provides List ViewModel.
+5. **CountryDetailDataModule**: Binds `CountryDetailRepository`.
+6. **CountryDetailDomainModule**: Provides Detail use cases.
+7. **CountryDetailPresentationModule**: Provides Detail ViewModel.
 
 ### Scopes:
-- `@Singleton`: Database, DAOs, Repositories
-- `@ViewModelScoped`: ViewModels (via Hilt injection)
+- Singletons: Database, DAOs, Repositories (declared in DataModules)
+- ViewModels: Declared in PresentationModules and injected via `koinViewModel()` or `viewModel()` in Composables.
 
 ## Design Patterns
 
