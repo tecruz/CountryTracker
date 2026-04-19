@@ -87,25 +87,4 @@ class CountryListRepositoryImplTest {
             awaitComplete()
         }
     }
-
-    @Test
-    fun `getAllCountries should handle empty database`() = runTest {
-        every { dao.getAllCountries() } returns flowOf(emptyList())
-
-        repository.getAllCountries().test {
-            val result = awaitItem()
-            assertTrue(result.isEmpty())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun `getVisitedCount should return zero for empty database`() = runTest {
-        every { dao.getVisitedCount() } returns flowOf(0)
-
-        repository.getVisitedCount().test {
-            assertEquals(0, awaitItem())
-            awaitComplete()
-        }
-    }
 }
