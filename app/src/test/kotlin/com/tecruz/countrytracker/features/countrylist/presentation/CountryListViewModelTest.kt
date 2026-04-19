@@ -179,4 +179,14 @@ class CountryListViewModelTest {
             assertEquals(4, state.countries.size)
         }
     }
+
+    @Test
+    fun `should navigate on country click`() = runTest {
+        viewModel.onAction(CountryListAction.OnCountryClick("US"))
+
+        viewModel.events.test {
+            val event = awaitItem()
+            assertTrue(event is CountryListEvent.NavigateToDetail)
+        }
+    }
 }
