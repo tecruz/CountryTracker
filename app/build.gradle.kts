@@ -216,17 +216,10 @@ val jacocoExcludes =
         "**/*Module_*.*",
         "**/dagger/**",
         "**/hilt_aggregated_deps/**",
-        "**/di/*.*",
         // Room generated
         "**/*_Impl*.*",
         "**/dao/*Dao_Impl*.*",
-        // Data classes and sealed classes
-        "**/model/*.*",
-        "**/entity/*.*",
-        // Navigation
-        "**/navigation/*.*",
-        // Theme
-        "**/theme/*.*",
+        // Preview only - keep everything else included for maximum measurement
         "**/preview/*.*",
     )
 
