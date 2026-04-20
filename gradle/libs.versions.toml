@@ -33,7 +33,7 @@ room = "2.8.4"
 # Koin
 
 # Koin
-koin = "4.0.0"
+koin = "4.2.1"
 
 
 # Coroutines
