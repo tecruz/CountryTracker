@@ -25,7 +25,7 @@ material3Expressive = "1.5.0-alpha17"
 material3Adaptive = "1.2.0"
 
 # Navigation
-navigationCompose = "2.9.7"
+navigationCompose = "2.9.8"
 
 # Room
 room = "2.8.4"
