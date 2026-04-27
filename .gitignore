@@ -50,28 +50,8 @@ CLAUDE.local.md
 
 z*/
 
-_bmad
-_bmad-output
-.clinerules
-.augment
-.crush
-.cursor
-.iflow
+.agents
 .opencode
-.qwen
-.rovodev
-.kilocodemodes
-.claude/commands
-.codex
-.github/chatmodes
-.github/agents
-.agent
-.agentvibes
-.kiro
-.roo
-.trae
-.windsurf
-.specify
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
