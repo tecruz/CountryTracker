@@ -37,7 +37,7 @@ koin = "4.2.1"
 
 
 # Coroutines
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 
 # DataStore
 datastore = "1.2.1"
