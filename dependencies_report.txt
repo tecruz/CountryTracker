@@ -1,5 +1,0 @@
-
-> Configure project :
-e: file:///home/hermes/projects/CountryTracker/build.gradle.kts:1:1: Unresolved reference 'android'.
-e: file:///home/hermes/projects/CountryTracker/build.gradle.kts:2:5: Unresolved reference 'namespace'.
-[truncated - file too long, see read_file output for full content]
