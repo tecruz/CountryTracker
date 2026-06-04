@@ -7,7 +7,7 @@ targetSdk = "37"
 # Plugins
 agp = "9.2.1"
 kotlin="2.3.21"
-ksp = "2.3.8"
+ksp = "2.3.9"
 detekt = "1.23.8"
 spotless = "8.6.0"
 ktlint = "1.5.0"
