@@ -4,8 +4,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.tecruz.countrytracker.core.data.database.CountryDao
 import com.tecruz.countrytracker.core.data.database.CountryDatabase
 import com.tecruz.countrytracker.core.data.database.CountryEntity
+import com.tecruz.countrytracker.core.data.repository.CountryRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,12 +27,11 @@ import org.junit.runner.RunWith
 class CountryListRepositoryIntegrationTest {
 
     private lateinit var database: CountryDatabase
-    private lateinit var dao: com.tecruz.countrytracker.core.data.database.CountryDao
-    private lateinit var repository: CountryListRepositoryImpl
+    private lateinit var dao: CountryDao
+    private lateinit var repository: CountryRepositoryImpl
 
     private val testDispatcher = StandardTestDispatcher()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -39,10 +40,9 @@ class CountryListRepositoryIntegrationTest {
             CountryDatabase::class.java,
         ).allowMainThreadQueries().build()
         dao = database.countryDao()
-        repository = CountryListRepositoryImpl(dao)
+        repository = CountryRepositoryImpl(dao)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
         Dispatchers.resetMain()
@@ -50,10 +50,10 @@ class CountryListRepositoryIntegrationTest {
     }
 
     @Test
-    fun getAllCountries_should_return_mapped_CountryListItem_with_all_fields() = runTest {
+    fun getFilteredCountries_should_return_all_countries_when_filters_are_empty() = runTest {
         dao.insertCountries(listOf(testEntity1, testEntity2, testEntity3))
 
-        repository.getAllCountries().test {
+        repository.getFilteredCountries("", "All", false).test {
             val result = awaitItem()
             assertEquals(3, result.size)
 
@@ -61,24 +61,24 @@ class CountryListRepositoryIntegrationTest {
             assertEquals("United States", usResult?.name)
             assertEquals("North America", usResult?.region)
             assertFalse(usResult?.visited ?: true)
-            assertEquals("\uD83C\uDDFA\uD83C\uDDF8", usResult?.flagEmoji)
+            assertEquals("🇺🇸", usResult?.flagEmoji)
 
             val frResult = result.find { it.code == "FR" }
             assertEquals("France", frResult?.name)
             assertEquals("Europe", frResult?.region)
             assertTrue(frResult?.visited ?: false)
-            assertEquals("\uD83C\uDDEB\uD83C\uDDF7", frResult?.flagEmoji)
+            assertEquals("🇫🇷", frResult?.flagEmoji)
 
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun getAllCountries_should_map_entity_with_empty_flagEmoji_correctly() = runTest {
+    fun getFilteredCountries_should_map_entity_with_empty_flagEmoji_correctly() = runTest {
         val entityWithEmptyFlag = testEntity1.copy(flagEmoji = "")
         dao.insertCountry(entityWithEmptyFlag)
 
-        repository.getAllCountries().test {
+        repository.getFilteredCountries("", "All", false).test {
             val result = awaitItem()
             assertEquals(1, result.size)
             assertEquals("", result[0].flagEmoji)
@@ -87,7 +87,7 @@ class CountryListRepositoryIntegrationTest {
     }
 
     @Test
-    fun getAllCountries_should_preserve_unicode_flagEmoji() = runTest {
+    fun getFilteredCountries_should_preserve_unicode_flagEmoji() = runTest {
         val entityWithUnicodeFlag = CountryEntity(
             code = "ES",
             name = "Spain",
@@ -96,24 +96,24 @@ class CountryListRepositoryIntegrationTest {
             visitedDate = null,
             notes = "",
             rating = 0,
-            flagEmoji = "\uD83C\uDDEA\uD83C\uDDF8",
+            flagEmoji = "🇪🇸",
         )
         dao.insertCountry(entityWithUnicodeFlag)
 
-        repository.getAllCountries().test {
+        repository.getFilteredCountries("", "All", false).test {
             val result = awaitItem()
             assertEquals(1, result.size)
-            assertEquals("\uD83C\uDDEA\uD83C\uDDF8", result[0].flagEmoji)
+            assertEquals("🇪🇸", result[0].flagEmoji)
             assertEquals("ES", result[0].code)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun getCountriesByRegion_should_filter_and_map_entities() = runTest {
+    fun getFilteredCountries_should_filter_by_region() = runTest {
         dao.insertCountries(listOf(testEntity1, testEntity2, testEntity3))
 
-        repository.getCountriesByRegion("Europe").test {
+        repository.getFilteredCountries("", "Europe", false).test {
             val result = awaitItem()
             assertEquals(1, result.size)
             assertEquals("France", result[0].name)
@@ -160,7 +160,7 @@ class CountryListRepositoryIntegrationTest {
     }
 
     @Test
-    fun getAllCountries_should_handle_entity_with_non_default_excluded_fields_correctly() = runTest {
+    fun getFilteredCountries_should_handle_entity_with_all_fields_correctly() = runTest {
         val entityWithExtraFields = CountryEntity(
             code = "DE",
             name = "Germany",
@@ -169,11 +169,11 @@ class CountryListRepositoryIntegrationTest {
             visitedDate = 1704067200000L,
             notes = "Long trip with lots of memories",
             rating = 5,
-            flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA",
+            flagEmoji = "🇩🇪",
         )
         dao.insertCountry(entityWithExtraFields)
 
-        repository.getAllCountries().test {
+        repository.getFilteredCountries("", "All", false).test {
             val result = awaitItem()
             assertEquals(1, result.size)
             val deResult = result[0]
@@ -181,14 +181,17 @@ class CountryListRepositoryIntegrationTest {
             assertEquals("Europe", deResult.region)
             assertEquals("DE", deResult.code)
             assertTrue(deResult.visited)
-            assertEquals("\uD83C\uDDE9\uD83C\uDDEA", deResult.flagEmoji)
+            assertEquals("🇩🇪", deResult.flagEmoji)
+            assertEquals(1704067200000L, deResult.visitedDate)
+            assertEquals("Long trip with lots of memories", deResult.notes)
+            assertEquals(5, deResult.rating)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun getAll_methods_should_return_empty_on_empty_database() = runTest {
-        repository.getAllCountries().test {
+    fun all_methods_should_return_empty_on_empty_database() = runTest {
+        repository.getFilteredCountries("", "All", false).test {
             val result = awaitItem()
             assertEquals(0, result.size)
             cancelAndIgnoreRemainingEvents()
@@ -219,7 +222,7 @@ class CountryListRepositoryIntegrationTest {
             name = "United States",
             region = "North America",
             visited = false,
-            flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+            flagEmoji = "🇺🇸",
         )
         private val testEntity2 = CountryEntity(
             code = "FR",
@@ -227,7 +230,7 @@ class CountryListRepositoryIntegrationTest {
             region = "Europe",
             visited = true,
             visitedDate = 1704067200000L,
-            flagEmoji = "\uD83C\uDDEB\uD83C\uDDF7",
+            flagEmoji = "🇫🇷",
         )
         private val testEntity3 = CountryEntity(
             code = "JP",
@@ -235,7 +238,7 @@ class CountryListRepositoryIntegrationTest {
             region = "Asia",
             visited = true,
             visitedDate = 1703980800000L,
-            flagEmoji = "\uD83C\uDDEF\uD83C\uDDF5",
+            flagEmoji = "🇯🇵",
         )
     }
 }

@@ -130,3 +130,5 @@ kotlin-ksp/
 # Mac specific
 .AppleDouble
 .LSOverride
+
+gradlew.bat

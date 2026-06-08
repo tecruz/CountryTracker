@@ -1,17 +1,17 @@
-package com.tecruz.countrytracker.features.countrydetail.domain.model
+package com.tecruz.countrytracker.core.domain.model
 
 /**
- * Domain model for country details.
+ * Domain model for country.
  * Contains all fields needed for displaying and editing country information.
  */
-data class CountryDetail(
+data class Country(
     val code: String,
     val name: String,
     val region: String,
     val visited: Boolean,
-    val visitedDate: Long?,
-    val notes: String,
-    val rating: Int,
+    val visitedDate: Long? = null,
+    val notes: String = "",
+    val rating: Int = 0,
     val flagEmoji: String,
 ) {
     companion object {

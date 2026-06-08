@@ -1,14 +1,14 @@
 package com.tecruz.countrytracker.core.navigation
 
+import kotlinx.serialization.Serializable
+
 /**
  * Type-safe navigation routes for the app.
  */
-sealed class Screen(val route: String) {
-    data object CountryList : Screen("country_list")
+sealed interface Screen {
+    @Serializable
+    data object CountryList : Screen
 
-    data object CountryDetail : Screen("country_detail/{countryCode}") {
-        const val ARG_COUNTRY_CODE = "countryCode"
-
-        fun createRoute(countryCode: String): String = "country_detail/$countryCode"
-    }
+    @Serializable
+    data class CountryDetail(val countryCode: String) : Screen
 }

@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecruz.countrytracker.core.presentation.UiText
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
+import com.tecruz.countrytracker.features.countrylist.domain.GetAllRegionsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
-import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
+import com.tecruz.countrytracker.features.countrylist.domain.GetVisitedCountryCodesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,10 +27,12 @@ private const val KEY_SEARCH_QUERY = "search_query"
 private const val KEY_SELECTED_REGION = "selected_region"
 private const val KEY_SHOW_ONLY_VISITED = "show_only_visited"
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class CountryListViewModel(
     private val getAllCountriesUseCase: GetAllCountriesUseCase,
     private val getCountryStatisticsUseCase: GetCountryStatisticsUseCase,
+    private val getAllRegionsUseCase: GetAllRegionsUseCase,
+    private val getVisitedCountryCodesUseCase: GetVisitedCountryCodesUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -44,89 +49,66 @@ class CountryListViewModel(
     val events = _events.receiveAsFlow()
 
     // Debounced search query - waits 300ms after user stops typing
-    private val debouncedSearchQuery = _searchQuery
-        .debounce(300)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = "",
-        )
+    private val debouncedSearchQuery = _searchQuery.debounce(300)
 
-    val state: StateFlow<CountryListState> = combine(
-        combine(
-            getAllCountriesUseCase()
+    /**
+     * Dedicated flow for fetching countries reactively based on filters.
+     */
+    private val filteredCountriesFlow = combine(
+        debouncedSearchQuery,
+        _selectedRegion,
+        _showOnlyVisited,
+    ) { q, r, v -> Triple(q, r, v) }
+        .flatMapLatest { (q, r, v) ->
+            getAllCountriesUseCase(q, r, v)
                 .catch { e ->
                     _manualError.value = UiText.DynamicString(e.message ?: "Failed to load countries")
                     emit(emptyList())
-                },
-            getCountryStatisticsUseCase()
-                .catch { e ->
-                    _manualError.value = UiText.DynamicString(e.message ?: "Failed to load statistics")
-                    emit(CountryStatistics(0, 0, 0))
-                },
-            _searchQuery,
-        ) { countries: List<CountryListItem>, stats: CountryStatistics, immediateSearchQuery: String ->
-            Triple(countries, stats, immediateSearchQuery)
-        },
-        combine(
-            debouncedSearchQuery,
-            _selectedRegion,
-            _showOnlyVisited,
-        ) { debouncedQuery: String, selectedRegion: String, showOnlyVisited: Boolean ->
-            Triple(debouncedQuery, selectedRegion, showOnlyVisited)
-        },
-        _manualError,
-    ) { dataTriple, filterTriple, manualError ->
-        val (countries, stats, immediateSearchQuery) = dataTriple
-        val (debouncedQuery, selectedRegion, showOnlyVisited) = filterTriple
-        try {
-            val filteredCountries = countries
-                .filter { country ->
-                    val regionMatch = selectedRegion == "All" || country.region == selectedRegion
-                    val visitedMatch = !showOnlyVisited || country.visited
-                    val searchMatch = debouncedQuery.isEmpty() ||
-                        country.name.contains(debouncedQuery, ignoreCase = true)
-                    regionMatch && visitedMatch && searchMatch
                 }
-
-            val regions = countries.map { it.region }.distinct().sorted()
-
-            // Compute visited country codes from ALL countries (not filtered)
-            val visitedCodes = countries.filter { it.visited }.map { it.code }.toSet()
-
-            CountryListState(
-                countries = filteredCountries,
-                visitedCountryCodes = visitedCodes,
-                visitedCount = stats.visitedCount,
-                totalCount = stats.totalCount,
-                percentage = stats.percentage,
-                selectedRegion = selectedRegion,
-                searchQuery = immediateSearchQuery,
-                showOnlyVisited = showOnlyVisited,
-                isLoading = false,
-                allRegions = regions,
-                error = manualError,
-            )
-        } catch (e: Exception) {
-            _manualError.value = UiText.DynamicString(e.message ?: "An unexpected error occurred")
-            CountryListState(
-                isLoading = false,
-                error = _manualError.value,
-            )
         }
-    }.catch { e ->
-        _manualError.value = UiText.DynamicString(e.message ?: "Failed to load countries")
-        emit(
-            CountryListState(
-                isLoading = false,
-                error = _manualError.value,
-            ),
+
+    /**
+     * Dedicated flow for current UI filter values (immediate updates).
+     */
+    private val currentFiltersFlow = combine(
+        _searchQuery,
+        _selectedRegion,
+        _showOnlyVisited,
+        _manualError,
+    ) { sq, sr, sov, err ->
+        Filters(sq, sr, sov, err)
+    }
+
+    /**
+     * Main UI state, combining domain data and immediate filter state.
+     */
+    val state: StateFlow<CountryListState> = combine(
+        filteredCountriesFlow,
+        getCountryStatisticsUseCase().catch { emit(CountryStatistics(0, 0, 0)) },
+        getVisitedCountryCodesUseCase().catch { emit(emptySet()) },
+        getAllRegionsUseCase().catch { emit(emptyList()) },
+        currentFiltersFlow,
+    ) { countries, stats, visitedCodes, regions, filters ->
+        CountryListState(
+            countries = countries,
+            visitedCountryCodes = visitedCodes,
+            visitedCount = stats.visitedCount,
+            totalCount = stats.totalCount,
+            percentage = stats.percentage,
+            searchQuery = filters.query,
+            selectedRegion = filters.region,
+            showOnlyVisited = filters.showOnlyVisited,
+            error = filters.error,
+            isLoading = false,
+            allRegions = regions,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CountryListState(),
+        initialValue = CountryListState(isLoading = true),
     )
+
+    private data class Filters(val query: String, val region: String, val showOnlyVisited: Boolean, val error: UiText?)
 
     fun onAction(action: CountryListAction) {
         when (action) {

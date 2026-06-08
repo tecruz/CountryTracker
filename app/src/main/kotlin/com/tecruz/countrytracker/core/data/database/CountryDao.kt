@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
  * Data Access Object for country operations.
  */
 @Dao
+@Suppress("TooManyFunctions")
 interface CountryDao {
 
     @Query("SELECT * FROM countries ORDER BY name ASC")
@@ -29,11 +30,17 @@ interface CountryDao {
     @Query("SELECT * FROM countries WHERE code = :code")
     suspend fun getCountryByCode(code: String): CountryEntity?
 
+    @Query("SELECT * FROM countries WHERE code = :code")
+    fun getCountryByCodeFlow(code: String): Flow<CountryEntity?>
+
     @Query("SELECT COUNT(*) FROM countries WHERE visited = 1")
     fun getVisitedCount(): Flow<Int>
 
     @Query("SELECT COUNT(*) FROM countries")
     fun getTotalCount(): Flow<Int>
+
+    @Query("SELECT code FROM countries WHERE visited = 1")
+    fun getVisitedCountryCodes(): Flow<List<String>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCountry(country: CountryEntity)
@@ -52,4 +59,19 @@ interface CountryDao {
 
     @Query("SELECT DISTINCT region FROM countries ORDER BY region ASC")
     fun getAllRegions(): Flow<List<String>>
+
+    /**
+     * Returns a filtered list of countries based on search query, region, and visited status.
+     * Uses SQLite's LIKE operator for search and simple equality for region/visited.
+     */
+    @Query(
+        """
+        SELECT * FROM countries
+        WHERE (name LIKE '%' || :query || '%' OR code LIKE '%' || :query || '%')
+        AND (:region = 'All' OR region = :region)
+        AND (:showOnlyVisited = 0 OR visited = 1)
+        ORDER BY name ASC
+    """,
+    )
+    fun getFilteredCountries(query: String, region: String, showOnlyVisited: Boolean): Flow<List<CountryEntity>>
 }

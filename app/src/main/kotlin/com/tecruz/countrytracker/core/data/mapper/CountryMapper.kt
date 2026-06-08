@@ -1,12 +1,13 @@
-package com.tecruz.countrytracker.features.countrydetail.data.mapper
+package com.tecruz.countrytracker.core.data.mapper
 
 import com.tecruz.countrytracker.core.data.database.CountryEntity
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
+import com.tecruz.countrytracker.core.domain.model.Country
 
 /**
- * Maps CountryEntity to CountryDetail domain model.
+ * Mappers for Country data and domain models.
  */
-fun CountryEntity.toCountryDetail(): CountryDetail = CountryDetail(
+
+fun CountryEntity.toCountry(): Country = Country(
     code = code,
     name = name,
     region = region,
@@ -17,10 +18,7 @@ fun CountryEntity.toCountryDetail(): CountryDetail = CountryDetail(
     flagEmoji = flagEmoji,
 )
 
-/**
- * Maps CountryDetail domain model to CountryEntity.
- */
-fun CountryDetail.toEntity(): CountryEntity = CountryEntity(
+fun Country.toEntity(): CountryEntity = CountryEntity(
     code = code,
     name = name,
     region = region,

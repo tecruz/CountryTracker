@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -14,10 +14,10 @@ import org.junit.Test
 
 class UpdateCountryNotesUseCaseTest {
 
-    private lateinit var repository: CountryDetailRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: UpdateCountryNotesUseCase
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "US",
         name = "United States",
         region = "North America",
@@ -54,7 +54,7 @@ class UpdateCountryNotesUseCaseTest {
 
     @Test
     fun `invoke should accept notes at max length boundary`() = runTest {
-        val maxNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH)
+        val maxNotes = "A".repeat(Country.MAX_NOTES_LENGTH)
         coEvery { repository.updateCountry(any()) } returns Unit
 
         useCase(testCountry, maxNotes)
@@ -63,11 +63,11 @@ class UpdateCountryNotesUseCaseTest {
     }
 
     @Test
-    fun `invoke should reject notes exceeding max length`() {
-        val tooLongNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH + 1)
+    fun `invoke should reject notes exceeding max length`() = runTest {
+        val tooLongNotes = "A".repeat(Country.MAX_NOTES_LENGTH + 1)
 
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, tooLongNotes)
             }
         }

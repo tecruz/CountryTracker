@@ -1,6 +1,6 @@
 package com.tecruz.countrytracker.features.countrydetail.presentation.model
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
+import com.tecruz.countrytracker.core.domain.model.Country
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,7 +24,7 @@ data class CountryDetailUi(
 /**
  * Maps domain model to presentation model.
  */
-fun CountryDetail.toUi(): CountryDetailUi {
+fun Country.toUi(): CountryDetailUi {
     val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
     return CountryDetailUi(
         code = code,

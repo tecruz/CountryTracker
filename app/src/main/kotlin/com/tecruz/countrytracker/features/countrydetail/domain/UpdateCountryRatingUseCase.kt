@@ -1,17 +1,15 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 
 /**
  * Use case for updating country rating.
- * Encapsulates validation and business logic for rating countries.
  */
-class UpdateCountryRatingUseCase(private val repository: CountryDetailRepository) {
-    suspend operator fun invoke(country: CountryDetail, rating: Int) {
-        // Validate rating range
-        require(rating in CountryDetail.MIN_RATING..CountryDetail.MAX_RATING) {
-            "Rating must be between ${CountryDetail.MIN_RATING} and ${CountryDetail.MAX_RATING}"
+class UpdateCountryRatingUseCase(private val repository: CountryRepository) {
+    suspend operator fun invoke(country: Country, rating: Int) {
+        require(rating in Country.MIN_RATING..Country.MAX_RATING) {
+            "Rating must be between ${Country.MIN_RATING} and ${Country.MAX_RATING}"
         }
 
         val updatedCountry = country.copy(rating = rating)

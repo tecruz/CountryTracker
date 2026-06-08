@@ -3,14 +3,13 @@ package com.tecruz.countrytracker.features.countrydetail.presentation
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.tecruz.countrytracker.core.navigation.Screen
+import com.tecruz.countrytracker.core.domain.model.Country
 import com.tecruz.countrytracker.core.util.DispatcherProvider
 import com.tecruz.countrytracker.features.countrydetail.domain.GetCountryByCodeUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsUnvisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.MarkCountryAsVisitedUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryNotesUseCase
 import com.tecruz.countrytracker.features.countrydetail.domain.UpdateCountryRatingUseCase
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -19,8 +18,8 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -46,7 +45,7 @@ class CountryDetailViewModelTest {
     private lateinit var dispatcherProvider: DispatcherProvider
     private lateinit var viewModel: CountryDetailViewModel
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "US",
         name = "United States",
         region = "North America",
@@ -54,7 +53,7 @@ class CountryDetailViewModelTest {
         visitedDate = null,
         notes = "",
         rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+        flagEmoji = "🇺🇸",
     )
 
     @Before
@@ -68,7 +67,9 @@ class CountryDetailViewModelTest {
         markCountryAsUnvisitedUseCase = mockk(relaxed = true)
         updateCountryNotesUseCase = mockk(relaxed = true)
         updateCountryRatingUseCase = mockk(relaxed = true)
-        savedStateHandle = SavedStateHandle(mapOf(Screen.CountryDetail.ARG_COUNTRY_CODE to "US"))
+
+        // Use a real SavedStateHandle with the expected key
+        savedStateHandle = SavedStateHandle(mapOf("countryCode" to "US"))
 
         dispatcherProvider = mockk {
             every { io } returns testDispatcher
@@ -77,7 +78,7 @@ class CountryDetailViewModelTest {
             every { unconfined } returns testDispatcher
         }
 
-        coEvery { getCountryByCodeUseCase("US") } returns testCountry
+        every { getCountryByCodeUseCase("US") } returns flowOf(testCountry)
     }
 
     @After
@@ -103,7 +104,6 @@ class CountryDetailViewModelTest {
         viewModel.state.test {
             val state = awaitItem()
             // With UnconfinedTestDispatcher, loading completes immediately
-            // Verify the first state exists and either is loading or has loaded
             assertTrue(state.isLoading || state.country != null)
         }
     }
@@ -140,7 +140,7 @@ class CountryDetailViewModelTest {
     @Test
     fun `markAsUnvisited should call use case`() = runTest {
         val visitedCountry = testCountry.copy(visited = true, visitedDate = 1704067200000L)
-        coEvery { getCountryByCodeUseCase("US") } returns visitedCountry
+        every { getCountryByCodeUseCase("US") } returns flowOf(visitedCountry)
 
         viewModel = createViewModel()
 
@@ -172,20 +172,22 @@ class CountryDetailViewModelTest {
 
     @Test
     fun `updateNotes should handle validation error`() = runTest {
-        val longNotes = "a".repeat(CountryDetail.MAX_NOTES_LENGTH + 1)
+        val longNotes = "a".repeat(Country.MAX_NOTES_LENGTH + 1)
         coEvery { updateCountryNotesUseCase.invoke(any(), longNotes) } throws
             IllegalArgumentException("Notes cannot exceed 500 characters")
 
         viewModel = createViewModel()
-        advanceUntilIdle()
 
-        // Trigger action that throws validation error
-        viewModel.onAction(CountryDetailAction.OnUpdateNotes(longNotes))
-        advanceUntilIdle()
+        viewModel.state.test {
+            awaitItem() // Initial state
 
-        // Error should be set after action
-        val errorState = viewModel.state.value
-        assertNotNull("Error should not be null", errorState.error)
+            // Trigger action that throws validation error
+            viewModel.onAction(CountryDetailAction.OnUpdateNotes(longNotes))
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -194,15 +196,17 @@ class CountryDetailViewModelTest {
             IllegalArgumentException("Rating must be between 0 and 5")
 
         viewModel = createViewModel()
-        advanceUntilIdle()
 
-        // Trigger action that throws validation error
-        viewModel.onAction(CountryDetailAction.OnUpdateRating(6))
-        advanceUntilIdle()
+        viewModel.state.test {
+            awaitItem() // Initial state
 
-        // Error should be set after action
-        val errorState = viewModel.state.value
-        assertNotNull("Error should not be null", errorState.error)
+            // Trigger action that throws validation error
+            viewModel.onAction(CountryDetailAction.OnUpdateRating(6))
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -211,27 +215,22 @@ class CountryDetailViewModelTest {
             IllegalArgumentException("Rating must be between 0 and 5")
 
         viewModel = createViewModel()
-        advanceUntilIdle()
 
-        // Trigger an error
-        viewModel.onAction(CountryDetailAction.OnUpdateRating(10))
-        advanceUntilIdle()
-        val errorState = viewModel.state.value
-        assertNotNull("Error should not be null after action", errorState.error)
+        viewModel.state.test {
+            awaitItem() // Initial state
 
-        // Clear the error
-        viewModel.onAction(CountryDetailAction.OnClearError)
-        advanceUntilIdle()
-        assertNull("Error should be null after clear", viewModel.state.value.error)
-    }
+            // Trigger an error
+            viewModel.onAction(CountryDetailAction.OnUpdateRating(10))
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null after action", errorState.error)
 
-    @Test
-    @Suppress("UNUSED")
-    fun `should handle use case error gracefully`() = runTest {
-        // Skipped: ViewModel uses viewModelScope.launch which runs on Dispatchers.Main,
-        // but test sets Dispatchers.Main to UnconfinedTestDispatcher. The coroutine doesn't
-        // execute synchronously in the test. The functionality works in practice.
-        // This is a known limitation of testing ViewModels with this setup.
+            // Clear the error
+            viewModel.onAction(CountryDetailAction.OnClearError)
+            val clearedState = awaitItem()
+            assertNull("Error should be null after clear", clearedState.error)
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -251,7 +250,7 @@ class CountryDetailViewModelTest {
 
     @Test
     fun `should not update when country is null`() = runTest {
-        coEvery { getCountryByCodeUseCase("US") } returns null
+        every { getCountryByCodeUseCase("US") } returns flowOf(null)
 
         viewModel = createViewModel()
 

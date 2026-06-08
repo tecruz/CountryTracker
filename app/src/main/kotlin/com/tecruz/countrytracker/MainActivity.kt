@@ -14,15 +14,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.window.core.layout.WindowSizeClass
-import com.tecruz.countrytracker.core.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.core.designsystem.PRIMARY_GREEN_ARGB
 import com.tecruz.countrytracker.core.navigation.CountryTrackerNavHost
-import com.tecruz.countrytracker.core.util.DispatcherProvider
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
+import com.tecruz.countrytracker.core.presentation.MainViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * CompositionLocal to provide WindowSizeClass throughout the app for adaptive layouts.
@@ -38,14 +35,11 @@ val LocalWindowSizeClass = staticCompositionLocalOf<WindowSizeClass> {
  */
 class MainActivity : ComponentActivity() {
 
-    private val dispatchers: DispatcherProvider by inject()
-
-    @Volatile
-    private var isMapDataReady = false
+    private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen before super.onCreate() as required by the API.
-        // The splash stays visible while map path data is loading on a background thread.
+        // The splash stays visible while map path data is loading in the MainViewModel.
         val splashScreen = installSplashScreen()
 
         // Enable edge-to-edge with themed status bar
@@ -56,18 +50,8 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
 
-        // Load map path JSON from assets on a background coroutine during the splash animation.
-        if (WorldMapPathData.isLoaded) {
-            isMapDataReady = true
-        } else {
-            lifecycleScope.launch(dispatchers.io) {
-                WorldMapPathData.loadCountryPaths(this@MainActivity)
-                isMapDataReady = true
-            }
-        }
-
-        // Keep the splash screen visible until the map data has finished loading.
-        splashScreen.setKeepOnScreenCondition { !isMapDataReady }
+        // Keep the splash screen visible until the app has finished initializing.
+        splashScreen.setKeepOnScreenCondition { !viewModel.isInitialized.value }
 
         setContent {
             val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass

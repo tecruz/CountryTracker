@@ -22,12 +22,12 @@ import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.OnSurfaceVariant
 import com.tecruz.countrytracker.core.designsystem.PrimaryGreen
 import com.tecruz.countrytracker.core.designsystem.Surface
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
+import com.tecruz.countrytracker.core.domain.model.Country
 
 @Composable
 fun NotesDialog(currentNotes: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     var tempNotes by remember { mutableStateOf(currentNotes) }
-    val maxLength = CountryDetail.MAX_NOTES_LENGTH
+    val maxLength = Country.MAX_NOTES_LENGTH
     val isOverLimit = tempNotes.length > maxLength
 
     AlertDialog(

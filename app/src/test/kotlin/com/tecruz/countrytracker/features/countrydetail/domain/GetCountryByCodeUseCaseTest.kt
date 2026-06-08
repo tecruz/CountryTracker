@@ -1,10 +1,12 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
-import io.mockk.coEvery
-import io.mockk.coVerify
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -13,10 +15,10 @@ import org.junit.Test
 
 class GetCountryByCodeUseCaseTest {
 
-    private lateinit var repository: CountryDetailRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: GetCountryByCodeUseCase
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "US",
         name = "United States",
         region = "North America",
@@ -35,42 +37,42 @@ class GetCountryByCodeUseCaseTest {
 
     @Test
     fun `invoke should delegate to repository getCountryByCode and return result`() = runTest {
-        coEvery { repository.getCountryByCode("US") } returns testCountry
+        every { repository.getCountryByCodeFlow("US") } returns flowOf(testCountry)
 
-        val result = useCase("US")
+        val result = useCase("US").first()
 
         assertEquals(testCountry, result)
-        coVerify { repository.getCountryByCode("US") }
+        verify { repository.getCountryByCodeFlow("US") }
     }
 
     @Test
     fun `invoke should return null when country not found`() = runTest {
-        coEvery { repository.getCountryByCode("XX") } returns null
+        every { repository.getCountryByCodeFlow("XX") } returns flowOf(null)
 
-        val result = useCase("XX")
+        val result = useCase("XX").first()
 
         assertNull(result)
-        coVerify { repository.getCountryByCode("XX") }
+        verify { repository.getCountryByCodeFlow("XX") }
     }
 
     @Test
     fun `invoke should pass country code to repository`() = runTest {
         val expected = testCountry.copy(code = "FR")
-        coEvery { repository.getCountryByCode("FR") } returns expected
+        every { repository.getCountryByCodeFlow("FR") } returns flowOf(expected)
 
-        val result = useCase("FR")
+        val result = useCase("FR").first()
 
         assertEquals(expected, result)
-        coVerify { repository.getCountryByCode("FR") }
+        verify { repository.getCountryByCodeFlow("FR") }
     }
 
     @Test
     fun `invoke should handle empty country code`() = runTest {
-        coEvery { repository.getCountryByCode("") } returns null
+        every { repository.getCountryByCodeFlow("") } returns flowOf(null)
 
-        val result = useCase("")
+        val result = useCase("").first()
 
         assertNull(result)
-        coVerify { repository.getCountryByCode("") }
+        verify { repository.getCountryByCodeFlow("") }
     }
 }

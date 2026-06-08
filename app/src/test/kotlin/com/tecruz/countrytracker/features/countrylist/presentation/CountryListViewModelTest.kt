@@ -3,7 +3,9 @@ package com.tecruz.countrytracker.features.countrylist.presentation
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
+import com.tecruz.countrytracker.features.countrylist.domain.GetAllRegionsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
+import com.tecruz.countrytracker.features.countrylist.domain.GetVisitedCountryCodesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
 import io.mockk.every
@@ -11,7 +13,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -25,9 +27,12 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class CountryListViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
+
     private lateinit var getAllCountriesUseCase: GetAllCountriesUseCase
     private lateinit var getCountryStatisticsUseCase: GetCountryStatisticsUseCase
+    private lateinit var getAllRegionsUseCase: GetAllRegionsUseCase
+    private lateinit var getVisitedCountryCodesUseCase: GetVisitedCountryCodesUseCase
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: CountryListViewModel
 
@@ -44,17 +49,24 @@ class CountryListViewModelTest {
         percentage = 50,
     )
 
+    private val testRegions = listOf("Asia", "Europe", "North America", "South America")
+    private val testVisitedCodes = setOf("FR", "BR")
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+
         getAllCountriesUseCase = mockk()
         getCountryStatisticsUseCase = mockk()
+        getAllRegionsUseCase = mockk()
+        getVisitedCountryCodesUseCase = mockk()
         savedStateHandle = SavedStateHandle()
 
-        every { getAllCountriesUseCase() } returns flowOf(testCountries)
+        // Default behavior for mocks
+        every { getAllCountriesUseCase(any(), any(), any()) } returns flowOf(testCountries)
         every { getCountryStatisticsUseCase() } returns flowOf(testStatistics)
-
-        viewModel = CountryListViewModel(getAllCountriesUseCase, getCountryStatisticsUseCase, savedStateHandle)
+        every { getAllRegionsUseCase() } returns flowOf(testRegions)
+        every { getVisitedCountryCodesUseCase() } returns flowOf(testVisitedCodes)
     }
 
     @After
@@ -62,60 +74,114 @@ class CountryListViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun initViewModel() {
+        viewModel = CountryListViewModel(
+            getAllCountriesUseCase,
+            getCountryStatisticsUseCase,
+            getAllRegionsUseCase,
+            getVisitedCountryCodesUseCase,
+            savedStateHandle,
+        )
+    }
+
     @Test
-    fun `initial state should be loading`() {
+    fun `initial state should be loading`() = runTest(testDispatcher) {
+        initViewModel()
         val state = viewModel.state.value
         assertTrue(state.isLoading)
     }
 
     @Test
-    fun `should load countries successfully`() = runTest {
+    fun `should load countries successfully`() = runTest(testDispatcher) {
+        initViewModel()
         viewModel.state.test {
+            // 1. Initial state
+            assertEquals(CountryListState(isLoading = true), awaitItem())
+
+            // 2. Loaded state
             val state = awaitItem()
             assertFalse(state.isLoading)
             assertEquals(4, state.countries.size)
             assertEquals(2, state.visitedCount)
             assertEquals(4, state.totalCount)
             assertEquals(50, state.percentage)
+            assertEquals(testRegions, state.allRegions)
+            assertEquals(testVisitedCodes, state.visitedCountryCodes)
         }
     }
 
     @Test
-    fun `should update search query in state`() = runTest {
+    fun `should update search query in state and trigger new fetch after debounce`() = runTest(testDispatcher) {
+        val query = "france"
+        every { getAllCountriesUseCase(query, "All", false) } returns flowOf(listOf(testCountries[1]))
+
+        initViewModel()
+
         viewModel.state.test {
-            awaitItem() // Initial loaded state
+            // Consume initial states
+            skipItems(2)
 
-            viewModel.onAction(CountryListAction.OnSearchQueryChange("france"))
+            viewModel.onAction(CountryListAction.OnSearchQueryChange(query))
 
-            val state = awaitItem()
-            assertEquals("france", state.searchQuery)
+            // 3. State updates with new searchQuery, but countries are still the old ones (4)
+            var state = awaitItem()
+            assertEquals(query, state.searchQuery)
+            assertEquals(4, state.countries.size)
+
+            // 4. Advance time to trigger debounce (300ms)
+            testScheduler.advanceTimeBy(301)
+
+            // 5. New state with filtered countries
+            state = awaitItem()
+            assertEquals(1, state.countries.size)
+            assertEquals("France", state.countries.first().name)
 
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `should filter countries by region`() = runTest {
+    fun `should filter countries by region and trigger new fetch`() = runTest(testDispatcher) {
+        val region = "Europe"
+        every { getAllCountriesUseCase("", region, false) } returns flowOf(listOf(testCountries[1]))
+
+        initViewModel()
+
         viewModel.state.test {
-            awaitItem() // Initial loaded state
+            skipItems(2)
 
-            viewModel.onAction(CountryListAction.OnRegionSelect("Europe"))
+            viewModel.onAction(CountryListAction.OnRegionSelect(region))
 
-            val state = awaitItem()
-            assertEquals("Europe", state.selectedRegion)
+            // No debounce for region, so we might get one or two emissions depending on how combine handles it
+            // Typically: one where SR changed, then flatMapLatest triggers and emits new countries.
+
+            var state = awaitItem()
+            if (state.selectedRegion != region || state.countries.size != 1) {
+                state = awaitItem()
+            }
+
+            assertEquals(region, state.selectedRegion)
             assertEquals(1, state.countries.size)
             assertEquals("France", state.countries.first().name)
         }
     }
 
     @Test
-    fun `should filter visited countries only`() = runTest {
+    fun `should filter visited countries only and trigger new fetch`() = runTest(testDispatcher) {
+        every { getAllCountriesUseCase("", "All", true) } returns flowOf(testCountries.filter { it.visited })
+
+        initViewModel()
+
         viewModel.state.test {
-            awaitItem() // Initial loaded state
+            skipItems(2)
 
             viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited)
 
-            val state = awaitItem()
+            var state = awaitItem()
+            if (!state.showOnlyVisited || state.countries.size != 2) {
+                state = awaitItem()
+            }
+
             assertTrue(state.showOnlyVisited)
             assertEquals(2, state.countries.size)
             assertTrue(state.countries.all { it.visited })
@@ -123,65 +189,8 @@ class CountryListViewModelTest {
     }
 
     @Test
-    fun `should toggle visited filter off`() = runTest {
-        viewModel.state.test {
-            awaitItem() // Initial loaded state
-
-            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited) // Turn on
-            awaitItem()
-
-            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited) // Turn off
-
-            val state = awaitItem()
-            assertFalse(state.showOnlyVisited)
-            assertEquals(4, state.countries.size)
-        }
-    }
-
-    @Test
-    fun `should extract unique regions from countries`() = runTest {
-        viewModel.state.test {
-            val state = awaitItem()
-            assertEquals(4, state.allRegions.size)
-            assertTrue(state.allRegions.containsAll(listOf("Asia", "Europe", "North America", "South America")))
-        }
-    }
-
-    @Test
-    fun `should combine multiple filters correctly`() = runTest {
-        viewModel.state.test {
-            awaitItem() // Initial loaded state
-
-            viewModel.onAction(CountryListAction.OnRegionSelect("South America"))
-            awaitItem()
-
-            viewModel.onAction(CountryListAction.OnToggleShowOnlyVisited)
-
-            val state = awaitItem()
-            assertEquals(1, state.countries.size)
-            assertEquals("Brazil", state.countries.first().name)
-        }
-    }
-
-    @Test
-    fun `should reset region filter to All`() = runTest {
-        viewModel.state.test {
-            awaitItem() // Initial loaded state
-
-            viewModel.onAction(CountryListAction.OnRegionSelect("Europe"))
-            val filteredState = awaitItem()
-            assertEquals(1, filteredState.countries.size)
-
-            viewModel.onAction(CountryListAction.OnRegionSelect("All"))
-
-            val state = awaitItem()
-            assertEquals("All", state.selectedRegion)
-            assertEquals(4, state.countries.size)
-        }
-    }
-
-    @Test
-    fun `should navigate on country click`() = runTest {
+    fun `should navigate on country click`() = runTest(testDispatcher) {
+        initViewModel()
         viewModel.onAction(CountryListAction.OnCountryClick("US"))
 
         viewModel.events.test {

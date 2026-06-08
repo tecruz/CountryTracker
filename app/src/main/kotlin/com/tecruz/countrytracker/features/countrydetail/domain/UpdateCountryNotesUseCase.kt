@@ -1,17 +1,15 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 
 /**
  * Use case for updating country notes.
- * Encapsulates validation and business logic for updating travel notes.
  */
-class UpdateCountryNotesUseCase(private val repository: CountryDetailRepository) {
-    suspend operator fun invoke(country: CountryDetail, notes: String) {
-        // Validate notes length
-        require(notes.length <= CountryDetail.MAX_NOTES_LENGTH) {
-            "Notes cannot exceed ${CountryDetail.MAX_NOTES_LENGTH} characters"
+class UpdateCountryNotesUseCase(private val repository: CountryRepository) {
+    suspend operator fun invoke(country: Country, notes: String) {
+        require(notes.length <= Country.MAX_NOTES_LENGTH) {
+            "Notes cannot exceed ${Country.MAX_NOTES_LENGTH} characters"
         }
 
         val updatedCountry = country.copy(notes = notes)

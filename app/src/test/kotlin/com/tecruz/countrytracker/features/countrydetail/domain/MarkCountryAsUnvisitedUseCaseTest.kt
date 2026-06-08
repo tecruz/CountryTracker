@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -13,14 +13,14 @@ import org.junit.Test
 
 class MarkCountryAsUnvisitedUseCaseTest {
 
-    private lateinit var repository: CountryDetailRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: MarkCountryAsUnvisitedUseCase
 
     companion object {
         private const val TEST_VISITED_DATE = 1704067200000L
     }
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "FR",
         name = "France",
         region = "Europe",

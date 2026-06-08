@@ -1,8 +1,8 @@
 package com.tecruz.countrytracker.features.countrylist.domain
 
 import app.cash.turbine.test
-import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
-import com.tecruz.countrytracker.features.countrylist.domain.repository.CountryListRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,12 +14,12 @@ import org.junit.Test
 
 class GetAllCountriesUseCaseTest {
 
-    private lateinit var repository: CountryListRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: GetAllCountriesUseCase
 
     private val testCountries = listOf(
-        CountryListItem("US", "United States", "North America", false, "\uD83C\uDDFA\uD83C\uDDF8"),
-        CountryListItem("FR", "France", "Europe", true, "\uD83C\uDDEB\uD83C\uDDF7"),
+        Country("US", "United States", "North America", false, flagEmoji = "🇺🇸"),
+        Country("FR", "France", "Europe", true, flagEmoji = "🇫🇷"),
     )
 
     @Before
@@ -29,28 +29,30 @@ class GetAllCountriesUseCaseTest {
     }
 
     @Test
-    fun `invoke should return countries from repository`() = runTest {
-        every { repository.getAllCountries() } returns flowOf(testCountries)
+    fun `invoke should return countries from repository using filters`() = runTest {
+        val filteredCountries = listOf(testCountries[1])
+        every { repository.getFilteredCountries("France", "Europe", true) } returns flowOf(filteredCountries)
 
-        useCase().test {
+        useCase("France", "Europe", true).test {
             val result = awaitItem()
-            assertEquals(2, result.size)
-            assertEquals("United States", result[0].name)
-            assertEquals("France", result[1].name)
+            assertEquals(1, result.size)
+            assertEquals("France", result[0].name)
             awaitComplete()
         }
 
-        verify { repository.getAllCountries() }
+        verify { repository.getFilteredCountries("France", "Europe", true) }
     }
 
     @Test
     fun `invoke should return empty list when no countries`() = runTest {
-        every { repository.getAllCountries() } returns flowOf(emptyList())
+        every { repository.getFilteredCountries(any(), any(), any()) } returns flowOf(emptyList())
 
         useCase().test {
             val result = awaitItem()
             assertEquals(0, result.size)
             awaitComplete()
         }
+
+        verify { repository.getFilteredCountries("", "All", false) }
     }
 }

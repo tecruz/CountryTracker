@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -14,10 +14,10 @@ import org.junit.Test
 
 class UpdateCountryRatingUseCaseTest {
 
-    private lateinit var repository: CountryDetailRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: UpdateCountryRatingUseCase
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "US",
         name = "United States",
         region = "North America",
@@ -47,9 +47,9 @@ class UpdateCountryRatingUseCaseTest {
     @Test
     fun `invoke should accept minimum rating`() = runTest {
         coEvery { repository.updateCountry(any()) } returns Unit
-        useCase(testCountry, CountryDetail.MIN_RATING)
+        useCase(testCountry, Country.MIN_RATING)
 
-        coVerify { repository.updateCountry(testCountry.copy(rating = CountryDetail.MIN_RATING)) }
+        coVerify { repository.updateCountry(testCountry.copy(rating = Country.MIN_RATING)) }
     }
 
     @Test
@@ -62,15 +62,15 @@ class UpdateCountryRatingUseCaseTest {
     @Test
     fun `invoke should accept maximum rating`() = runTest {
         coEvery { repository.updateCountry(any()) } returns Unit
-        useCase(testCountry, CountryDetail.MAX_RATING)
+        useCase(testCountry, Country.MAX_RATING)
 
-        coVerify { repository.updateCountry(testCountry.copy(rating = CountryDetail.MAX_RATING)) }
+        coVerify { repository.updateCountry(testCountry.copy(rating = Country.MAX_RATING)) }
     }
 
     @Test
-    fun `invoke should reject negative rating`() {
+    fun `invoke should reject negative rating`() = runTest {
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, -1)
             }
         }
@@ -79,10 +79,10 @@ class UpdateCountryRatingUseCaseTest {
     }
 
     @Test
-    fun `invoke should reject rating above maximum`() {
+    fun `invoke should reject rating above maximum`() = runTest {
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
-                useCase(testCountry, CountryDetail.MAX_RATING + 1)
+            kotlinx.coroutines.runBlocking {
+                useCase(testCountry, Country.MAX_RATING + 1)
             }
         }
 
