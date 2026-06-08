@@ -7,11 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.tecruz.countrytracker.features.countrydetail.presentation.CountryDetailRoot
 import com.tecruz.countrytracker.features.countrylist.presentation.CountryListRoot
 import kotlinx.coroutines.delay
@@ -22,24 +21,20 @@ fun CountryTrackerNavHost(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.CountryList.route,
+        startDestination = Screen.CountryList,
         modifier = modifier,
     ) {
-        composable(Screen.CountryList.route) {
+        composable<Screen.CountryList> {
             CountryListRoot(
                 onCountryClick = { countryCode ->
-                    navController.navigate(Screen.CountryDetail.createRoute(countryCode))
+                    navController.navigate(Screen.CountryDetail(countryCode))
                 },
             )
         }
 
-        composable(
-            route = Screen.CountryDetail.route,
-            arguments = listOf(
-                navArgument(Screen.CountryDetail.ARG_COUNTRY_CODE) { type = NavType.StringType },
-            ),
-        ) { backStackEntry ->
-            val countryCode = backStackEntry.arguments?.getString(Screen.CountryDetail.ARG_COUNTRY_CODE) ?: ""
+        composable<Screen.CountryDetail> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.CountryDetail>()
+            val countryCode = route.countryCode
             var isValidCode by remember(countryCode) { mutableStateOf(validateCountryCode(countryCode)) }
 
             if (isValidCode) {

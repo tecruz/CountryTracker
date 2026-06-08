@@ -1,14 +1,13 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 
 /**
  * Use case for marking a country as unvisited.
- * Handles the business logic of clearing visit information from a country.
  */
-class MarkCountryAsUnvisitedUseCase(private val repository: CountryDetailRepository) {
-    suspend operator fun invoke(country: CountryDetail) {
+class MarkCountryAsUnvisitedUseCase(private val repository: CountryRepository) {
+    suspend operator fun invoke(country: Country) {
         repository.markAsUnvisited(country)
     }
 }
