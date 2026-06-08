@@ -5,7 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tecruz.countrytracker.core.data.database.CountryDatabase
 import com.tecruz.countrytracker.core.data.database.CountryEntity
-import com.tecruz.countrytracker.features.countrydetail.data.mapper.toEntity
+import com.tecruz.countrytracker.core.data.mapper.toEntity
+import com.tecruz.countrytracker.core.data.repository.CountryRepositoryImpl
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -21,7 +22,7 @@ class CountryDetailRepositoryIntegrationTest {
 
     private lateinit var database: CountryDatabase
     private lateinit var dao: com.tecruz.countrytracker.core.data.database.CountryDao
-    private lateinit var repository: CountryDetailRepositoryImpl
+    private lateinit var repository: CountryRepositoryImpl
 
     private val testEntity = CountryEntity(
         code = "US",
@@ -41,7 +42,7 @@ class CountryDetailRepositoryIntegrationTest {
             CountryDatabase::class.java,
         ).allowMainThreadQueries().build()
         dao = database.countryDao()
-        repository = CountryDetailRepositoryImpl(dao)
+        repository = CountryRepositoryImpl(dao)
     }
 
     @After
@@ -50,7 +51,7 @@ class CountryDetailRepositoryIntegrationTest {
     }
 
     @Test
-    fun getCountryByCode_should_return_CountryDetail_with_all_8_fields_mapped_correctly() = runTest {
+    fun getCountryByCode_should_return_Country_with_all_fields_mapped_correctly() = runTest {
         dao.insertCountry(testEntity)
 
         val result = repository.getCountryByCode("US")
@@ -173,8 +174,8 @@ class CountryDetailRepositoryIntegrationTest {
         )
         dao.insertCountry(originalEntity)
 
-        val countryDetail = repository.getCountryByCode("FR")!!
-        val roundtripEntity = countryDetail.toEntity()
+        val country = repository.getCountryByCode("FR")!!
+        val roundtripEntity = country.toEntity()
 
         assertEquals(originalEntity.code, roundtripEntity.code)
         assertEquals(originalEntity.name, roundtripEntity.name)

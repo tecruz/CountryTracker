@@ -1,7 +1,7 @@
 package com.tecruz.countrytracker.features.countrydetail.domain
 
-import com.tecruz.countrytracker.features.countrydetail.domain.model.CountryDetail
-import com.tecruz.countrytracker.features.countrydetail.domain.repository.CountryDetailRepository
+import com.tecruz.countrytracker.core.domain.model.Country
+import com.tecruz.countrytracker.core.domain.repository.CountryRepository
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -11,10 +11,10 @@ import org.junit.Test
 
 class MarkCountryAsVisitedUseCaseTest {
 
-    private lateinit var repository: CountryDetailRepository
+    private lateinit var repository: CountryRepository
     private lateinit var useCase: MarkCountryAsVisitedUseCase
 
-    private val testCountry = CountryDetail(
+    private val testCountry = Country(
         code = "US",
         name = "United States",
         region = "North America",
@@ -22,7 +22,7 @@ class MarkCountryAsVisitedUseCaseTest {
         visitedDate = null,
         notes = "",
         rating = 0,
-        flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+        flagEmoji = "🇺🇸",
     )
 
     @Before
@@ -69,7 +69,7 @@ class MarkCountryAsVisitedUseCaseTest {
     @Test
     fun `invoke should handle long notes at max length`() = runTest {
         val date = 1704067200000L
-        val longNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH)
+        val longNotes = "A".repeat(Country.MAX_NOTES_LENGTH)
 
         useCase(testCountry, date, longNotes, 4)
 
@@ -103,10 +103,10 @@ class MarkCountryAsVisitedUseCaseTest {
     @Test
     fun `invoke should reject notes exceeding max length`() = runTest {
         val date = 1704067200000L
-        val tooLongNotes = "A".repeat(CountryDetail.MAX_NOTES_LENGTH + 1)
+        val tooLongNotes = "A".repeat(Country.MAX_NOTES_LENGTH + 1)
 
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, date, tooLongNotes, 3)
             }
         }
@@ -119,8 +119,8 @@ class MarkCountryAsVisitedUseCaseTest {
         val date = 1704067200000L
 
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
-                useCase(testCountry, date, "Notes", CountryDetail.MAX_RATING + 1)
+            kotlinx.coroutines.runBlocking {
+                useCase(testCountry, date, "Notes", Country.MAX_RATING + 1)
             }
         }
 
@@ -132,7 +132,7 @@ class MarkCountryAsVisitedUseCaseTest {
         val date = 1704067200000L
 
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, date, "Notes", -1)
             }
         }
@@ -143,7 +143,7 @@ class MarkCountryAsVisitedUseCaseTest {
     @Test
     fun `invoke should reject zero date`() = runTest {
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, 0L, "Notes", 3)
             }
         }
@@ -154,7 +154,7 @@ class MarkCountryAsVisitedUseCaseTest {
     @Test
     fun `invoke should reject negative date`() = runTest {
         assertThrows(IllegalArgumentException::class.java) {
-            kotlinx.coroutines.test.runTest {
+            kotlinx.coroutines.runBlocking {
                 useCase(testCountry, -1L, "Notes", 3)
             }
         }

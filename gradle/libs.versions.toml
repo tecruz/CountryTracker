@@ -26,6 +26,7 @@ material3Adaptive = "1.2.0"
 
 # Navigation
 navigationCompose = "2.9.8"
+kotlinxSerialization = "1.8.0"
 
 # Room
 room = "2.8.4"
@@ -78,6 +79,7 @@ androidx-compose-material3-windowsizes = { group = "androidx.compose.material3",
 
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 # ViewModel
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntime" }
@@ -165,6 +167,7 @@ android-testing = [
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
