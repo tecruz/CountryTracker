@@ -26,7 +26,7 @@ material3Adaptive = "1.2.0"
 
 # Navigation
 navigationCompose = "2.9.8"
-kotlinxSerialization = "1.8.0"
+kotlinxSerialization = "1.11.0"
 
 # Room
 room = "2.8.4"
