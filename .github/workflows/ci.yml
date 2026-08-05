@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -31,7 +31,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
@@ -78,7 +78,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -87,7 +87,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -99,7 +99,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: AVD cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: avd-cache
         with:
           path: |
@@ -151,7 +151,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -160,7 +160,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -183,7 +183,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -192,7 +192,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -215,7 +215,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -224,7 +224,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -241,7 +241,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -250,7 +250,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
