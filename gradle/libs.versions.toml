@@ -20,7 +20,7 @@ lifecycleRuntime = "2.11.0"
 activityCompose = "1.13.0"
 
 # Compose
-composeBom = "2026.06.00"
+composeBom = "2026.06.01"
 material3Expressive = "1.5.0-alpha25"
 material3Adaptive = "1.2.0"
 
@@ -34,7 +34,7 @@ room = "2.8.4"
 # Koin
 
 # Koin
-koin = "4.2.1"
+koin = "4.2.2"
 
 
 # Coroutines
