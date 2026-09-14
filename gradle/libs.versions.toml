@@ -29,7 +29,7 @@ navigationCompose = "2.9.8"
 kotlinxSerialization = "1.11.0"
 
 # Room
-room = "2.8.4"
+room = "2.8.5"
 
 # Koin
 
