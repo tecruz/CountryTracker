@@ -14,7 +14,7 @@ ktlint = "1.5.0"
 kover = "0.9.9"
 
 # AndroidX Core
-coreKtx = "1.19.0"
+coreKtx = "1.19.1"
 splashscreen = "1.2.0"
 lifecycleRuntime = "2.11.0"
 activityCompose = "1.13.0"
