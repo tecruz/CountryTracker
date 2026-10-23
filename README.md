@@ -38,10 +38,12 @@ A modern Android application for tracking countries you've visited around the wo
 
 ## Prerequisites
 
+<!-- versions:prerequisites:start -->
 - Android Studio Ladybug or newer
 - JDK 17
-- Android SDK 36 (compileSdk)
+- Android SDK 37 (compileSdk)
 - Minimum device: Android 7.0 (API 24)
+<!-- versions:prerequisites:end -->
 
 ## Getting Started
 
@@ -55,22 +57,24 @@ A modern Android application for tracking countries you've visited around the wo
 
 ## Tech Stack
 
+<!-- versions:tech-stack:start -->
 | Category | Technology | Version |
 |----------|------------|---------|
-| Language | Kotlin | 2.3.20 |
-| UI Framework | Jetpack Compose (BOM) | 2026.03.01 |
-| Design System | Material 3 Expressive | 1.5.0-alpha17 |
+| Language | Kotlin | 2.4.20 |
+| UI Framework | Jetpack Compose (BOM) | 2026.09.00 |
+| Design System | Material 3 Expressive | 1.5.0-beta01 |
 | Adaptive UI | Material 3 Adaptive | 1.2.0 |
 | Architecture | Clean Architecture + MVVM | - |
-| DI | Koin | 4.0.0 |
-| Database | Room | 2.8.4 |
-| Async | Coroutines + Flow | 1.10.2 |
-| Navigation | Navigation Compose | 2.9.7 |
-| Code Formatting | Spotless + ktlint | 8.4.0 / 1.5.0 |
+| DI | Koin | 4.2.2 |
+| Database | Room | 2.8.5 |
+| Async | Coroutines + Flow | 1.11.0 |
+| Navigation | Navigation Compose | 2.10.2 |
+| Code Formatting | Spotless + ktlint | 8.10.4 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
-| Code Coverage | Kover + JaCoCo | 0.9.8 / 0.8.12 |
-| Build System | Gradle (Kotlin DSL) | 9.1.0 |
-| Annotation Processing | KSP | 2.3.6 |
+| Code Coverage | Kover + JaCoCo | 0.9.11 / 0.8.12 |
+| Build System | Gradle (Kotlin DSL) | 9.8.1 |
+| Annotation Processing | KSP | 2.3.12 |
+<!-- versions:tech-stack:end -->
 
 ## Project Structure
 

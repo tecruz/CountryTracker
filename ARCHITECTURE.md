@@ -6,20 +6,22 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 
 ### Technology Versions
 
+<!-- versions:technology-versions:start -->
 | Technology | Version |
 |------------|---------|
-| Kotlin | 2.3.20 |
-| Jetpack Compose BOM | 2026.03.01 |
-| Material 3 Expressive | 1.5.0-alpha17 |
+| Kotlin | 2.4.20 |
+| Jetpack Compose BOM | 2026.09.00 |
+| Material 3 Expressive | 1.5.0-beta01 |
 | Material 3 Adaptive | 1.2.0 |
-| Room | 2.8.4 |
-| Koin | 4.0.0 |
-| Navigation Compose | 2.9.7 |
-| Coroutines | 1.10.2 |
-| AGP | 9.1.0 |
-| KSP | 2.3.6 |
-| Target SDK | 36 |
+| Room | 2.8.5 |
+| Koin | 4.2.2 |
+| Navigation Compose | 2.10.2 |
+| Coroutines | 1.11.0 |
+| AGP | 9.4.1 |
+| KSP | 2.3.12 |
+| Target SDK | 37 |
 | Min SDK | 24 |
+<!-- versions:technology-versions:end -->
 
 ### Project Structure
 
@@ -470,16 +472,18 @@ app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests (19 f
 
 ### Testing Libraries
 
+<!-- versions:testing-libraries:start -->
 | Library | Purpose |
 |---------|---------|
 | JUnit 4.13.2 | Unit test framework |
-| MockK 1.14.9 | Mocking library |
+| MockK 1.14.11 | Mocking library |
 | Turbine 1.2.1 | Flow testing |
-| Coroutines Test 1.10.2 | Coroutine testing |
+| Coroutines Test 1.11.0 | Coroutine testing |
 | Arch Core Testing 2.2.0 | Architecture component testing |
-| Robolectric 4.16.1 | JVM-based Android framework simulation |
-| Compose UI Test | Compose UI testing |
-| Room Testing | Room in-memory database testing |
+| Robolectric 4.17 | JVM-based Android framework simulation |
+| Compose UI Test (BOM 2026.09.00) | Compose UI testing |
+| Room Testing 2.8.5 | Room in-memory database testing |
+<!-- versions:testing-libraries:end -->
 
 ### Running Tests
 
@@ -504,8 +508,10 @@ app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests (19 f
 
 The project uses a hybrid coverage setup:
 
-- **Kover 0.9.7** for unit test coverage (Compose-aware instrumentation, accurate for `@Composable` functions)
+<!-- versions:coverage-tools:start -->
+- **Kover 0.9.11** for unit test coverage (Compose-aware instrumentation, accurate for `@Composable` functions)
 - **JaCoCo 0.8.12** for instrumented test coverage and combined reports
+<!-- versions:coverage-tools:end -->
 
 | Task | Engine | Scope |
 |------|--------|-------|
@@ -548,20 +554,22 @@ The **Build Release APK** job runs only on pushes to `main`/`master` after build
 
 ## Key Technologies
 
+<!-- versions:key-technologies:start -->
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Kotlin | 2.3.10 | Primary language |
-| Jetpack Compose (BOM) | 2026.02.00 | Declarative UI framework |
-| Material 3 Expressive | 1.5.0-alpha14 | Design system |
+| Kotlin | 2.4.20 | Primary language |
+| Jetpack Compose (BOM) | 2026.09.00 | Declarative UI framework |
+| Material 3 Expressive | 1.5.0-beta01 | Design system |
 | Material 3 Adaptive | 1.2.0 | Responsive layouts for all screen sizes |
-| Room | 2.8.4 | Local SQLite database |
-| Hilt | 2.59.1 | Dependency injection |
-| Coroutines | 1.10.2 | Asynchronous operations |
+| Room | 2.8.5 | Local SQLite database |
+| Koin | 4.2.2 | Dependency injection |
+| Coroutines | 1.11.0 | Asynchronous operations |
 | Flow | (with Coroutines) | Reactive data streams |
-| Navigation Compose | 2.9.7 | Screen navigation |
-| DataStore | 1.2.0 | Preferences storage |
-| Splash Screen | 1.0.1 | Native splash screen API |
-| SavedStateHandle | (with Lifecycle) | Process death survival |
+| Navigation Compose | 2.10.2 | Screen navigation |
+| DataStore | 1.2.1 | Preferences storage |
+| Splash Screen | 1.2.0 | Native splash screen API |
+| SavedStateHandle | (with Lifecycle 2.11.0) | Process death survival |
+<!-- versions:key-technologies:end -->
 
 ## Future Enhancements
 
