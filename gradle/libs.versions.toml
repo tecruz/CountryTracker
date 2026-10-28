@@ -53,6 +53,9 @@ coroutinesTest = "1.11.0"
 archCoreTesting = "2.2.0"
 robolectric = "4.17"
 
+# Coverage
+jacoco = "0.8.14"
+
 [libraries]
 # AndroidX Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

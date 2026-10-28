@@ -191,7 +191,7 @@ kover {
 
 // JaCoCo Configuration (instrumented tests only — unit test coverage is handled by Kover)
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = libs.versions.jacoco.get()
 }
 
 // Exclude generated files from instrumented-test coverage
