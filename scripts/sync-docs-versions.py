@@ -29,6 +29,38 @@ def read_match(path: Path, pattern: str, label: str) -> str:
     return match.group(1)
 
 
+def _read_jacoco_version(build_file: Path, versions: dict[str, str]) -> str:
+    """Read JaCoCo version from build.gradle.kts.
+
+    Supports both a hardcoded string (toolVersion = "0.8.14") and a version
+    catalog reference (toolVersion = libs.versions.jacoco.get()).
+    """
+    text = build_file.read_text(encoding="utf-8")
+    # Try hardcoded string first
+    match = re.search(
+        r'^jacoco\s*\{[^}]*?toolVersion\s*=\s*"([^"]+)"',
+        text,
+        re.MULTILINE,
+    )
+    if match:
+        return match.group(1)
+    # Fall back to version catalog reference
+    match = re.search(
+        r'^jacoco\s*\{[^}]*?toolVersion\s*=\s*libs\.versions\.(\w+)\.get\(\)',
+        text,
+        re.MULTILINE,
+    )
+    if match:
+        catalog_key = match.group(1)
+        if catalog_key in versions:
+            return versions[catalog_key]
+        raise ValueError(
+            f"could not resolve JaCoCo version catalog key '{catalog_key}' "
+            f"from {build_file.relative_to(ROOT)}"
+        )
+    raise ValueError(f"could not determine JaCoCo version from {build_file.relative_to(ROOT)}")
+
+
 def load_versions() -> dict[str, str]:
     versions = read_version_catalog()
     versions["gradle"] = read_match(
@@ -36,11 +68,7 @@ def load_versions() -> dict[str, str]:
         r"^distributionUrl=.*?gradle-([0-9][0-9.]*)-bin\.zip$",
         "Gradle version",
     )
-    versions["jacoco"] = read_match(
-        APP_BUILD,
-        r'^jacoco\s*\{[^}]*?toolVersion\s*=\s*"([^"]+)"',
-        "JaCoCo version",
-    )
+    versions["jacoco"] = _read_jacoco_version(APP_BUILD, versions)
     versions["java"] = read_match(
         APP_BUILD,
         r"sourceCompatibility\s*=\s*JavaVersion\.VERSION_(\d+)",

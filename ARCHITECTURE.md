@@ -510,7 +510,7 @@ The project uses a hybrid coverage setup:
 
 <!-- versions:coverage-tools:start -->
 - **Kover 0.9.11** for unit test coverage (Compose-aware instrumentation, accurate for `@Composable` functions)
-- **JaCoCo 0.8.12** for instrumented test coverage and combined reports
+- **JaCoCo 0.8.14** for instrumented test coverage and combined reports
 <!-- versions:coverage-tools:end -->
 
 | Task | Engine | Scope |

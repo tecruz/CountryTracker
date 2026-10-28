@@ -71,7 +71,7 @@ A modern Android application for tracking countries you've visited around the wo
 | Navigation | Navigation Compose | 2.10.2 |
 | Code Formatting | Spotless + ktlint | 8.10.4 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
-| Code Coverage | Kover + JaCoCo | 0.9.11 / 0.8.12 |
+| Code Coverage | Kover + JaCoCo | 0.9.11 / 0.8.14 |
 | Build System | Gradle (Kotlin DSL) | 9.8.1 |
 | Annotation Processing | KSP | 2.3.12 |
 <!-- versions:tech-stack:end -->
