@@ -9,9 +9,9 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 <!-- versions:technology-versions:start -->
 | Technology | Version |
 |------------|---------|
-| Kotlin | 2.4.20 |
+| Kotlin | 2.4.21 |
 | Jetpack Compose BOM | 2026.09.00 |
-| Material 3 Expressive | 1.5.0-beta01 |
+| Material 3 Expressive | 1.5.0-beta02 |
 | Material 3 Adaptive | 1.2.0 |
 | Room | 2.8.5 |
 | Koin | 4.2.2 |
@@ -510,7 +510,7 @@ The project uses a hybrid coverage setup:
 
 <!-- versions:coverage-tools:start -->
 - **Kover 0.9.11** for unit test coverage (Compose-aware instrumentation, accurate for `@Composable` functions)
-- **JaCoCo 0.8.12** for instrumented test coverage and combined reports
+- **JaCoCo 0.8.14** for instrumented test coverage and combined reports
 <!-- versions:coverage-tools:end -->
 
 | Task | Engine | Scope |
@@ -557,16 +557,16 @@ The **Build Release APK** job runs only on pushes to `main`/`master` after build
 <!-- versions:key-technologies:start -->
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Kotlin | 2.4.20 | Primary language |
+| Kotlin | 2.4.21 | Primary language |
 | Jetpack Compose (BOM) | 2026.09.00 | Declarative UI framework |
-| Material 3 Expressive | 1.5.0-beta01 | Design system |
+| Material 3 Expressive | 1.5.0-beta02 | Design system |
 | Material 3 Adaptive | 1.2.0 | Responsive layouts for all screen sizes |
 | Room | 2.8.5 | Local SQLite database |
 | Koin | 4.2.2 | Dependency injection |
 | Coroutines | 1.11.0 | Asynchronous operations |
 | Flow | (with Coroutines) | Reactive data streams |
 | Navigation Compose | 2.10.2 | Screen navigation |
-| DataStore | 1.2.1 | Preferences storage |
+| DataStore | 1.3.0 | Preferences storage |
 | Splash Screen | 1.2.0 | Native splash screen API |
 | SavedStateHandle | (with Lifecycle 2.11.0) | Process death survival |
 <!-- versions:key-technologies:end -->
