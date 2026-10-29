@@ -46,6 +46,7 @@ def load_versions() -> dict[str, str]:
         r"sourceCompatibility\s*=\s*JavaVersion\.VERSION_(\d+)",
         "Java version",
     )
+    print(f"DEBUG versions: {versions}", file=sys.stderr)
     return versions
 
 
@@ -189,6 +190,7 @@ def sync_document(path: Path, blocks: dict[str, str], versions: dict[str, str]) 
         updated = pattern.sub(lambda _match, n=name, b=render(versions): render_block(n, b), updated)
     if updated == text:
         return False
+    print(f"DEBUG {path.relative_to(ROOT)} would be updated", file=sys.stderr)
     path.write_text(updated, encoding="utf-8", newline="\n")
     return True
 
