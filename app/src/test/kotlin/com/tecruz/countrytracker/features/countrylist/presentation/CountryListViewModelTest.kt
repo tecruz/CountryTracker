@@ -2,6 +2,7 @@ package com.tecruz.countrytracker.features.countrylist.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.tecruz.countrytracker.core.presentation.UiText
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllRegionsUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatisticsUseCase
@@ -12,14 +13,18 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -197,5 +202,71 @@ class CountryListViewModelTest {
             val event = awaitItem()
             assertTrue(event is CountryListEvent.NavigateToDetail)
         }
+    }
+
+    @Test
+    fun `country fetch failure is surfaced as an error state`() = runTest(testDispatcher) {
+        every { getAllCountriesUseCase(any(), any(), any()) } returns
+            flow { throw IllegalStateException("network down") }
+
+        initViewModel()
+
+        val state = viewModel.state.first { it.error != null }
+
+        assertFalse(state.isLoading)
+        assertTrue(state.countries.isEmpty())
+        assertEquals("network down", (state.error as UiText.DynamicString).value)
+    }
+
+    @Test
+    fun `statistics failure falls back to zero statistics`() = runTest(testDispatcher) {
+        every { getCountryStatisticsUseCase() } returns flow { throw IllegalStateException("stats") }
+
+        initViewModel()
+
+        val state = viewModel.state.first { !it.isLoading }
+
+        assertEquals(0, state.visitedCount)
+        assertEquals(0, state.totalCount)
+        assertEquals(0, state.percentage)
+        assertEquals(testCountries, state.countries)
+    }
+
+    @Test
+    fun `visited codes failure falls back to an empty set`() = runTest(testDispatcher) {
+        every { getVisitedCountryCodesUseCase() } returns flow { throw IllegalStateException("visited") }
+
+        initViewModel()
+
+        val state = viewModel.state.first { !it.isLoading }
+
+        assertTrue(state.visitedCountryCodes.isEmpty())
+        assertEquals(testCountries, state.countries)
+    }
+
+    @Test
+    fun `regions failure falls back to an empty region list`() = runTest(testDispatcher) {
+        every { getAllRegionsUseCase() } returns flow { throw IllegalStateException("regions") }
+
+        initViewModel()
+
+        val state = viewModel.state.first { !it.isLoading }
+
+        assertTrue(state.allRegions.isEmpty())
+        assertEquals(testCountries, state.countries)
+    }
+
+    @Test
+    fun `clear error removes the current error`() = runTest(testDispatcher) {
+        every { getAllCountriesUseCase(any(), any(), any()) } returns
+            flow { throw IllegalStateException("boom") }
+
+        initViewModel()
+        viewModel.state.first { it.error != null }
+
+        viewModel.onAction(CountryListAction.OnClearError)
+        advanceUntilIdle()
+
+        assertNull(viewModel.state.value.error)
     }
 }
