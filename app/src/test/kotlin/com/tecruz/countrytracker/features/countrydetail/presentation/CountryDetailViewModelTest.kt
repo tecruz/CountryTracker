@@ -271,4 +271,77 @@ class CountryDetailViewModelTest {
             markCountryAsUnvisitedUseCase(any())
         }
     }
+
+    @Test
+    fun `markAsVisited unexpected failure surfaces an error`() = runTest {
+        coEvery { markCountryAsVisitedUseCase(any(), any(), any(), any()) } throws
+            IllegalStateException("disk failure")
+
+        viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Loaded state
+
+            viewModel.onAction(CountryDetailAction.OnMarkAsVisited(1L, "", 0))
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            assertFalse(errorState.isSaving)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `markAsUnvisited unexpected failure surfaces an error`() = runTest {
+        coEvery { markCountryAsUnvisitedUseCase(any()) } throws IllegalStateException("disk failure")
+
+        viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Loaded state
+
+            viewModel.onAction(CountryDetailAction.OnMarkAsUnvisited)
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            assertFalse(errorState.isSaving)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `updateNotes unexpected failure surfaces an error`() = runTest {
+        coEvery { updateCountryNotesUseCase(any(), any()) } throws IllegalStateException("disk failure")
+
+        viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Loaded state
+
+            viewModel.onAction(CountryDetailAction.OnUpdateNotes("note"))
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            assertFalse(errorState.isSaving)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `updateRating unexpected failure surfaces an error`() = runTest {
+        coEvery { updateCountryRatingUseCase(any(), any()) } throws IllegalStateException("disk failure")
+
+        viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Loaded state
+
+            viewModel.onAction(CountryDetailAction.OnUpdateRating(3))
+
+            val errorState = awaitItem()
+            assertNotNull("Error should not be null", errorState.error)
+            assertFalse(errorState.isSaving)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
