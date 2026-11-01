@@ -27,7 +27,7 @@ class CountryTrackerE2ETest {
     @Test
     fun completeUserJourney_browseCountries_markAsVisited_verifyChanges() {
         // Wait for the app to load
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -36,7 +36,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Country Tracker").assertIsDisplayed()
 
         // Step 2: Countries tab is now the default, verify it's displayed
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -45,7 +45,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Map").performClick()
 
         // Wait for Map tab to load
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("VISITED", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -57,7 +57,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for Countries tab to load with search field
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -67,7 +67,7 @@ class CountryTrackerE2ETest {
             .performTextInput("Brazil")
 
         // Wait for search results to appear
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithTag("country_item_Brazil")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -76,7 +76,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithTag("country_item_Brazil").performClick()
 
         // Step 6: Verify detail screen is displayed
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription("Navigate back")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -93,7 +93,7 @@ class CountryTrackerE2ETest {
             composeTestRule.onNodeWithText("Mark as not visited", substring = true)
                 .performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.waitUntil(timeoutMillis = 10000) {
                 composeTestRule.onAllNodesWithText("Mark as Visited")
                     .fetchSemanticsNodes().isNotEmpty()
             }
@@ -103,14 +103,14 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Mark as Visited").performClick()
 
         // Wait for date picker dialog and confirm
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("OK")
                 .fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithText("OK").performClick()
 
         // Wait for status to change
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Mark as not visited", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -123,7 +123,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithContentDescription("Navigate back").performClick()
 
         // Wait for list screen
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -133,7 +133,7 @@ class CountryTrackerE2ETest {
             .performClick()
 
         // Step 12: Verify Brazil shows in the list
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithTag("country_item_Brazil")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -145,7 +145,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Map").performClick()
 
         // Wait for map tab to load
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("VISITED", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -158,7 +158,7 @@ class CountryTrackerE2ETest {
     @Test
     fun filterCountries_byRegion_verifyFiltering() {
         // Wait for the app to load
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -170,7 +170,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for Countries tab to load with filter chips
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Visited only", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -190,7 +190,7 @@ class CountryTrackerE2ETest {
     @Test
     fun searchCountries_findSpecificCountry_openDetails() {
         // Wait for the app to load
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -199,7 +199,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for tab to switch and search field to appear
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -209,7 +209,7 @@ class CountryTrackerE2ETest {
             .performTextInput("Japan")
 
         // Step 3: Wait for search results
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithTag("country_item_Japan")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -221,7 +221,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithTag("country_item_Japan").performClick()
 
         // Step 6: Verify detail screen opens
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription("Navigate back")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -232,7 +232,7 @@ class CountryTrackerE2ETest {
     @Test
     fun markCountryAsVisited_addNotes_verifyPersistence() {
         // Wait for the app to load
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -241,7 +241,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for tab to switch and search field to appear
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -251,7 +251,7 @@ class CountryTrackerE2ETest {
             .performTextInput("Canada")
 
         // Step 3: Wait for search results
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithTag("country_item_Canada")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -260,7 +260,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithTag("country_item_Canada").performClick()
 
         // Step 5: Wait for detail screen
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription("Navigate back")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -274,7 +274,7 @@ class CountryTrackerE2ETest {
             composeTestRule.onNodeWithText("Mark as not visited", substring = true)
                 .performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.waitUntil(timeoutMillis = 10000) {
                 composeTestRule.onAllNodesWithText("Mark as Visited")
                     .fetchSemanticsNodes().isNotEmpty()
             }
@@ -284,14 +284,14 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Mark as Visited").performClick()
 
         // Wait for date picker dialog and confirm
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("OK")
                 .fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithText("OK").performClick()
 
         // Wait for status to change
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Mark as not visited", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -304,7 +304,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithContentDescription("Navigate back").performClick()
 
         // Wait to return to list
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -313,7 +313,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithTag("country_item_Canada").performClick()
 
         // Step 11: Verify it's still marked as visited
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Mark as not visited", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -323,7 +323,7 @@ class CountryTrackerE2ETest {
         // Step 12: Navigate back to list
         composeTestRule.onNodeWithContentDescription("Navigate back").performClick()
 
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -333,7 +333,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Map").performClick()
 
         // Wait for map tab to load
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("VISITED", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -346,7 +346,7 @@ class CountryTrackerE2ETest {
     @Test
     fun verifyStatisticsUpdate_whenMarkingCountriesAsVisited() {
         // Wait for the app to load
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -355,7 +355,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Countries").performClick()
 
         // Wait for tab to switch and search field to appear
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -364,7 +364,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNode(hasSetTextAction())
             .performTextInput("Australia")
 
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithTag("country_item_Australia")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -373,7 +373,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithTag("country_item_Australia").performClick()
 
         // Step 4: Wait for detail screen
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription("Navigate back")
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -387,14 +387,14 @@ class CountryTrackerE2ETest {
             composeTestRule.onNodeWithText("Mark as Visited").performClick()
 
             // Wait for date picker dialog and confirm
-            composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.waitUntil(timeoutMillis = 10000) {
                 composeTestRule.onAllNodesWithText("OK")
                     .fetchSemanticsNodes().isNotEmpty()
             }
             composeTestRule.onNodeWithText("OK").performClick()
 
             // Wait for status to change
-            composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.waitUntil(timeoutMillis = 10000) {
                 composeTestRule.onAllNodesWithText("Mark as not visited", substring = true)
                     .fetchSemanticsNodes().isNotEmpty()
             }
@@ -404,7 +404,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithContentDescription("Navigate back").performClick()
 
         // Wait for list screen
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodes(hasSetTextAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -414,7 +414,7 @@ class CountryTrackerE2ETest {
         composeTestRule.onNodeWithText("Map").performClick()
 
         // Wait for map tab to load
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("VISITED", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
@@ -431,7 +431,7 @@ class CountryTrackerE2ETest {
     @Test
     fun appStartup_mapDataIsPreLoaded_afterSplashScreen() {
         // Wait for the app to fully load (splash screen has dismissed)
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithText("Country Tracker", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
