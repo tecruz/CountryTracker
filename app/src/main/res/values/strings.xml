@@ -53,6 +53,12 @@
     <!-- Errors -->
     <string name="error_generic">An unexpected error occurred</string>
     <string name="error_load_countries">Failed to load countries</string>
+    <string name="error_load_statistics">Could not load visit statistics</string>
+    <string name="error_load_regions">Could not load regions</string>
+    <string name="error_load_visited">Could not load visited countries</string>
+    <string name="error_load_map">Could not load the world map</string>
+    <string name="error_parse_map">Could not read the world map shapes</string>
+    <string name="action_retry">Retry</string>
     <string name="error_load_country">Failed to load country details</string>
     <string name="error_save_failed">Failed to save changes</string>
     <string name="error_notes_too_long">Notes cannot exceed %1$d characters</string>

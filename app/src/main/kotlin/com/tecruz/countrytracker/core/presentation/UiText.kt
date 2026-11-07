@@ -1,6 +1,9 @@
 package com.tecruz.countrytracker.core.presentation
 
+import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.res.stringResource
 
 sealed interface UiText {
     @Immutable
@@ -26,4 +29,26 @@ sealed interface UiText {
 fun UiText.asString(): String = when (this) {
     is UiText.DynamicString -> value
     is UiText.StringResource -> "" // Will be resolved in composable
+}
+
+/**
+ * Resolves this text with Android resources. Use from a [Composable] via [resolve].
+ */
+fun UiText.resolve(context: Context): String = when (this) {
+    is UiText.DynamicString -> value
+    is UiText.StringResource -> if (args.isEmpty()) {
+        context.getString(resourceId)
+    } else {
+        context.getString(resourceId, *args)
+    }
+}
+
+@Composable
+fun UiText.resolve(): String = when (this) {
+    is UiText.DynamicString -> value
+    is UiText.StringResource -> if (args.isEmpty()) {
+        stringResource(resourceId)
+    } else {
+        stringResource(resourceId, *args)
+    }
 }

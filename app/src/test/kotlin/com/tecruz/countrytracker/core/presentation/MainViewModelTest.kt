@@ -1,6 +1,8 @@
 package com.tecruz.countrytracker.core.presentation
 
 import app.cash.turbine.test
+import com.tecruz.countrytracker.core.domain.DataError
+import com.tecruz.countrytracker.core.domain.Result
 import com.tecruz.countrytracker.core.domain.repository.MapRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -38,7 +40,7 @@ class MainViewModelTest {
     fun `init should load map data if not loaded`() = runTest(testDispatcher) {
         // Given
         every { mapRepository.isMapDataLoaded() } returns false
-        coEvery { mapRepository.loadMapData() } returns Unit
+        coEvery { mapRepository.loadMapData() } returns Result.Success(Unit)
 
         // When
         val viewModel = MainViewModel(mapRepository)
@@ -69,6 +71,21 @@ class MainViewModelTest {
         viewModel.isInitialized.test {
             assertTrue(awaitItem())
             coVerify(exactly = 0) { mapRepository.loadMapData() }
+        }
+    }
+
+    @Test
+    fun `init completes when map preload fails`() = runTest(testDispatcher) {
+        every { mapRepository.isMapDataLoaded() } returns false
+        coEvery { mapRepository.loadMapData() } returns Result.Failure(DataError.Local.NOT_FOUND)
+
+        val viewModel = MainViewModel(mapRepository)
+
+        viewModel.isInitialized.test {
+            assertFalse(awaitItem())
+            testScheduler.advanceUntilIdle()
+            assertTrue(awaitItem())
+            coVerify { mapRepository.loadMapData() }
         }
     }
 }
