@@ -55,17 +55,16 @@ class WorldMapGeometryLoader(
         outlines: List<CountryMapOutline>,
     ): Result<List<CountryPathData>, WorldMapFailure> {
         val parsed = withContext(dispatchers.default) { buildPaths(outlines) }
-        return if (parsed == null) {
-            Result.Failure(WorldMapFailure.PathParseFailed)
-        } else {
-            cachedPaths = parsed
-            Result.Success(parsed)
+        if (parsed == null) {
+            return Result.Failure(WorldMapFailure.PathParseFailed)
         }
+        cachedPaths = parsed
+        return Result.Success(parsed)
     }
 
     private fun buildPaths(outlines: List<CountryMapOutline>): List<CountryPathData>? {
         val paths = ArrayList<CountryPathData>(outlines.size)
-        for (outline in outlines) {
+        outlines.forEach { outline ->
             val path = parseOrNull(outline.svgPath) ?: return null
             paths.add(CountryPathData(code = outline.code, path = path, bounds = path.getBounds()))
         }

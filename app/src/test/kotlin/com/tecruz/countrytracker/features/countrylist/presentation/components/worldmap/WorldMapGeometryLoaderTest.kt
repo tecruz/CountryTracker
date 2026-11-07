@@ -14,6 +14,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -109,6 +110,28 @@ class WorldMapGeometryLoaderTest {
 
         coVerify(exactly = 2) { repository.loadCountryOutlines() }
         verify(exactly = 2) { parser.parse("good") }
+    }
+
+    @Test
+    fun `parser cancellation is rethrown and does not fill the cache`() = runTest(dispatcher) {
+        coEvery { repository.loadCountryOutlines() } returns Result.Success(
+            listOf(CountryMapOutline("US", "stop")),
+        )
+        every { parser.parse("stop") } throws CancellationException("stop")
+        val loader = loader()
+
+        try {
+            loader.load()
+            error("parser cancellation should propagate")
+        } catch (cancelled: CancellationException) {
+            assertEquals("stop", cancelled.message)
+        }
+
+        every { parser.parse("stop") } returns path()
+        val recovered = loader.load()
+
+        assertTrue(recovered is Result.Success)
+        verify(exactly = 2) { parser.parse("stop") }
     }
 
     @Test

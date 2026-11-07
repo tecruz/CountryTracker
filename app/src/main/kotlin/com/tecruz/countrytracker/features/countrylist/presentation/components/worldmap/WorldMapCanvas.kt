@@ -166,7 +166,7 @@ fun WorldMapCanvas(
 
 @DevicePreviews
 @Composable
-private fun WorldMapCanvasPreview() {
+internal fun WorldMapCanvasPreview() {
     PreviewWrapper {
         val previewBounds = Rect(10f, 10f, 200f, 120f)
         val previewPath = Path().apply { addRect(previewBounds) }

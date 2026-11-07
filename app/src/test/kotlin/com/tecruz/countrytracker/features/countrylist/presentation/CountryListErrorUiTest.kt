@@ -18,7 +18,9 @@ import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.core.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.core.designsystem.CountryTrackerTheme
 import com.tecruz.countrytracker.core.presentation.UiText
+import com.tecruz.countrytracker.features.countrylist.presentation.components.ReadFailureNotice
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapCanvas
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapCanvasPreview
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.CountryPathData
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -140,6 +142,136 @@ class CountryListErrorUiTest {
         composeTestRule.onNodeWithText("Map").performClick()
         composeTestRule.onNodeWithText("VISITED").assertExists()
         composeTestRule.onNodeWithContentDescription("World map with no visited countries").assertIsDisplayed()
+    }
+
+    @Test
+    fun `map read failure without a message uses the fallback and can be retried`() {
+        var retries = 0
+        setScreen(
+            state = CountryListState(
+                isLoading = false,
+                visitedCodesStatus = DataReadStatus.Ready,
+                statisticsStatus = DataReadStatus.Ready,
+            ),
+            mapState = WorldMapState(status = DataReadStatus.Unavailable, error = null),
+            onAction = { if (it is CountryListAction.OnRetry) retries += 1 },
+        )
+
+        composeTestRule.onNodeWithText("Map").performClick()
+        composeTestRule.onNodeWithText("Could not load the world map").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Retry").performClick()
+        assertEquals(1, retries)
+    }
+
+    @Test
+    fun `map read failure shows the loader error instead of an empty map`() {
+        setScreen(
+            state = CountryListState(
+                isLoading = false,
+                visitedCodesStatus = DataReadStatus.Ready,
+                statisticsStatus = DataReadStatus.Ready,
+            ),
+            mapState = WorldMapState(
+                status = DataReadStatus.Unavailable,
+                error = UiText.DynamicString("shapes failed"),
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Map").performClick()
+        composeTestRule.onNodeWithText("shapes failed").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("world_map").assertDoesNotExist()
+    }
+
+    @Test
+    fun `region read failure offers retry instead of an empty region list`() {
+        var retries = 0
+        setScreen(
+            state = CountryListState(
+                isLoading = false,
+                countriesStatus = DataReadStatus.Ready,
+                regionsStatus = DataReadStatus.Unavailable,
+                countries = emptyList(),
+            ),
+            onAction = { if (it is CountryListAction.OnRetry) retries += 1 },
+        )
+
+        composeTestRule.onNodeWithText("Could not load regions").assertIsDisplayed()
+        composeTestRule.onNodeWithText("No countries found").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Retry").performClick()
+        assertEquals(1, retries)
+    }
+
+    @Test
+    fun `failure notice uses its default modifier`() {
+        var retried = false
+        composeTestRule.setContent {
+            CountryTrackerTheme {
+                ReadFailureNotice(
+                    message = UiText.DynamicString("Could not load regions"),
+                    onRetry = { retried = true },
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Could not load regions").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Retry").performClick()
+        assertEquals(true, retried)
+    }
+
+    @Test
+    fun `statistics stay hidden while the country list is still loading`() {
+        setScreen(
+            CountryListState(
+                isLoading = true,
+                statisticsStatus = DataReadStatus.Loading,
+                visitedCount = 0,
+                totalCount = 0,
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Map").performClick()
+        composeTestRule.onNodeWithText("VISITED").assertDoesNotExist()
+    }
+
+    @Test
+    fun `map stays hidden while visited codes are still loading`() {
+        setScreen(
+            state = CountryListState(
+                isLoading = false,
+                visitedCodesStatus = DataReadStatus.Loading,
+                statisticsStatus = DataReadStatus.Ready,
+            ),
+            mapState = WorldMapState(status = DataReadStatus.Ready),
+        )
+
+        composeTestRule.onNodeWithText("Map").performClick()
+        composeTestRule.onNodeWithText("VISITED").assertExists()
+        composeTestRule.onNodeWithTag("world_map").assertDoesNotExist()
+    }
+
+    @Test
+    fun `map stays hidden while geometry is still loading`() {
+        setScreen(
+            state = CountryListState(
+                isLoading = false,
+                visitedCodesStatus = DataReadStatus.Ready,
+                statisticsStatus = DataReadStatus.Ready,
+            ),
+            mapState = WorldMapState(status = DataReadStatus.Loading),
+        )
+
+        composeTestRule.onNodeWithText("Map").performClick()
+        composeTestRule.onNodeWithText("VISITED").assertExists()
+        composeTestRule.onNodeWithTag("world_map").assertDoesNotExist()
+    }
+
+    @Test
+    fun `preview draws the sample path`() {
+        composeTestRule.setContent {
+            WorldMapCanvasPreview()
+        }
+
+        composeTestRule.onNodeWithTag("world_map").assertIsDisplayed()
     }
 
     @Test
