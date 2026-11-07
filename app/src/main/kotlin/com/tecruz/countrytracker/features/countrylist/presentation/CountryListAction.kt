@@ -6,4 +6,5 @@ sealed interface CountryListAction {
     data object OnToggleShowOnlyVisited : CountryListAction
     data class OnCountryClick(val code: String) : CountryListAction
     data object OnClearError : CountryListAction
+    data object OnRetry : CountryListAction
 }

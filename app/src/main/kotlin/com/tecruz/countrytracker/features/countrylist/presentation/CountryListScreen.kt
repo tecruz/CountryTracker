@@ -62,7 +62,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -73,11 +72,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecruz.countrytracker.LocalWindowSizeClass
 import com.tecruz.countrytracker.R
 import com.tecruz.countrytracker.core.designsystem.Background
@@ -90,13 +91,15 @@ import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
 import com.tecruz.countrytracker.core.designsystem.preview.ExcludeFromGeneratedCoverageReport
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewCountryListItems
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
-import com.tecruz.countrytracker.core.presentation.asString
+import com.tecruz.countrytracker.core.presentation.UiText
+import com.tecruz.countrytracker.core.presentation.resolve
 import com.tecruz.countrytracker.core.util.contentPadding
 import com.tecruz.countrytracker.core.util.gridColumns
 import com.tecruz.countrytracker.core.util.horizontalPadding
 import com.tecruz.countrytracker.core.util.itemSpacing
 import com.tecruz.countrytracker.features.countrylist.presentation.components.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.presentation.components.FilterChips
+import com.tecruz.countrytracker.features.countrylist.presentation.components.ReadFailureNotice
 import com.tecruz.countrytracker.features.countrylist.presentation.components.SearchBar
 import com.tecruz.countrytracker.features.countrylist.presentation.components.StatsCard
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapCanvas
@@ -109,10 +112,13 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 @Composable
 fun CountryListRoot(onCountryClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val viewModel: CountryListViewModel = koinViewModel()
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val mapState by viewModel.mapState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val errorDismissText = stringResource(R.string.error_dismiss)
+    val stateErrorText = state.error?.resolve()
+    val mapErrorText = mapState.error?.resolve()
 
     // Handle events
     LaunchedEffect(Unit) {
@@ -120,21 +126,31 @@ fun CountryListRoot(onCountryClick: (String) -> Unit, modifier: Modifier = Modif
             when (event) {
                 is CountryListEvent.NavigateToDetail -> onCountryClick(event.countryCode)
                 is CountryListEvent.ShowSnackbar -> {
-                    val message = event.message.asString()
-                    snackbarHostState.showSnackbar(
-                        message = message,
-                        actionLabel = errorDismissText,
-                    )
+                    val message = event.message.resolve(context)
+                    if (message.isNotEmpty()) {
+                        snackbarHostState.showSnackbar(
+                            message = message,
+                            actionLabel = errorDismissText,
+                        )
+                    }
                 }
             }
         }
     }
 
-    // Show error snackbar when error occurs
-    LaunchedEffect(state.error) {
-        state.error?.let { error ->
+    // Show error snackbar when a read fails. Lifecycle collection stops with the screen.
+    LaunchedEffect(stateErrorText) {
+        if (stateErrorText != null) {
             snackbarHostState.showSnackbar(
-                message = error.asString(),
+                message = stateErrorText,
+                actionLabel = errorDismissText,
+            )
+        }
+    }
+    LaunchedEffect(mapErrorText) {
+        if (mapErrorText != null) {
+            snackbarHostState.showSnackbar(
+                message = mapErrorText,
                 actionLabel = errorDismissText,
             )
         }
@@ -145,6 +161,7 @@ fun CountryListRoot(onCountryClick: (String) -> Unit, modifier: Modifier = Modif
         onAction = viewModel::onAction,
         modifier = modifier,
         snackbarHostState = snackbarHostState,
+        mapState = mapState,
     )
 }
 
@@ -155,6 +172,7 @@ fun CountryListScreen(
     onAction: (CountryListAction) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState? = null,
+    mapState: WorldMapState = WorldMapState(),
 ) {
     val windowSizeClass = LocalWindowSizeClass.current
     val hPadding = windowSizeClass.horizontalPadding()
@@ -313,6 +331,8 @@ fun CountryListScreen(
                     )
                     1 -> MapTab(
                         state = state,
+                        mapState = mapState,
+                        onAction = onAction,
                         horizontalPadding = hPadding,
                     )
                 }
@@ -328,12 +348,15 @@ fun CountryListScreen(
 @Composable
 private fun MapTab(
     state: CountryListState,
+    mapState: WorldMapState,
+    onAction: (CountryListAction) -> Unit,
     modifier: Modifier = Modifier,
     horizontalPadding: androidx.compose.ui.unit.Dp = 16.dp,
 ) {
     // Use visitedCountryCodes from state (computed from ALL countries, not filtered)
     val visitedCountryCodes = state.visitedCountryCodes
     val scrollState = rememberScrollState()
+    val retry = { onAction(CountryListAction.OnRetry) }
 
     Column(
         modifier = modifier
@@ -355,23 +378,69 @@ private fun MapTab(
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
         ) {
-            WorldMapCanvas(
-                visitedCountryCodes = visitedCountryCodes,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-            )
+            when {
+                state.visitedCodesStatus == DataReadStatus.Unavailable -> {
+                    ReadFailureNotice(
+                        message = UiText.StringResource(R.string.error_load_visited),
+                        onRetry = retry,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                mapState.status == DataReadStatus.Unavailable -> {
+                    ReadFailureNotice(
+                        message = mapState.error ?: UiText.StringResource(R.string.error_load_map),
+                        onRetry = retry,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                mapState.status == DataReadStatus.Ready &&
+                    state.visitedCodesStatus == DataReadStatus.Ready -> {
+                    WorldMapCanvas(
+                        visitedCountryCodes = visitedCountryCodes,
+                        countryPaths = mapState.paths,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                    )
+                }
+                else -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        LoadingIndicator(color = PrimaryGreen)
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Statistics Card with enhanced design
-        StatsCard(
-            visitedCount = state.visitedCount,
-            totalCount = state.totalCount,
-            percentage = state.percentage,
-            modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 12.dp),
-        )
+        // Statistics are hidden when the read failed so a failure is not shown as zero visited.
+        when {
+            state.statisticsStatus == DataReadStatus.Unavailable -> {
+                ReadFailureNotice(
+                    message = UiText.StringResource(R.string.error_load_statistics),
+                    onRetry = retry,
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
+                )
+            }
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator(color = PrimaryGreen)
+                }
+            }
+            else -> {
+                StatsCard(
+                    visitedCount = state.visitedCount,
+                    totalCount = state.totalCount,
+                    percentage = state.percentage,
+                    modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 12.dp),
+                )
+            }
+        }
 
         // Hint text with better styling (only show if not empty)
         val hintText = stringResource(R.string.map_hint)
@@ -448,9 +517,17 @@ private fun ListTab(
             modifier = Modifier.padding(horizontal = contentPadding),
         )
 
+        if (state.regionsStatus == DataReadStatus.Unavailable) {
+            ReadFailureNotice(
+                message = UiText.StringResource(R.string.error_load_regions),
+                onRetry = { onAction(CountryListAction.OnRetry) },
+                modifier = Modifier.padding(horizontal = contentPadding),
+            )
+        }
+
         Spacer(modifier = Modifier.height(itemSpacing))
 
-        // Country List
+        // Country List. A failed read is not the same as a successful empty filter.
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -458,6 +535,12 @@ private fun ListTab(
             ) {
                 LoadingIndicator(color = PrimaryGreen)
             }
+        } else if (state.countriesStatus == DataReadStatus.Unavailable) {
+            ReadFailureNotice(
+                message = UiText.StringResource(R.string.error_load_countries),
+                onRetry = { onAction(CountryListAction.OnRetry) },
+                modifier = Modifier.fillMaxSize(),
+            )
         } else if (state.countries.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),

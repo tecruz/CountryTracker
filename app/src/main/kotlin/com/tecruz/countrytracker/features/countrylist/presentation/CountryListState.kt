@@ -17,4 +17,8 @@ data class CountryListState(
     val isLoading: Boolean = true,
     val allRegions: List<String> = emptyList(),
     val error: UiText? = null,
+    val countriesStatus: DataReadStatus = DataReadStatus.Loading,
+    val statisticsStatus: DataReadStatus = DataReadStatus.Loading,
+    val visitedCodesStatus: DataReadStatus = DataReadStatus.Loading,
+    val regionsStatus: DataReadStatus = DataReadStatus.Loading,
 )
