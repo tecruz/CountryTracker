@@ -12,16 +12,69 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 | Kotlin | 2.4.21 |
 | Jetpack Compose BOM | 2026.09.00 |
 | Material 3 Expressive | 1.5.0-beta02 |
-| Material 3 Adaptive | 1.2.0 |
+| Material 3 Adaptive | 1.3.0 |
 | Room | 2.8.5 |
 | Koin | 4.2.2 |
 | Navigation Compose | 2.10.2 |
 | Coroutines | 1.11.0 |
-| AGP | 9.4.1 |
+| AGP | 9.5.0 |
 | KSP | 2.3.12 |
 | Target SDK | 37 |
 | Min SDK | 24 |
 <!-- versions:technology-versions:end -->
+
+## Toolchain compatibility
+
+The version table above is generated from `gradle/libs.versions.toml`, the Gradle wrapper, and `app/build.gradle.kts`. The only catalog edit is Material 3 Adaptive, raised from 1.2.0 to 1.3.0 so the declaration matches Compose BOM `2026.09.00`. Gradle was already selecting 1.3.0. Newer releases were not applied only because they exist.
+
+| Requirement | Declared | Compatibility |
+|-------------|----------|----------------|
+| Android Gradle Plugin | 9.5.0 | Minimum Gradle 9.6.0, minimum JDK 17, maximum API level 37 |
+| Gradle wrapper | 9.8.2 | Newer than the AGP 9.5 minimum. CI and local builds use the wrapper |
+| JDK | 17 | Bytecode target is Java 17. CI uses Temurin 17. AGP 9.5 runs on JDK 17 or newer |
+| Kotlin / KSP | 2.4.21 / 2.3.12 | KSP 2.3.x is the plugin line that supports Kotlin 2.4. Room's compiler runs on this KSP version |
+| Compose BOM | 2026.09.00 | Stable BOM. It would select Material 3 1.4.0; this app overrides that artifact |
+| compileSdk / targetSdk | 37 | Final Android 17 base platform, API 37.0. AGP 9.5 supports API 37 |
+| minSdk | 24 | Unchanged |
+
+### SDK 37 and Google Play
+
+API 37.0 is the stable Android 17 base SDK, released 16 June 2026. The installed platform reports `AndroidVersion.ApiLevel=37.0`, an empty codename, and `PreviewSdkInt=0`. Google Play's target API policy, in force since 31 August 2026, requires new apps and updates to target API 36 or higher, so target 37 is accepted. Play has not published a rule that rejects API 37. `minSdk` stays at 24; the API 37 behavior set does not require raising it.
+
+Behavior changes that apply when an app targets API 37 were reviewed against this codebase:
+
+- The app has no widgets, custom notification `RemoteViews`, SMS handling, local-network discovery, Bluetooth sockets, audio playback, or reflection on `MessageQueue` or `static final` fields.
+- `AndroidManifest.xml` does not set `screenOrientation`, `resizeableActivity`, or aspect-ratio constraints. Android 17 ignores those opt-outs on large screens (smallest width above 600dp) for apps targeting API 37. Layouts already follow `WindowSizeClass`, and instrumented tests cover compact, medium, tablet, foldable, and orientation changes.
+- The only permission is `INTERNET`. Country data is pre-populated; the app does not open its own network connections.
+
+CI runs instrumented tests on an API 34 emulator (`.github/workflows/ci.yml`). An API 37 system image was not booted for this check. With OpenJDK 17.0.20 and Android SDK Platform 37.0, `assembleDebug`, `testDebugUnitTest` (214 tests), `lintDebug`, `detekt`, `spotlessCheck`, and `bundleRelease` succeeded. `bundleRelease` wrote an unsigned `app-release.aab`; the project has no signing config.
+
+### Material 3 Expressive beta
+
+`androidx.compose.material3:material3` stays on **1.5.0-beta02**. That pin is intentional.
+
+Compose BOM `2026.09.00` manages stable Material 3 **1.4.0**. In 1.4.0, `MaterialExpressiveTheme` is not public, and `LoadingIndicator` / `ContainedLoadingIndicator` do not exist. `CountryTrackerTheme`, `CountryListScreen`, and `CountryDetailScreen` call those APIs. Stable 1.5.0 is not published. The newest pre-release on 4 November 2026 is `1.5.0-rc01`. It was not adopted: the beta already resolves, and the release candidate's fixes are slider and toggle-button bugs this app does not use.
+
+Shipping the beta has these limits:
+
+- `LoadingIndicator` and `ContainedLoadingIndicator` still need `@OptIn(ExperimentalMaterial3ExpressiveApi)`. Those APIs can change before 1.5.0 stable.
+- `MaterialExpressiveTheme` is public in 1.5.0-beta02, but the artifact is a pre-release. Dependabot updates dependencies that are already pre-release, so it can propose `1.5.0-rc01` or stable `1.5.0` later.
+- The `androidx.compose.material3` atomic group moves `material3-window-size-class` to the same `1.5.0-beta02`. The catalog pins that artifact explicitly so the request matches resolution. Compose UI stays on the stable BOM (`ui` 1.12.1).
+- Material 3 Adaptive is the stable `1.3.0` from BOM `2026.09.00`. An older catalog pin of `1.2.0` did not stick: Gradle conflict resolution selected `1.3.0`.
+
+`CountryListScreenComposableTest` and `CountryDetailScreenDialogsTest.countryDetailScreen_showsLoadingIndicator_whenUnvisitedAndSaving` cover the loading indicators. Screen tests run under `CountryTrackerTheme`.
+
+Replace `1.5.0-beta02` with stable `1.5.0` when that release exists. Returning to BOM-managed 1.4.0 requires removing the expressive calls.
+
+### Detekt
+
+Detekt **1.23.8** is the latest stable release and is built against Kotlin 2.0.21. Detekt 2.0 is still alpha (`2.0.0-alpha.6` tracks Kotlin 2.4). This project's `detekt` task passes with `maxIssues: 0`, so the alpha was not adopted. If 1.23.8 starts failing on Kotlin 2.4 metadata, move to a stable Detekt 2.0.
+
+### Dependabot
+
+`.github/dependabot.yml` updates Gradle and GitHub Actions every Monday, with at most five open pull requests per ecosystem. Labels and commit prefixes match the existing history (`deps` / `ci`). There is no ignore rule for the Material 3 pre-release, so a later stable 1.5.0 can arrive as a normal Dependabot pull request.
+
+Dependabot does not edit these documents. `scripts/sync-docs-versions.py` regenerates the version tables. Pull requests from people run that script with `--check`. Dependabot pull requests skip the check because they only change the catalog. After those merges, `.github/workflows/docs-sync.yml` opens a follow-up pull request. It does not push to `master`: repository rules require a pull request. The 2 November 2026 run (`41546768522`) failed with `GH013` for that reason, which left the AGP row at 9.4.1 after the 9.5.0 merge.
 
 ### Project Structure
 
@@ -36,12 +89,17 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   │   ├── CountryDao.kt          # Room Data Access Object
 │   │   │   ├── CountryDatabase.kt     # Room Database configuration
 │   │   │   └── CountryEntity.kt       # Database entity
-│   │   └── datasource/
-│   │       ├── CountryDataLoader.kt   # Pre-populates database
-│   │       └── WorldMapPathData.kt    # Loads SVG path data from assets
+│   │   ├── datasource/
+│   │   │   ├── CountryDataLoader.kt   # Pre-populates database
+│   │   │   └── WorldMapPathData.kt    # Loads SVG path data from assets
+│   │   ├── mapper/
+│   │   │   └── CountryMapper.kt       # Entity-to-domain mapping
+│   │   └── repository/
+│   │       ├── CountryRepositoryImpl.kt
+│   │       └── MapRepositoryImpl.kt
 │   ├── designsystem/
 │   │   ├── Color.kt
-│   │   ├── Theme.kt
+│   │   ├── Theme.kt                   # MaterialExpressiveTheme
 │   │   ├── Type.kt
 │   │   ├── component/
 │   │   │   ├── AdaptiveGrid.kt        # Responsive grid/list component
@@ -53,8 +111,14 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │       ├── PreviewData.kt         # Sample data & parameter providers
 │   │       └── PreviewUtil.kt         # Theme + WindowSizeClass wrapper
 │   ├── di/
-│   │   └── CoreDataModule.kt          # Database, DAO, and DataStore providers
+│   │   ├── CoreDataModule.kt          # Database, DAO, repositories, dispatchers
+│   │   └── CorePresentationModule.kt  # MainViewModel
 │   ├── domain/
+│   │   ├── model/
+│   │   │   └── Country.kt             # Shared country model
+│   │   ├── repository/
+│   │   │   ├── CountryRepository.kt
+│   │   │   └── MapRepository.kt
 │   │   ├── DataError.kt               # Domain error hierarchy
 │   │   ├── Result.kt                  # Functional result wrapper
 │   │   └── ResultExtensions.kt        # Convenience functions for Result
@@ -63,6 +127,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │   └── Screen.kt                  # Type-safe navigation routes
 │   ├── presentation/
 │   │   ├── DataErrorExt.kt            # Error-to-UiText mapping
+│   │   ├── MainViewModel.kt           # Splash / map initialization
 │   │   └── UiText.kt                  # String resource abstraction
 │   └── util/
 │       ├── DispatcherProvider.kt      # Coroutine dispatcher abstraction
@@ -71,23 +136,16 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │
 ├── features/
 │   ├── countrylist/                    # Country List feature
-│   │   ├── data/
-│   │   │   ├── di/
-│   │   │   │   └── CountryListDataModule.kt
-│   │   │   ├── mapper/
-│   │   │   │   └── CountryListMapper.kt
-│   │   │   └── repository/
-│   │   │       └── CountryListRepositoryImpl.kt
 │   │   ├── domain/
 │   │   │   ├── model/
 │   │   │   │   ├── CountryListItem.kt
 │   │   │   │   └── CountryStatistics.kt   # Statistics data (visited/total/percentage)
-│   │   │   ├── repository/
-│   │   │   │   └── CountryListRepository.kt
 │   │   │   ├── di/
 │   │   │   │   └── CountryListDomainModule.kt
 │   │   │   ├── GetAllCountriesUseCase.kt
-│   │   │   └── GetCountryStatisticsUseCase.kt
+│   │   │   ├── GetAllRegionsUseCase.kt
+│   │   │   ├── GetCountryStatisticsUseCase.kt
+│   │   │   └── GetVisitedCountryCodesUseCase.kt
 │   │   └── presentation/
 │   │       ├── components/
 │   │       │   ├── worldmap/              # World map rendering package
@@ -112,18 +170,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │   │       └── CountryListViewModel.kt
 │   │
 │   └── countrydetail/                  # Country Detail feature
-│       ├── data/
-│       │   ├── di/
-│       │   │   └── CountryDetailDataModule.kt
-│       │   ├── mapper/
-│       │   │   └── CountryDetailMapper.kt
-│       │   └── repository/
-│       │       └── CountryDetailRepositoryImpl.kt
 │       ├── domain/
-│       │   ├── model/
-│       │   │   └── CountryDetail.kt
-│       │   ├── repository/
-│       │   │   └── CountryDetailRepository.kt
 │       │   ├── di/
 │       │   │   └── CountryDetailDomainModule.kt
 │       │   ├── GetCountryByCodeUseCase.kt
@@ -142,7 +189,7 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 │           ├── di/
 │           │   └── CountryDetailPresentationModule.kt
 │           ├── model/
-│           │   └── CountryDetailUi.kt
+│           │   └── CountryDetailUi.kt     # Screen model mapped from Country
 │           ├── CountryDetailAction.kt
 │           ├── CountryDetailEvent.kt
 │           ├── CountryDetailScreen.kt
@@ -157,10 +204,10 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 **Purpose**: Contains business logic and is independent of frameworks
 
 **Components**:
-- **Models**: Pure Kotlin data classes (`CountryListItem`, `CountryStatistics`, `CountryDetail`)
-- **Repository Interfaces**: Contracts for data operations (`CountryListRepository`, `CountryDetailRepository`)
+- **Models**: Pure Kotlin data classes (`Country`, `CountryListItem`, `CountryStatistics`). Country detail renders `CountryDetailUi`, a presentation model mapped from `Country`
+- **Repository Interfaces**: Contracts for data operations (`CountryRepository`, `MapRepository`)
 - **Use Cases**: Single-responsibility business operations
-  - Country List: `GetAllCountriesUseCase`, `GetCountryStatisticsUseCase`
+  - Country List: `GetAllCountriesUseCase`, `GetAllRegionsUseCase`, `GetCountryStatisticsUseCase`, `GetVisitedCountryCodesUseCase`
   - Country Detail: `GetCountryByCodeUseCase`, `MarkCountryAsVisitedUseCase`, `MarkCountryAsUnvisitedUseCase`, `UpdateCountryNotesUseCase`, `UpdateCountryRatingUseCase`
 
 **Benefits**:
@@ -175,8 +222,8 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 - **Entities**: Room database entities (`CountryEntity`)
 - **DAOs**: Database access objects (`CountryDao`)
 - **Database**: Room database configuration (`CountryDatabase`)
-- **Mappers**: Entity-to-model conversion (`CountryListMapper`, `CountryDetailMapper`)
-- **Repository Implementations**: Concrete implementations of domain repositories (`CountryListRepositoryImpl`, `CountryDetailRepositoryImpl`)
+- **Mappers**: Entity-to-model conversion (`CountryMapper`)
+- **Repository Implementations**: Concrete implementations of domain repositories (`CountryRepositoryImpl`, `MapRepositoryImpl`), both in `core/data`
 
 **Key Features**:
 - Converts between Entity (data) and Model (domain)
@@ -220,17 +267,18 @@ Presentation → Domain ← Data
 ## Dependency Injection with Koin
 
 ### Modules:
-1. **CoreDataModule** (core): Provides Room database, DAO, DataStore, and Dispatchers.
-2. **CountryListDataModule**: Binds `CountryListRepository`.
-3. **CountryListDomainModule**: Provides List use cases.
-4. **CountryListPresentationModule**: Provides List ViewModel.
-5. **CountryDetailDataModule**: Binds `CountryDetailRepository`.
-6. **CountryDetailDomainModule**: Provides Detail use cases.
-7. **CountryDetailPresentationModule**: Provides Detail ViewModel.
+1. **CoreDataModule**: Provides the Room database, DAO, `DispatcherProvider`, `CountryRepository`, and `MapRepository`.
+2. **CorePresentationModule**: Provides `MainViewModel`.
+3. **CountryListDomainModule**: Provides list use cases.
+4. **CountryListPresentationModule**: Provides the list ViewModel.
+5. **CountryDetailDomainModule**: Provides detail use cases.
+6. **CountryDetailPresentationModule**: Provides the detail ViewModel.
+
+`CountryTrackerApplication` registers those six modules. Feature packages do not have their own data modules.
 
 ### Scopes:
-- Singletons: Database, DAOs, Repositories (declared in DataModules)
-- ViewModels: Declared in PresentationModules and injected via `koinViewModel()` or `viewModel()` in Composables.
+- Singletons: Database, DAO, and repositories, declared in `CoreDataModule`
+- ViewModels: Declared in the presentation modules and injected via `koinViewModel()` or `viewModel()`
 
 ## Design Patterns
 
@@ -305,7 +353,7 @@ The app uses modern edge-to-edge rendering where content draws behind system bar
 ```kotlin
 // MainActivity.kt
 enableEdgeToEdge(
-    statusBarStyle = SystemBarStyle.dark(PRIMARY_GREEN),
+    statusBarStyle = SystemBarStyle.dark(PRIMARY_GREEN_ARGB),
     navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
 )
 ```
@@ -407,28 +455,40 @@ All public UI components include `@Preview` annotations rendered at the three su
 ### Test Structure
 
 ```
-app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests (17 files)
+app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests (29 files)
 ├── core/
+│   ├── data/repository/
+│   │   └── CountryRepositoryImplTest.kt
 │   ├── designsystem/component/
-│   │   ├── AdaptiveGridTest.kt                # Adaptive grid component tests
-│   │   ├── AdaptiveScaffoldTest.kt            # Adaptive scaffold component tests
-│   │   └── ResponsiveCardTest.kt              # Responsive card component tests
+│   │   ├── AdaptiveGridTest.kt
+│   │   ├── AdaptiveScaffoldTest.kt
+│   │   └── ResponsiveCardTest.kt
+│   ├── domain/
+│   │   ├── DataErrorTest.kt
+│   │   └── ResultExtensionsTest.kt
+│   ├── navigation/
+│   │   └── ScreenTest.kt
+│   ├── presentation/
+│   │   ├── DataErrorExtTest.kt
+│   │   ├── MainViewModelTest.kt
+│   │   └── UiTextTest.kt
 │   └── util/
-│       └── WindowSizeClassExtTest.kt          # Window size class extension tests
+│       ├── DispatcherProviderTest.kt
+│       └── WindowSizeClassExtTest.kt
 ├── features/
 │   ├── countrylist/
-│   │   ├── data/repository/
-│   │   │   └── CountryListRepositoryImplTest.kt
 │   │   ├── domain/
 │   │   │   ├── GetAllCountriesUseCaseTest.kt
-│   │   │   └── GetCountryStatisticsUseCaseTest.kt
+│   │   │   ├── GetCountryStatisticsUseCaseTest.kt
+│   │   │   └── model/
+│   │   │       ├── CountryListItemTest.kt
+│   │   │       └── CountryStatisticsTest.kt
 │   │   └── presentation/
 │   │       ├── CountryListScreenComposableTest.kt  # Composable UI tests (Robolectric)
-│   │       ├── CountryListRowResponsiveTest.kt     # Responsive row layout tests
+│   │       ├── CountryListRowResponsiveTest.kt
+│   │       ├── CountryListUiStateTest.kt
 │   │       └── CountryListViewModelTest.kt
 │   └── countrydetail/
-│       ├── data/repository/
-│       │   └── CountryDetailRepositoryImplTest.kt
 │       ├── domain/
 │       │   ├── GetCountryByCodeUseCaseTest.kt
 │       │   ├── MarkCountryAsVisitedUseCaseTest.kt
@@ -436,39 +496,57 @@ app/src/test/kotlin/com/tecruz/countrytracker/     # Unit tests (17 files)
 │       │   ├── UpdateCountryNotesUseCaseTest.kt
 │       │   └── UpdateCountryRatingUseCaseTest.kt
 │       └── presentation/
+│           ├── CountryDetailUiStateTest.kt
 │           └── CountryDetailViewModelTest.kt
+└── test/
+    ├── KoinResetRule.kt
+    └── KoinTestHelper.kt
 
-app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests (19 files)
-├── core/data/database/
-│   └── CountryDaoTest.kt                      # DAO integration tests
+app/src/androidTest/kotlin/com/tecruz/countrytracker/ # Instrumented tests (25 files)
+├── core/
+│   ├── data/
+│   │   ├── database/
+│   │   │   └── CountryDaoTest.kt
+│   │   └── datasource/
+│   │       └── CountryDataLoaderInstrumentedTest.kt
+│   └── designsystem/
+│       ├── ThemeInstrumentedTest.kt
+│       └── component/
+│           ├── AdaptiveGridInstrumentedTest.kt
+│           ├── AdaptiveScaffoldInstrumentedTest.kt
+│           └── ResponsiveCardInstrumentedTest.kt
 ├── features/
 │   ├── countrylist/
 │   │   ├── data/
 │   │   │   ├── datasource/
-│   │   │   │   └── WorldMapPathDataTest.kt    # SVG path data loading tests
+│   │   │   │   └── WorldMapPathDataTest.kt
 │   │   │   └── repository/
 │   │   │       └── CountryListRepositoryIntegrationTest.kt
 │   │   └── presentation/
-│   │       ├── CountryListScreenCompactTest.kt    # Compact layout UI tests
-│   │       ├── CountryListScreenMediumTest.kt     # Medium layout UI tests
-│   │       ├── WorldMapCanvasCompactTest.kt       # World map compact tests
-│   │       └── WorldMapCanvasTabletTest.kt        # World map tablet tests
+│   │       ├── CountryListScreenCompactTest.kt
+│   │       ├── CountryListScreenMediumTest.kt
+│   │       ├── CountryListScreenStatesInstrumentedTest.kt
+│   │       ├── WorldMapCanvasCompactTest.kt
+│   │       └── WorldMapCanvasTabletTest.kt
 │   └── countrydetail/
 │       ├── data/repository/
 │       │   └── CountryDetailRepositoryIntegrationTest.kt
 │       └── presentation/
-│           ├── CountryDetailScreenCompactTest.kt  # Detail screen compact tests
-│           ├── CountryDetailScreenDialogsTest.kt  # Dialog interaction tests
-│           └── CountryDetailScreenTabletTest.kt   # Detail screen tablet tests
-├── CountryListScreenTest.kt                   # UI tests
+│           ├── components/
+│           │   └── HeroCardInstrumentedTest.kt
+│           ├── CountryDetailScreenCompactTest.kt
+│           ├── CountryDetailScreenDialogsTest.kt  # Includes the expressive loading indicator
+│           └── CountryDetailScreenTabletTest.kt
+├── AdaptiveLayoutE2ETest.kt
 ├── CountryDetailScreenTest.kt
-├── CountryTrackerE2ETest.kt                   # End-to-end tests
-├── AdaptiveLayoutE2ETest.kt                   # Adaptive layout E2E tests
-├── OrientationChangeTest.kt                   # Orientation change tests
-├── FoldableTransitionTest.kt                  # Foldable transition tests
-├── WorldMapColoringTest.kt
-└── HiltTestRunner.kt                          # Custom test runner
+├── CountryListScreenTest.kt
+├── CountryTrackerE2ETest.kt
+├── FoldableTransitionTest.kt
+├── OrientationChangeTest.kt
+└── WorldMapColoringTest.kt
 ```
+
+Instrumented tests use `androidx.test.runner.AndroidJUnitRunner`.
 
 ### Testing Libraries
 
@@ -528,10 +606,11 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs parallel jobs afte
 | Job | Description |
 |-----|-------------|
 | **Build & Unit Tests** | Compiles debug APK, runs unit tests, generates Kover coverage report, uploads to Codecov |
-| **Code Coverage** | Boots an API 30 emulator, runs `jacocoCombinedReport` (unit + instrumented via JaCoCo), uploads to Codecov |
+| **Code Coverage** | Boots an API 34 emulator, runs `jacocoCombinedReport` (unit + instrumented via JaCoCo), uploads to Codecov |
 | **Android Lint** | Static analysis via `lintDebug` |
 | **Detekt Analysis** | Kotlin static analysis |
 | **Code Formatting** | Checks formatting via Spotless |
+| **Documentation Versions** | On non-Dependabot pull requests, checks that README and this file match the version catalog |
 
 The **Build Release APK** job runs only on pushes to `main`/`master` after build, lint, detekt, and spotless pass.
 
@@ -560,7 +639,7 @@ The **Build Release APK** job runs only on pushes to `main`/`master` after build
 | Kotlin | 2.4.21 | Primary language |
 | Jetpack Compose (BOM) | 2026.09.00 | Declarative UI framework |
 | Material 3 Expressive | 1.5.0-beta02 | Design system |
-| Material 3 Adaptive | 1.2.0 | Responsive layouts for all screen sizes |
+| Material 3 Adaptive | 1.3.0 | Responsive layouts for all screen sizes |
 | Room | 2.8.5 | Local SQLite database |
 | Koin | 4.2.2 | Dependency injection |
 | Coroutines | 1.11.0 | Asynchronous operations |

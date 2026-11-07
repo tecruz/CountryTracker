@@ -232,7 +232,9 @@ jobs:
       - name: Check code formatting
         run: ./gradlew spotlessCheck --no-daemon
 
-  # Documentation version synchronization (dependabot PRs are synced after merge)
+  # Documentation version synchronization.
+  # Dependabot pull requests only change the catalog. The docs-sync workflow
+  # opens a follow-up pull request after merge, so this check does not fail those PRs.
   docs:
     name: Documentation Versions
     runs-on: ubuntu-latest

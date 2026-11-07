@@ -63,7 +63,7 @@ A modern Android application for tracking countries you've visited around the wo
 | Language | Kotlin | 2.4.21 |
 | UI Framework | Jetpack Compose (BOM) | 2026.09.00 |
 | Design System | Material 3 Expressive | 1.5.0-beta02 |
-| Adaptive UI | Material 3 Adaptive | 1.2.0 |
+| Adaptive UI | Material 3 Adaptive | 1.3.0 |
 | Architecture | Clean Architecture + MVVM | - |
 | DI | Koin | 4.2.2 |
 | Database | Room | 2.8.5 |
@@ -76,6 +76,16 @@ A modern Android application for tracking countries you've visited around the wo
 | Annotation Processing | KSP | 2.3.12 |
 <!-- versions:tech-stack:end -->
 
+## Toolchain and release policy
+
+The table above is generated from `gradle/libs.versions.toml`, the Gradle wrapper, and `app/build.gradle.kts`. `python3 scripts/sync-docs-versions.py --check` fails a pull request when the tables drift. [ARCHITECTURE.md](ARCHITECTURE.md) records the compatibility evidence.
+
+- **JDK 17.** Source and target compatibility are Java 17. CI runs on Temurin 17. Android Gradle Plugin 9.5 runs on JDK 17 or newer.
+- **Gradle 9.8.2.** AGP 9.5 requires Gradle 9.6.0 or newer. The wrapper satisfies that.
+- **API 37.** `compileSdk` and `targetSdk` are the final Android 17 base SDK (API 37.0). Google Play requires new apps and updates to target API 36 or higher, so API 37 is an accepted target. `minSdk` stays at 24.
+- **Material 3 Expressive `1.5.0-beta02`.** The stable BOM would select Material 3 1.4.0, which does not publish `MaterialExpressiveTheme`, `LoadingIndicator`, or `ContainedLoadingIndicator`. Stable 1.5.0 is not published, so the beta stays. The loading indicators are still experimental. `1.5.0-rc01` exists; the beta stays because it already resolves, and that release candidate fixes slider and toggle-button bugs this app does not use. The same beta version is pinned for `material3-window-size-class`, because the Material 3 atomic group selects one version for the group. Move to stable 1.5.0 when it ships.
+- **Material 3 Adaptive `1.3.0`.** This matches Compose BOM `2026.09.00`. The previous catalog pin of `1.2.0` was upgraded to `1.3.0` during resolution.
+
 ## Project Structure
 
 ```
@@ -85,21 +95,21 @@ app/src/main/kotlin/com/tecruz/countrytracker/
 ├── core/
 │   ├── data/
 │   │   ├── database/              # Room database, DAO, Entity
-│   │   └── datasource/            # World map data and pre-population
+│   │   ├── datasource/            # World map data and pre-population
+│   │   ├── mapper/                # Entity-to-domain mapping
+│   │   └── repository/            # CountryRepository and MapRepository
 │   ├── designsystem/              # Theme, Colors, Typography, Previews
-│   ├── di/                        # Core DI module (Database, Dispatchers)
-│   ├── domain/                    # Global domain models (Result, Error handling)
+│   ├── di/                        # Core data and presentation modules
+│   ├── domain/                    # Country model, repositories, Result, errors
 │   ├── navigation/                # Navigation graph and routes
-│   ├── presentation/              # Global UI models (UiText, Error extensions)
+│   ├── presentation/              # MainViewModel, UiText, error extensions
 │   └── util/                      # Shared utilities (SVG parser, window size)
 └── features/
     ├── countrydetail/
-    │   ├── data/                  # Repository impl, mappers, DI
-    │   ├── domain/                # Use cases, models, repository interface, DI
+    │   ├── domain/                # Use cases and DI
     │   └── presentation/          # Screen, ViewModel, UI model, components, DI
     └── countrylist/
-        ├── data/                  # Repository impl, mappers, DI
-        ├── domain/                # Use cases, models, repository interface, DI
+        ├── domain/                # Use cases, list models, DI
         └── presentation/          # Screen, ViewModel, components, DI
 ```
 
@@ -146,7 +156,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
 | Layer | Tests |
 |-------|-------|
-| **Data** | `CountryListRepositoryImplTest`, `CountryDetailRepositoryImplTest` |
+| **Data** | `CountryRepositoryImplTest` |
 | **Domain** | `GetAllCountriesUseCaseTest`, `GetCountryStatisticsUseCaseTest`, `MarkCountryAsVisitedUseCaseTest`, `MarkCountryAsUnvisitedUseCaseTest`, `UpdateCountryNotesUseCaseTest`, `UpdateCountryRatingUseCaseTest`, `GetCountryByCodeUseCaseTest` |
 | **Presentation** | `CountryListViewModelTest`, `CountryDetailViewModelTest`, `CountryListScreenComposableTest`, `CountryListRowResponsiveTest` |
 | **Design System** | `AdaptiveScaffoldTest`, `AdaptiveGridTest`, `ResponsiveCardTest`, `WindowSizeClassExtTest` |
@@ -167,7 +177,8 @@ The CI pipeline runs on every push and pull request:
 | **Code Formatting** | Verifies code style with Spotless + ktlint |
 | **Android Lint** | Runs Android lint checks |
 | **Detekt Analysis** | Static code analysis |
-| **Code Coverage** | Boots emulator, runs combined JaCoCo report (unit + instrumented), uploads to Codecov |
+| **Code Coverage** | Boots an API 34 emulator, runs combined JaCoCo report (unit + instrumented), uploads to Codecov |
+| **Documentation Versions** | Checks README and ARCHITECTURE against the version catalog (skipped for Dependabot) |
 | **Build Release APK** | Builds release APK (main/master only) |
 
 ## Build Variants
