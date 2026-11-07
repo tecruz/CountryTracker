@@ -42,6 +42,7 @@ class WorldMapCanvasTabletTest {
                     Box(modifier = Modifier.width(700.dp)) {
                         WorldMapCanvas(
                             visitedCountryCodes = setOf("US", "FR", "JP"),
+                            countryPaths = emptyList(),
                             modifier = Modifier.aspectRatio(16f / 9f),
                         )
                     }
@@ -60,6 +61,7 @@ class WorldMapCanvasTabletTest {
                     Box(modifier = Modifier.width(900.dp)) {
                         WorldMapCanvas(
                             visitedCountryCodes = setOf("US", "FR", "JP"),
+                            countryPaths = emptyList(),
                             modifier = Modifier.aspectRatio(16f / 9f),
                         )
                     }

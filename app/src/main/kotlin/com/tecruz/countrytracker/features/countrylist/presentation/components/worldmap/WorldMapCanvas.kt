@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -16,12 +16,10 @@ import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.tecruz.countrytracker.core.data.datasource.WorldMapPathData
 import com.tecruz.countrytracker.core.designsystem.CountryShadow
 import com.tecruz.countrytracker.core.designsystem.LandColor
 import com.tecruz.countrytracker.core.designsystem.LandShadow
@@ -34,10 +32,9 @@ import com.tecruz.countrytracker.core.designsystem.OceanGradientMid
 import com.tecruz.countrytracker.core.designsystem.OceanGradientStart
 import com.tecruz.countrytracker.core.designsystem.preview.DevicePreviews
 import com.tecruz.countrytracker.core.designsystem.preview.PreviewWrapper
-import com.tecruz.countrytracker.core.util.SvgPathParser
+import com.tecruz.countrytracker.core.domain.model.WorldMapViewport
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.CountryPathData
 import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.TransformedCountry
-import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.model.WorldMapPathCache
 
 // Shimmer highlight positioning constants
 private const val HIGHLIGHT_CENTER_X_RATIO = 0.3f
@@ -53,10 +50,11 @@ private const val HIGHLIGHT_RADIUS_RATIO = 0.5f
  * - Shadows and depth effects for countries
  * - Visited countries highlighted in green
  * - Purely visual display
- * - Async path parsing on background thread
+ * - Draws paths that were already parsed outside composition
  * - Cached transformed paths via drawWithCache
  *
  * @param visitedCountryCodes Set of ISO country codes that have been visited
+ * @param countryPaths Parsed outlines. Composition does not read assets or parse SVG.
  * @param modifier Modifier for the Canvas
  * @param unvisitedColor Color for unvisited countries
  * @param borderColor Color for country borders
@@ -64,32 +62,11 @@ private const val HIGHLIGHT_RADIUS_RATIO = 0.5f
 @Composable
 fun WorldMapCanvas(
     visitedCountryCodes: Set<String>,
+    countryPaths: List<CountryPathData>,
     modifier: Modifier = Modifier,
     unvisitedColor: Color = LandColor,
     borderColor: Color = MapBorder,
 ) {
-    val context = LocalContext.current
-
-    // Parse paths synchronously so the map renders immediately without delay.
-    // The result is cached in a process-level singleton to avoid re-parsing.
-    val countryPaths = remember {
-        WorldMapPathCache.paths ?: run {
-            if (!WorldMapPathData.isLoaded) {
-                WorldMapPathData.loadCountryPaths(context)
-            }
-
-            val parsed = WorldMapPathData.countryPaths.mapNotNull { (code, pathData) ->
-                runCatching {
-                    val path = SvgPathParser.parse(pathData)
-                    val bounds = path.getBounds()
-                    CountryPathData(code, path, bounds)
-                }.getOrNull()
-            }
-            WorldMapPathCache.paths = parsed
-            parsed
-        }
-    }
-
     // Build semantic description for accessibility and testing
     val visitedDescription = if (visitedCountryCodes.isEmpty()) {
         "World map with no visited countries"
@@ -106,13 +83,13 @@ fun WorldMapCanvas(
                 val canvasHeight = size.height
 
                 // Calculate scale to fit the map while maintaining aspect ratio
-                val scaleX = canvasWidth / WorldMapPathData.VIEW_BOX_WIDTH
-                val scaleY = canvasHeight / WorldMapPathData.VIEW_BOX_HEIGHT
+                val scaleX = canvasWidth / WorldMapViewport.WIDTH
+                val scaleY = canvasHeight / WorldMapViewport.HEIGHT
                 val scale = minOf(scaleX, scaleY)
 
                 // Center the map
-                val scaledWidth = WorldMapPathData.VIEW_BOX_WIDTH * scale
-                val scaledHeight = WorldMapPathData.VIEW_BOX_HEIGHT * scale
+                val scaledWidth = WorldMapViewport.WIDTH * scale
+                val scaledHeight = WorldMapViewport.HEIGHT * scale
                 val offsetX = (canvasWidth - scaledWidth) / 2
                 val offsetY = (canvasHeight - scaledHeight) / 2
 
@@ -191,8 +168,11 @@ fun WorldMapCanvas(
 @Composable
 private fun WorldMapCanvasPreview() {
     PreviewWrapper {
+        val previewBounds = Rect(10f, 10f, 200f, 120f)
+        val previewPath = Path().apply { addRect(previewBounds) }
         WorldMapCanvas(
-            visitedCountryCodes = setOf("US", "JP", "FR", "BR", "AU"),
+            visitedCountryCodes = setOf("US"),
+            countryPaths = listOf(CountryPathData("US", previewPath, previewBounds)),
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f)

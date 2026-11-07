@@ -2,6 +2,7 @@ package com.tecruz.countrytracker.core.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tecruz.countrytracker.core.domain.Result
 import com.tecruz.countrytracker.core.domain.repository.MapRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +23,12 @@ class MainViewModel(private val mapRepository: MapRepository) : ViewModel() {
     private fun initialize() {
         if (!mapRepository.isMapDataLoaded()) {
             viewModelScope.launch {
-                mapRepository.loadMapData()
-                _isInitialized.value = true
+                // Success and failure both leave the splash screen. A missing asset
+                // must not keep the splash up, and loadMapData does not throw.
+                val preload = mapRepository.loadMapData()
+                _isInitialized.value = when (preload) {
+                    is Result.Success, is Result.Failure -> true
+                }
             }
         }
     }

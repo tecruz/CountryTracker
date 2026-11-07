@@ -2,6 +2,8 @@ package com.tecruz.countrytracker.features.countrylist.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.tecruz.countrytracker.R
+import com.tecruz.countrytracker.core.domain.Result
 import com.tecruz.countrytracker.core.presentation.UiText
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllCountriesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.GetAllRegionsUseCase
@@ -9,6 +11,8 @@ import com.tecruz.countrytracker.features.countrylist.domain.GetCountryStatistic
 import com.tecruz.countrytracker.features.countrylist.domain.GetVisitedCountryCodesUseCase
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryListItem
 import com.tecruz.countrytracker.features.countrylist.domain.model.CountryStatistics
+import com.tecruz.countrytracker.features.countrylist.presentation.components.worldmap.WorldMapGeometryLoader
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +42,7 @@ class CountryListViewModelTest {
     private lateinit var getCountryStatisticsUseCase: GetCountryStatisticsUseCase
     private lateinit var getAllRegionsUseCase: GetAllRegionsUseCase
     private lateinit var getVisitedCountryCodesUseCase: GetVisitedCountryCodesUseCase
+    private lateinit var worldMapGeometryLoader: WorldMapGeometryLoader
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: CountryListViewModel
 
@@ -65,6 +70,7 @@ class CountryListViewModelTest {
         getCountryStatisticsUseCase = mockk()
         getAllRegionsUseCase = mockk()
         getVisitedCountryCodesUseCase = mockk()
+        worldMapGeometryLoader = mockk()
         savedStateHandle = SavedStateHandle()
 
         // Default behavior for mocks
@@ -72,6 +78,7 @@ class CountryListViewModelTest {
         every { getCountryStatisticsUseCase() } returns flowOf(testStatistics)
         every { getAllRegionsUseCase() } returns flowOf(testRegions)
         every { getVisitedCountryCodesUseCase() } returns flowOf(testVisitedCodes)
+        coEvery { worldMapGeometryLoader.load() } returns Result.Success(emptyList())
     }
 
     @After
@@ -85,6 +92,7 @@ class CountryListViewModelTest {
             getCountryStatisticsUseCase,
             getAllRegionsUseCase,
             getVisitedCountryCodesUseCase,
+            worldMapGeometryLoader,
             savedStateHandle,
         )
     }
@@ -214,50 +222,53 @@ class CountryListViewModelTest {
         val state = viewModel.state.first { it.error != null }
 
         assertFalse(state.isLoading)
+        assertEquals(DataReadStatus.Unavailable, state.countriesStatus)
         assertTrue(state.countries.isEmpty())
-        assertEquals("network down", (state.error as UiText.DynamicString).value)
+        assertEquals(UiText.StringResource(R.string.error_load_countries), state.error)
     }
 
     @Test
-    fun `statistics failure falls back to zero statistics`() = runTest(testDispatcher) {
+    fun `statistics failure is not presented as zero visited countries`() = runTest(testDispatcher) {
         every { getCountryStatisticsUseCase() } returns flow { throw IllegalStateException("stats") }
 
         initViewModel()
 
-        val state = viewModel.state.first { !it.isLoading }
+        val state = viewModel.state.first { it.statisticsStatus == DataReadStatus.Unavailable }
 
-        assertEquals(0, state.visitedCount)
-        assertEquals(0, state.totalCount)
-        assertEquals(0, state.percentage)
+        assertFalse(state.isLoading)
+        assertEquals(UiText.StringResource(R.string.error_load_statistics), state.error)
+        assertEquals(DataReadStatus.Ready, state.countriesStatus)
         assertEquals(testCountries, state.countries)
     }
 
     @Test
-    fun `visited codes failure falls back to an empty set`() = runTest(testDispatcher) {
+    fun `visited codes failure is not presented as no countries visited`() = runTest(testDispatcher) {
         every { getVisitedCountryCodesUseCase() } returns flow { throw IllegalStateException("visited") }
 
         initViewModel()
 
-        val state = viewModel.state.first { !it.isLoading }
+        val state = viewModel.state.first { it.visitedCodesStatus == DataReadStatus.Unavailable }
 
-        assertTrue(state.visitedCountryCodes.isEmpty())
+        assertEquals(UiText.StringResource(R.string.error_load_visited), state.error)
+        assertEquals(DataReadStatus.Ready, state.countriesStatus)
         assertEquals(testCountries, state.countries)
     }
 
     @Test
-    fun `regions failure falls back to an empty region list`() = runTest(testDispatcher) {
+    fun `regions failure is not presented as a successful empty region list`() = runTest(testDispatcher) {
         every { getAllRegionsUseCase() } returns flow { throw IllegalStateException("regions") }
 
         initViewModel()
 
-        val state = viewModel.state.first { !it.isLoading }
+        val state = viewModel.state.first { it.regionsStatus == DataReadStatus.Unavailable }
 
-        assertTrue(state.allRegions.isEmpty())
+        assertEquals(UiText.StringResource(R.string.error_load_regions), state.error)
+        assertEquals(DataReadStatus.Ready, state.countriesStatus)
         assertEquals(testCountries, state.countries)
     }
 
     @Test
-    fun `clear error removes the current error`() = runTest(testDispatcher) {
+    fun `clear error removes the snackbar message and keeps the failed read`() = runTest(testDispatcher) {
         every { getAllCountriesUseCase(any(), any(), any()) } returns
             flow { throw IllegalStateException("boom") }
 
@@ -268,5 +279,6 @@ class CountryListViewModelTest {
         advanceUntilIdle()
 
         assertNull(viewModel.state.value.error)
+        assertEquals(DataReadStatus.Unavailable, viewModel.state.value.countriesStatus)
     }
 }
