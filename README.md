@@ -62,18 +62,18 @@ A modern Android application for tracking countries you've visited around the wo
 |----------|------------|---------|
 | Language | Kotlin | 2.4.21 |
 | UI Framework | Jetpack Compose (BOM) | 2026.09.00 |
-| Design System | Material 3 Expressive | 1.5.0-beta02 |
+| Design System | Material 3 Expressive | 1.5.0-rc01 |
 | Adaptive UI | Material 3 Adaptive | 1.3.0 |
 | Architecture | Clean Architecture + MVVM | - |
 | DI | Koin | 4.2.2 |
 | Database | Room | 2.8.5 |
 | Async | Coroutines + Flow | 1.11.0 |
 | Navigation | Navigation Compose | 2.10.2 |
-| Code Formatting | Spotless + ktlint | 8.10.4 / 1.5.0 |
+| Code Formatting | Spotless + ktlint | 8.11.0 / 1.5.0 |
 | Static Analysis | Detekt | 1.23.8 |
 | Code Coverage | Kover + JaCoCo | 0.9.11 / 0.8.14 |
 | Build System | Gradle (Kotlin DSL) | 9.8.2 |
-| Annotation Processing | KSP | 2.3.12 |
+| Annotation Processing | KSP | 2.3.13 |
 <!-- versions:tech-stack:end -->
 
 ## Toolchain and release policy

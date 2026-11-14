@@ -11,14 +11,14 @@ This app follows **Clean Architecture** principles with a **feature-based packag
 |------------|---------|
 | Kotlin | 2.4.21 |
 | Jetpack Compose BOM | 2026.09.00 |
-| Material 3 Expressive | 1.5.0-beta02 |
+| Material 3 Expressive | 1.5.0-rc01 |
 | Material 3 Adaptive | 1.3.0 |
 | Room | 2.8.5 |
 | Koin | 4.2.2 |
 | Navigation Compose | 2.10.2 |
 | Coroutines | 1.11.0 |
-| AGP | 9.5.0 |
-| KSP | 2.3.12 |
+| AGP | 9.5.1 |
+| KSP | 2.3.13 |
 | Target SDK | 37 |
 | Min SDK | 24 |
 <!-- versions:technology-versions:end -->
@@ -638,7 +638,7 @@ The **Build Release APK** job runs only on pushes to `main`/`master` after build
 |------------|---------|---------|
 | Kotlin | 2.4.21 | Primary language |
 | Jetpack Compose (BOM) | 2026.09.00 | Declarative UI framework |
-| Material 3 Expressive | 1.5.0-beta02 | Design system |
+| Material 3 Expressive | 1.5.0-rc01 | Design system |
 | Material 3 Adaptive | 1.3.0 | Responsive layouts for all screen sizes |
 | Room | 2.8.5 | Local SQLite database |
 | Koin | 4.2.2 | Dependency injection |
