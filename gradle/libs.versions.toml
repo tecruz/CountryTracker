@@ -20,7 +20,7 @@ lifecycleRuntime = "2.11.0"
 activityCompose = "1.13.0"
 
 # Compose
-composeBom = "2026.09.00"
+composeBom = "2026.11.01"
 # Pinned ahead of BOM 2026.09.00, which selects stable material3 1.4.0.
 # Required for MaterialExpressiveTheme and the expressive loading indicators.
 # The material3 atomic group also moves material3-window-size-class to this version.
